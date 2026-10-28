@@ -3,8 +3,10 @@
 (function () {
   'use strict';
   const D = document, de = D.documentElement;
-  const req = de.requestFullscreen || de.webkitRequestFullscreen, exit = D.exitFullscreen || D.webkitExitFullscreen;
-  const isFs = () => !!(D.fullscreenElement || D.webkitFullscreenElement);
+  // Arcade: when framed by Nic's Arcade the button drives the arcade page's full screen, not the frame's.
+  let AF = null; try { AF = window.parent !== window && window.parent.ARCADE_FS; } catch (e) { AF = null; }
+  const req = AF ? function () { return AF.request(); } : (de.requestFullscreen || de.webkitRequestFullscreen), exit = AF ? function () { return AF.exit(); } : (D.exitFullscreen || D.webkitExitFullscreen);
+  const isFs = AF ? () => AF.is() : () => !!(D.fullscreenElement || D.webkitFullscreenElement);
   let standalone = false;
   try { standalone = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || !!navigator.standalone; } catch (e) { /* ignore */ }
   if (!req || standalone) return;
@@ -26,7 +28,7 @@
       try { const r = isFs() ? exit.call(D) : req.call(de); if (r && r.catch) r.catch(() => {}); } catch (err) { /* ignore */ }
       b.blur();
     });
-    D.addEventListener('fullscreenchange', sync); D.addEventListener('webkitfullscreenchange', sync);
+    if (AF) AF.onchange(sync); D.addEventListener('fullscreenchange', sync); D.addEventListener('webkitfullscreenchange', sync);
     D.body.appendChild(b);
   }
   if (D.body) init(); else D.addEventListener('DOMContentLoaded', init);

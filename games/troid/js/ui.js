@@ -10,7 +10,7 @@
   const padIdx = (a, d) => ((S.padmap || {})[a] === undefined ? d : S.padmap[a]);
   const anySave = () => [0, 1, 2].some((n) => G.save.read(n));
   U.items = {
-    title: () => [{ k: 'new', t: 'NEW GAME' }, { k: 'cont', t: 'CONTINUE', off: !anySave() }, { k: 'opt', t: 'OPTIONS' }],
+    title: () => [{ k: 'new', t: 'NEW GAME' }, { k: 'cont', t: 'CONTINUE', off: !anySave() }, { k: 'opt', t: 'OPTIONS' }].concat(window.parent !== window && window.parent.ARCADE ? [{ k: 'arcade', t: 'BACK TO ARCADE' }] : []),
     pause: () => [{ k: 'resume', t: 'RESUME' }, { k: 'map', t: 'MAP' }, { k: 'inv', t: 'STATUS' }, { k: 'help', t: 'CONTROLS' }, { k: 'opt', t: 'OPTIONS' }, { k: 'quit', t: 'QUIT TO TITLE' }],
     options: () => [{ k: 'sfx', t: 'SOUND VOLUME  ' + bar(S.sfx) }, { k: 'music', t: 'MUSIC VOLUME  ' + bar(S.music) }, { k: 'mouse', t: 'MOUSE AIM  ' + (S.mouseAim ? 'ON' : 'OFF') }, { k: 'hard', t: 'DIFFICULTY  ' + (S.hard ? 'HARD' : 'NORMAL') }, { k: 'shake', t: 'SCREEN SHAKE  ' + (S.shake ? 'ON' : 'OFF') }, { k: 'reduced', t: 'REDUCED EFFECTS  ' + (S.reduced ? 'ON' : 'OFF') }, { k: 'pad', t: 'GAMEPAD  ' + (S.gamepad ? 'ON' : 'OFF') }, { k: 'padmap', t: 'CONTROLLER BUTTONS' }, { k: 'back', t: 'BACK' }],
     padmap: () => PADACT.map((a) => ({ k: 'pm', a: a[0], t: a[1] + '  ' + (U.cap === a[0] ? 'PRESS A BUTTON...' : '[' + padName(padIdx(a[0], a[2])) + ']') })).concat([{ k: 'pmreset', t: 'RESET BUTTONS' }, { k: 'back', t: 'BACK' }]),
@@ -69,6 +69,7 @@
       case 'inv': M.openInv(); break;
       case 'help': U.open('help'); break;
       case 'quit': M.toTitle(); break;
+      case 'arcade': window.parent.ARCADE.exitGame(); break;
       case 'mouse': S.mouseAim = !S.mouseAim; S.save(); break;
       case 'hard': S.hard = !S.hard; S.save(); break;
       case 'shake': S.shake = !S.shake; S.save(); break;

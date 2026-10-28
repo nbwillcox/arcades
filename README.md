@@ -15,7 +15,9 @@ No build step, no dependencies, no accounts. Every game is plain HTML5 and runs 
 | Mouse | Hover to preview, click to play, right-click to favorite | Move to the top edge and click the glowing bar |
 | Touch | Tap a cabinet | Tap the glowing bar at the top of the screen |
 
-The Arcade menu (Resume, Restart game, Full screen, Sound, Back to arcade) freezes the controller away from the game while it is open, so button presses never leak into the game.
+Every game's main menu has a **Back to Arcade** entry. Games go full screen when they start (the **AUTO FS** chip in the menu, or the Arcade menu, turns that off; each game's own corner button still toggles it) and leave full screen when you return to the arcade.
+
+The Arcade menu (Resume, Restart game, Full screen, Auto full screen, Sound, Back to arcade) freezes the controller away from the game while it is open, so button presses never leak into the game.
 
 Add it to your phone's home screen (*Add to Home Screen* / *Install*) for a full-screen app. A direct link such as `.../arcades/#spacebert` is not needed, but `#<id>` (for example `#bert`, `#fzero`, `#drake`) launches that cabinet straight away.
 
@@ -34,7 +36,7 @@ Each game keeps its own scores, settings and saves in your browser. Space Drake 
 index.html, css/, js/     the arcade shell (catalog.js lists the games)
 games/<id>/               one folder per game, copied unmodified from its own repo
 covers/                   menu art
-tools/import_games.py     re-copy the games from their source folders
+tools/import_games.py     re-copy the games from their source folders (and re-apply the small arcade patches: fs.js, Troid and Drake menus)
 tools/shoot.mjs           headless smoke test + cover capture
 tools/make_icons.py       app icons
 ```

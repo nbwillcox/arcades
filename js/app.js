@@ -7,6 +7,7 @@
   const byId = Object.fromEntries(GAMES.map((g) => [g.id, g]));
   const GENRE_NAME = { shoot: 'Shooter', action: 'Action', puzzle: 'Puzzle & Maze', race: 'Racing & Driving' };
 
+  const ARC_VER = 4; // bump with every deploy so games' index.html is refetched
   const store = {
     get(k, d) { try { const v = localStorage.getItem('arcades.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('arcades.' + k, JSON.stringify(v)); } catch (e) {} },
@@ -108,7 +109,7 @@
   let loadT = 0;
   function launch(id, fromHash) {
     const g = byId[id]; if (!g || mode !== 'hub') return;
-    mode = 'launch'; cur = g; sfx('launch'); store.set('last', id);
+    mode = 'launch'; cur = g; sfx('launch'); store.set('last', id); fsListeners = []; if (autoFS && !standalone) enterFS();
     $('lName').textContent = g.name; $('launch').hidden = false;
     $('launch').querySelector('i').style.width = '0'; requestAnimationFrame(() => requestAnimationFrame(() => ($('launch').querySelector('i').style.width = '100%')));
     window.ARC_STARS.warp(true); window.ARC_STARS.hue(g.hue);
@@ -117,7 +118,7 @@
     setTimeout(() => {
       if (mode !== 'launch') return;
       $('stage').hidden = false; frame.classList.remove('ready');
-      frame.onload = onFrameLoad; frame.src = 'games/' + id + '/index.html';
+      frame.onload = onFrameLoad; frame.src = 'games/' + id + '/index.html?a=' + ARC_VER;
       loadT = setTimeout(onFrameLoad, 9000);
     }, 650);
   }
@@ -125,13 +126,35 @@
     clearTimeout(loadT);
     if (mode !== 'launch') return;
     frame.onload = null;
-    let cw = null; try { cw = frame.contentWindow; cw.addEventListener('keydown', frameKey, true); } catch (e) {}
+    try { const cw = frame.contentWindow; cw.addEventListener('keydown', frameKey, true); injectBack(frame.contentDocument); armFSFallback(cw); } catch (e) {}
     setTimeout(() => {
       if (mode !== 'launch') return;
       mode = 'game'; $('launch').hidden = true; frame.classList.add('ready'); window.ARC_STARS.warp(false);
       $('hub').style.visibility = 'hidden';
       focusGame(); showTab();
     }, 450);
+  }
+  /* Back to Arcade entry in each game's main menu (Troid and Drake have it patched into their own menus) */
+  function injectBack(doc) {
+    const add = () => {
+      const m = doc.querySelector('#title .menu'); if (!m) return false;
+      if (!m.querySelector('.arcadeBack')) {
+        const sib = m.querySelectorAll('button'), b = doc.createElement('button');
+        b.type = 'button'; b.className = ((sib[sib.length - 1] || {}).className || '').replace(/primary/g, '').trim() + ' arcadeBack';
+        b.textContent = '‹ BACK TO ARCADE'; b.onclick = () => window.ARCADE.exitGame(); m.appendChild(b);
+      }
+      return true;
+    };
+    if (add() || !doc.body) return;
+    const mo = new doc.defaultView.MutationObserver((r) => { if (r.some((x) => x.addedNodes.length) && add()) mo.disconnect(); });
+    mo.observe(doc.body, { childList: true, subtree: true });
+    setTimeout(() => mo.disconnect(), 20000);
+  }
+  /* launched by a controller button there is no user activation, so full screen waits for the first key / click / tap in the game */
+  function armFSFallback(cw) {
+    if (!autoFS || standalone || isFS()) return;
+    const go = () => { cw.removeEventListener('pointerdown', go, true); cw.removeEventListener('keydown', go, true); if (autoFS && mode === 'game') enterFS(); };
+    cw.addEventListener('pointerdown', go, true); cw.addEventListener('keydown', go, true);
   }
   function frameKey(e) { if (e.code === 'Backquote' && !e.repeat) { e.preventDefault(); e.stopPropagation(); openPause(); } }
   function focusGame() { try { frame.focus(); frame.contentWindow.focus(); } catch (e) {} }
@@ -141,8 +164,8 @@
     frame.onload = null; frame.src = 'about:blank'; frame.classList.remove('ready');
     $('stage').hidden = true; $('launch').hidden = true; $('hub').style.visibility = '';
     window.ARC_STARS.warp(false); mode = 'hub'; sfx('back'); waitRelease();
-    if (!fromPop && location.hash) history.back();
-    if (document.fullscreenElement && false) document.exitFullscreen();
+    if (!fromPop && location.hash) history.replaceState(null, '', location.pathname);
+    leaveFS();
     cur && setFilter(filter);
     const i = list.findIndex((g) => cur && g.id === cur.id); if (i >= 0) select(i, true, true);
     try { window.focus(); document.body.focus(); } catch (e) {}
@@ -153,7 +176,8 @@
     ['Resume', () => closePause()],
     ['Restart game', () => { closePause(); frame.contentWindow.location.reload(); frame.onload = () => { frame.onload = null; try { frame.contentWindow.addEventListener('keydown', frameKey, true); } catch (e) {} focusGame(); }; }],
     ['Full screen', () => { toggleFS(); closePause(); }],
-    ['Sound: ', () => { window.ARC_SFX.setMuted(!window.ARC_SFX.muted); renderPause(); sndLabel(); }],
+    ['Auto full screen: ', () => { setAutoFS(!autoFS); renderPause(); }],
+    ['Sound: ', () => { window.ARC_SFX.setMuted(!window.ARC_SFX.muted); renderPause(); }],
     ['Back to arcade', () => exitGame()],
   ];
   function openPause() {
@@ -177,7 +201,7 @@
     } catch (e) {}
   }
   function closePause() { if (mode !== 'pause') return; closePauseUI(); sfx('back'); waitRelease(); focusGame(); showTab(); }
-  function sndLabel() { PAUSE_ITEMS[3][0] = 'Sound: ' + (window.ARC_SFX.muted ? 'off' : 'on'); }
+  function sndLabel() { PAUSE_ITEMS[3][0] = 'Auto full screen: ' + (autoFS ? 'on' : 'off'); PAUSE_ITEMS[4][0] = 'Sound: ' + (window.ARC_SFX.muted ? 'off' : 'on'); }
   function renderPause() {
     sndLabel(); const m = $('pMenu'); m.innerHTML = '';
     PAUSE_ITEMS.forEach((it, i) => {
@@ -196,11 +220,22 @@
   addEventListener('pointermove', (e) => { if (mode === 'game' && e.clientY < 70) showTab(); });
 
   /* ---------- fullscreen ---------- */
-  function toggleFS() {
-    const d = document;
-    if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
-    else { const e = d.documentElement; (e.requestFullscreen || e.webkitRequestFullscreen || (() => toast('Full screen not supported here'))).call(e); }
-  }
+  const de = document.documentElement, fsReq = de.requestFullscreen || de.webkitRequestFullscreen, fsExit = document.exitFullscreen || document.webkitExitFullscreen;
+  const isFS = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const standalone = (() => { try { return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || !!navigator.standalone; } catch (e) { return false; } })();
+  function enterFS() { if (!fsReq || isFS()) return; try { const r = fsReq.call(de); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+  function leaveFS() { if (!fsExit || !isFS()) return; try { const r = fsExit.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+  function toggleFS() { if (!fsReq) toast('Full screen not supported here'); else if (isFS()) leaveFS(); else enterFS(); }
+  /* the games' own full-screen buttons (js/fs.js) call into this so they toggle the whole arcade page */
+  let fsListeners = [];
+  window.ARCADE_FS = { request: enterFS, exit: leaveFS, is: isFS, onchange(fn) { fsListeners.push(fn); } };
+  const fsChanged = () => fsListeners.forEach((fn) => { try { fn(); } catch (e) {} });
+  document.addEventListener('fullscreenchange', fsChanged); document.addEventListener('webkitfullscreenchange', fsChanged);
+  let autoFS = store.get('autofs', true);
+  function afsChip() { $('afsBtn').classList.toggle('live', autoFS); }
+  function setAutoFS(v) { autoFS = v; store.set('autofs', v); afsChip(); }
+  $('afsBtn').onclick = () => { setAutoFS(!autoFS); sfx('ok'); toast('Auto full screen ' + (autoFS ? 'on' : 'off')); };
+  if (!fsReq || standalone) $('afsBtn').hidden = true;
   $('fsBtn').onclick = () => { sfx('ok'); toggleFS(); };
   if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) $('fsBtn').hidden = true;
   function muteChip() { $('muteBtn').classList.toggle('live', !window.ARC_SFX.muted); }
@@ -278,7 +313,7 @@
   addEventListener('visibilitychange', () => { if (document.hidden && mode === 'game') { /* games pause themselves on blur */ } });
 
   /* ---------- boot ---------- */
-  muteChip();
+  muteChip(); afsChip();
   setFilter(GENRES.some((t) => t.id === filter) ? filter : 'all');
   const last = store.get('last', null), li = list.findIndex((g) => g.id === last); if (li >= 0) select(li, true, true);
   requestAnimationFrame(pollPads);

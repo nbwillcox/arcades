@@ -40,6 +40,7 @@ export function installMenus(App) {
       items.push({ label: 'New Game', action: () => { sound('select'); Menus.slots(); } });
       items.push({ label: 'Settings', action: () => { sound('select'); Menus.settings(() => Menus.title()); } });
       items.push({ label: 'How to Play', action: () => { sound('select'); Menus.help(() => Menus.title()); } });
+      if (window.parent !== window && window.parent.ARCADE) items.push({ label: 'Back to Arcade', action: () => window.parent.ARCADE.exitGame() });
       UI.menu({ title: 'SPACEDRAKE', subtitle: 'Collect gems. Rescue the Elders. Beat Warlord Gloam.', items, wide: false });
     },
 
