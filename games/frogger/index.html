@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#03040d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>SpaceFrogger</title>
+  <meta name="description" content="SpaceFrogger - a free retro neon frog crossing game for phones and desktop: dodge space traffic, ride drifting wreckage over the void and dock in all five bays. Classic levels and an endless run.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body>
+  <canvas id="game" aria-label="SpaceFrogger game screen"></canvas>
+
+  <div id="ui">
+    <section id="title" class="screen">
+      <h1 class="logo"><span class="l1">SPACE</span><span class="l2">FROGGER</span></h1>
+      <p class="tag">Hop. Dodge. Dock.</p>
+      <div class="menu">
+        <button id="btnStart" class="primary">CLASSIC</button>
+        <button id="btnEndless" class="primary alt">ENDLESS RUN</button>
+        <button id="btnScores">HIGH SCORES</button>
+        <button id="btnSettings">SETTINGS</button>
+      </div>
+      <p class="hint"><b>Swipe</b> to hop any direction &middot; <b>tap</b> to hop forward &middot; or <b>arrow keys / WASD</b> &nbsp; <b>Space</b>: use power-up &nbsp; <b>P</b>: pause</p>
+      <footer class="credit">Free to play and share &middot; <a href="https://github.com/nbwillcox/SpaceFrogger" target="_blank" rel="noopener">github.com/nbwillcox/SpaceFrogger</a> &middot; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></footer>
+    </section>
+
+    <section id="pause" class="screen hidden">
+      <h2>PAUSED</h2>
+      <div class="menu">
+        <button id="btnResume" class="primary">RESUME</button>
+        <button id="btnPauseSettings">SETTINGS</button>
+        <button id="btnQuit">QUIT TO TITLE</button>
+      </div>
+    </section>
+
+    <section id="settings" class="screen hidden">
+      <h2>SETTINGS</h2>
+      <div class="panel">
+        <label>Master volume <input id="setMaster" type="range" min="0" max="1" step="0.05"></label>
+        <label>Music volume <input id="setMusic" type="range" min="0" max="1" step="0.05"></label>
+        <label>Effects volume <input id="setSfx" type="range" min="0" max="1" step="0.05"></label>
+        <label class="check"><input id="setBloom" type="checkbox"> Bloom glow</label>
+        <label class="check"><input id="setShake" type="checkbox"> Screen shake</label>
+        <label class="check"><input id="setReduced" type="checkbox"> Reduced motion (fewer flashes &amp; particles)</label>
+        <label class="check"><input id="setLeft" type="checkbox"> Left-handed layout (power-up button on the left)</label>
+        <label>Swipe distance <input id="setSwipe" type="range" min="14" max="50" step="2"></label>
+      </div>
+      <div class="menu"><button id="btnSettingsBack" class="primary">BACK</button></div>
+    </section>
+
+    <section id="scores" class="screen hidden">
+      <h2>HIGH SCORES</h2>
+      <div class="tabs"><button id="btnScoresClassic">CLASSIC</button><button id="btnScoresEndless">ENDLESS</button></div>
+      <ol id="scoreList" class="scorelist"></ol>
+      <div class="menu">
+        <button id="btnScoresPlay" class="primary">PLAY AGAIN</button>
+        <button id="btnScoresBack">TITLE</button>
+      </div>
+    </section>
+
+    <section id="gameover" class="screen hidden">
+      <h2 class="over">GAME OVER</h2>
+      <p class="final">Score <b id="goScore">0</b> &middot; <span id="goLabel">Level</span> <b id="goStage">1</b></p>
+      <div id="goEntry" class="entry hidden">
+        <p class="newhs">NEW HIGH SCORE! Enter your initials</p>
+        <input id="goName" type="text" maxlength="3" autocomplete="off" spellcheck="false" aria-label="Your initials">
+        <div class="menu"><button id="btnSaveScore" class="primary">SAVE SCORE</button></div>
+      </div>
+      <div id="goButtons" class="menu">
+        <button id="btnRetry" class="primary">PLAY AGAIN</button>
+        <button id="btnGoTitle">TITLE</button>
+      </div>
+    </section>
+  </div>
+
+  <noscript><p style="color:#fff;padding:2rem">SpaceFrogger needs JavaScript enabled.</p></noscript>
+
+  <script src="js/util.js?v=5"></script>
+  <script src="js/config.js?v=5"></script>
+  <script src="js/audio.js?v=5"></script>
+  <script src="js/gfx.js?v=5"></script>
+  <script src="js/art.js?v=5"></script>
+  <script src="js/fx.js?v=5"></script>
+  <script src="js/input.js?v=5"></script>
+  <script src="js/scores.js?v=5"></script>
+  <script src="js/world.js?v=5"></script>
+  <script src="js/game.js?v=5"></script>
+  <script src="js/hud.js?v=5"></script>
+  <script src="js/ui.js?v=5"></script>
+  <script src="js/padcfg.js?v=5"></script>
+  <script src="js/pad.js?v=5"></script>
+<script src="js/main.js?v=5"></script>
+  <script src="js/fs.js?v=5"></script>
+</body>
+</html>

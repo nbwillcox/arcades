@@ -1,0 +1,38 @@
+{
+  "name": "SpaceSidePews",
+  "short_name": "SpaceSidePews",
+  "description": "SpaceSidePews - a free retro-style side-scrolling shooter: free-flight hive hunts, forced-scroll organic corridors, a Gradius-style power-up meter and big stage bosses.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "orientation": "landscape",
+  "background_color": "#05071a",
+  "theme_color": "#05071a",
+  "categories": [
+    "games"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

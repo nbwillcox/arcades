@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#05071a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SpaceQix">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>SpaceQix</title>
+  <meta name="description" content="SpaceQix - a free neon territory-capture game: draw lines across the field to claim it and reveal the hidden picture, dodge the prowler and the border crawlers, and finish before the fuse catches you. Free to play, not for money.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2305071a'/%3E%3Crect x='6' y='6' width='20' height='20' fill='none' stroke='%23c9a0ff' stroke-width='2'/%3E%3Cpath d='M6 26L26 6' stroke='%237ee8ff' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/mobile.css?v=5">
+</head>
+<body>
+  <canvas id="game" aria-label="SpaceQix game screen"></canvas>
+
+  <div id="ui">
+    <section id="title" class="screen">
+      <h1 class="logo"><span class="l1">SPACE</span><span class="l2">QIX</span></h1>
+      <p class="tag">Claim the field. Reveal the picture.</p>
+      <div class="menu">
+        <button id="btnStart" class="primary">START GAME</button>
+        <button id="btnScores">HIGH SCORES</button>
+        <button id="btnSettings">SETTINGS</button>
+      </div>
+      <p class="hint" id="titleHint"><b>&larr; &uarr; &darr; &rarr;</b> / <b>W A S D</b>: move &nbsp; leave the edge to draw a line, close it on the edge to claim the side without the prowler &nbsp; hold <b>Shift</b> / <b>Space</b> as you leave for a slow line worth double &nbsp; <b>P</b> / <b>Esc</b>: pause</p>
+      <footer class="credit">Free to play and share &middot; <a href="https://github.com/nbwillcox/SpaceQix" target="_blank" rel="noopener">github.com/nbwillcox/SpaceQix</a> &middot; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></footer>
+    </section>
+
+    <section id="pause" class="screen hidden">
+      <h2>PAUSED</h2>
+      <div class="menu">
+        <button id="btnResume" class="primary">RESUME</button>
+        <button id="btnPauseSettings">SETTINGS</button>
+        <button id="btnQuit">QUIT TO TITLE</button>
+      </div>
+    </section>
+
+    <section id="settings" class="screen hidden">
+      <h2>SETTINGS</h2>
+      <div class="panel">
+        <label>Master volume <input id="setMaster" type="range" min="0" max="1" step="0.05"></label>
+        <label>Music volume <input id="setMusic" type="range" min="0" max="1" step="0.05"></label>
+        <label>Effects volume <input id="setSfx" type="range" min="0" max="1" step="0.05"></label>
+        <label class="check"><input id="setBloom" type="checkbox"> Bloom glow</label>
+        <label class="check"><input id="setShake" type="checkbox"> Screen shake</label>
+        <label class="check"><input id="setReduced" type="checkbox"> Reduced motion (fewer flashes &amp; particles)</label>
+      </div>
+      <div class="menu"><button id="btnSettingsBack" class="primary">BACK</button></div>
+    </section>
+
+    <section id="scores" class="screen hidden">
+      <h2>HIGH SCORES</h2>
+      <ol id="scoreList" class="scorelist"></ol>
+      <div class="menu">
+        <button id="btnScoresPlay" class="primary">PLAY AGAIN</button>
+        <button id="btnScoresBack">TITLE</button>
+      </div>
+    </section>
+
+    <section id="gameover" class="screen hidden">
+      <h2 class="over">GAME OVER</h2>
+      <p class="final">Score <b id="goScore">0</b> &middot; Level <b id="goStage">1</b></p>
+      <div id="goEntry" class="entry hidden">
+        <p class="newhs">NEW HIGH SCORE! Enter your initials</p>
+        <input id="goName" type="text" maxlength="3" autocomplete="off" spellcheck="false" aria-label="Your initials">
+        <div class="menu"><button id="btnSaveScore" class="primary">SAVE SCORE</button></div>
+      </div>
+      <div id="goButtons" class="menu">
+        <button id="btnRetry" class="primary">PLAY AGAIN</button>
+        <button id="btnGoTitle">TITLE</button>
+      </div>
+    </section>
+  </div>
+
+  <noscript><p style="color:#fff;padding:2rem">SpaceQix needs JavaScript enabled.</p></noscript>
+
+  <script src="js/util.js?v=5"></script>
+  <script src="js/config.js?v=5"></script>
+  <script src="js/audio.js?v=5"></script>
+  <script src="js/gfx.js?v=5"></script>
+  <script src="js/field.js?v=5"></script>
+  <script src="js/pics.js?v=5"></script>
+  <script src="js/art.js?v=5"></script>
+  <script src="js/fx.js?v=5"></script>
+  <script src="js/input.js?v=5"></script>
+  <script src="js/scores.js?v=5"></script>
+  <script src="js/game.js?v=5"></script>
+  <script src="js/hud.js?v=5"></script>
+  <script src="js/ui.js?v=5"></script>
+  <script src="js/touchcfg.js?v=5"></script>
+  <script src="js/mobile.js?v=5"></script>
+<script src="js/padcfg.js?v=5"></script>
+<script src="js/pad.js?v=5"></script>
+<script src="js/main.js?v=5"></script>
+  <script src="js/fs.js?v=5"></script>
+</body>
+</html>

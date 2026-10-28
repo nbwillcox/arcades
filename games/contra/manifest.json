@@ -1,0 +1,38 @@
+{
+  "name": "SpaceContra",
+  "short_name": "SpaceContra",
+  "description": "SpaceContra - a free retro-style run-and-gun platformer: a little astronaut runs, jumps and shoots across alien worlds, grabs weapon capsules and takes down giant bosses.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "orientation": "landscape",
+  "background_color": "#05071a",
+  "theme_color": "#05071a",
+  "categories": [
+    "games"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

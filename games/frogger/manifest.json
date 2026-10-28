@@ -1,0 +1,11 @@
+{
+  "name": "SpaceFrogger",
+  "short_name": "SpaceFrogger",
+  "description": "A free retro neon road-and-river hopper in space.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#03040d",
+  "theme_color": "#03040d",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

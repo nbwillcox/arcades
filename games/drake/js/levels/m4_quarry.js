@@ -1,0 +1,76 @@
+// Mossgate Meadows, level 4: Old Quarry. Terraced rock, heavy guards, smashable walls, a vent across the pit.
+import { elder, chest, lantern } from './helpers.js';
+
+const THEME = {
+  grass: 0x78b95a, grass2: 0x93cc6c, rock: 0xb8a59a, sand: 0xe3cf9c, sandBelow: -0.2,
+  sky: [0x5f93ff, 0xf3d9c0], fog: 0xf0d8c4, fogNear: 60, fogFar: 175,
+  water: 0x4aa8d8, hemiSky: 0xffe8d8, hemiGround: 0x8a6a5a, sun: 0xffc890,
+  palette: { leaf: 0x4a9a3a, leaf2: 0x66b24a, trunk: 0x7a5a3a, rock: 0xb8a59a, rock2: 0xd0bdb0, crystal: 0xffa8c8, crystal2: 0xffd0a8 },
+};
+
+export default {
+  id: 'm4_quarry', name: 'Old Quarry', world: 'mossgate', seed: 41,
+  size: 200, theme: THEME, music: 'quarry',
+  low: { h: 0.5, amp: 0.4, scale: 0.05 },
+  rim: 16, rimH: 18,
+  nodes: {
+    start: { x: 28, z: 100, r: 10, h: 0.5 },
+    yard: { x: 66, z: 100, r: 13, h: 2.5 },
+    t1: { x: 100, z: 70, r: 10, h: 6.5 },
+    t2: { x: 134, z: 48, r: 10, h: 11 },
+    t3: { x: 168, z: 70, r: 9, h: 15 },
+    pitFloor: { x: 108, z: 132, r: 14, h: -1.8 },
+    mineMouth: { x: 66, z: 150, r: 8, h: 0.5 },
+    ledge: { x: 150, z: 112, r: 8, h: 7.5 },
+    crown: { x: 168, z: 132, r: 9, h: 12 },
+    vaultE: { x: 176, z: 168, r: 6, h: 2, noFill: true },
+  },
+  links: [
+    { a: 'start', b: 'yard', type: 'steps', w: 7 },
+    { a: 'yard', b: 't1', type: 'ramp', w: 5 },
+    { a: 't1', b: 't2', type: 'ramp', w: 5 },
+    { a: 't2', b: 't3', type: 'ramp', w: 5 },
+    { a: 'yard', b: 'pitFloor', type: 'ramp', w: 7 },
+    { a: 'yard', b: 'mineMouth', type: 'ramp', w: 5 },
+    { a: 'pitFloor', b: 'ledge', type: 'ramp', w: 5 },
+    { a: 'ledge', b: 'crown', type: 'gap', vent: { x: 154, z: 118, h: 11 } },
+    { a: 'crown', b: 'vaultE', type: 'ramp', w: 4 },
+  ],
+  spawn: 'start', spawnYaw: Math.PI / 2,
+  entities: (c) => [
+    lantern(...c.at('yard', 180, 7), Math.PI / 2), lantern(...c.at('t1', 90, 5), 0), lantern(...c.at('ledge', 270, 5), 0), lantern(...c.at('crown', 0, 5), 0),
+    elder(...c.at('t2', 90, 4), 'Guards with shields: charge them. Guards with spikes: flame them!'),
+    elder(...c.at('mineMouth', 180, 3), 'Smash the cracked wall for a secret.'),
+    elder(...c.at('vaultE', 0, 2), 'You found the quarry treasure!'),
+    chest(...c.at('crown', 90, 2.5), [10, 10, 25, 25, 25, 25], 0),
+    chest(...c.at('t3', 90, 3), [5, 5, 10, 10], 0),
+    { t: 'barrier', by: 'charge', x: 172, z: 150, w: 6, h: 3.2, d: 1.2 },
+    { t: 'barrier', by: 'charge', x: 66, z: 126, w: 6, h: 3.2, d: 1.2 },
+    { t: 'brazier', group: 'c', x: c.at('t1', 180, 6)[0], z: c.at('t1', 180, 6)[1] },
+    { t: 'brazier', group: 'c', x: c.at('t3', 90, 6)[0], z: c.at('t3', 90, 6)[1] },
+    { t: 'spikes', x: 100, z: 100, w: 4, d: 3 }, { t: 'spikes', x: 138, z: 90, w: 3, d: 3 },
+    { t: 'exit', x: c.at('crown', 270, 5)[0], z: c.at('crown', 270, 5)[1] },
+  ],
+  decor: () => [{ k: 'mineentrance', x: 66, y: 0.5, z: 141, s: 1, ry: 0, v: 0.5 }, { k: 'mineentrance_anim', x: 66, y: 0.5, z: 141, s: 1, ry: 0, v: 0.5 }],
+  boxes: () => [
+    { min: [62.5, -1, 140.6], max: [63.5, 5.8, 141.4], hidden: true }, { min: [68.5, -1, 140.6], max: [69.5, 5.8, 141.4], hidden: true },
+    { min: [58.5, -1, 140], max: [61.5, 6, 143], hidden: true }, { min: [70.5, -1, 140], max: [73.5, 6, 143], hidden: true },
+  ],
+  fill: [
+    { t: 'pile', n: 20, v: 1, where: 'low', count: 6 }, { t: 'pile', n: 9, v: 2, where: 'high', count: 5 }, { t: 'ring', n: 5, v: 1, count: 10, r: 2.4 },
+    { t: 'pile', n: 6, v: 5, where: 'high', count: 4 },
+    { t: 'crate', n: 10, gems: [1, 1, 2], where: 'low' }, { t: 'vase', n: 7, gems: [1, 2], where: 'low' }, { t: 'crate', n: 5, gems: [5, 5], where: 'high' },
+    { t: 'enemy', kind: 'stroller', n: 4, where: 'low', patrol: 6 }, { t: 'enemy', kind: 'shield', n: 5, node: 't1', patrol: 5 },
+    { t: 'enemy', kind: 'spiked', n: 4, node: 't2', patrol: 5 }, { t: 'enemy', kind: 'hopper', n: 3, node: 'yard', patrol: 7 },
+    { t: 'enemy', kind: 'spitter', n: 2, node: 't3', patrol: 0 }, { t: 'enemy', kind: 'brute', n: 2, node: 'pitFloor', patrol: 5 },
+    { t: 'moth', n: 6 },
+  ],
+  trails: 1,
+  scatter: [
+    { k: 'tree', n: 30, where: 'low', solid: 0.7, spacing: 9, maxSlope: 0.22 },
+    { k: 'rock', n: 70, where: 'any', solid: 0.9, spacing: 5, s0: 0.9, s1: 1.8 },
+    { k: 'crystal', n: 25, where: 'any', spacing: 12, maxSlope: 0.3 },
+    { k: 'tuft', n: 220, where: 'any', s0: 0.8, s1: 1.4 }, { k: 'lamppost', n: 6, where: 'any', spacing: 20 },
+    { k: 'tree', n: 60, where: 'any', minH: 14, s0: 1.4, s1: 2.2 },
+  ],
+};
