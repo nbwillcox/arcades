@@ -1,7 +1,7 @@
 {
   "name": "Nic's Arcade",
   "short_name": "Nic's Arcade",
-  "description": "29 free neon space arcade games in one place - controller, keyboard, mouse and touch.",
+  "description": "30 free neon space arcade games in one place - controller, keyboard, mouse and touch.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

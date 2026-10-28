@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#04050f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SpaceJong">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>SpaceJong</title>
+  <meta name="description" content="SpaceJong - a free glass Mahjong solitaire game: refractive crystal tiles, sci-fi glyphs, twelve boards, combos, zen and timed modes.">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+  <canvas id="game" aria-label="SpaceJong game board"></canvas>
+  <div id="hud" role="status">
+    <button id="hPause" type="button" aria-label="Pause">&#10074;&#10074;</button>
+    <div class="hl"><b id="hName">BOARD</b><span id="hMode">ZEN</span></div>
+    <div class="hs"><span>SCORE<b id="hScore">0</b></span><span>TIME<b id="hTime">0:00</b></span><span>TILES<b id="hTiles">0</b></span><span id="hMovesBox">MOVES<b id="hMoves">0</b></span></div>
+    <div id="hCombo"></div><div id="comboBar"><i id="comboFill"></i></div>
+  </div>
+  <div id="bar"><button id="bHint" type="button">HINT <small>-10s</small></button><button id="bUndo" type="button">UNDO <small>-8s</small></button><button id="bShuf" type="button">SHUFFLE <small>-15s</small></button></div>
+  <div id="ui"></div>
+  <noscript><p style="color:#fff;padding:2rem">SpaceJong needs JavaScript enabled.</p></noscript>
+  <script src="js/util.js?v=1"></script>
+  <script src="js/config.js?v=1"></script>
+  <script src="js/layouts.js?v=1"></script>
+  <script src="js/core.js?v=1"></script>
+  <script src="js/audio.js?v=1"></script>
+  <script src="js/faces.js?v=1"></script>
+  <script src="js/glass.js?v=1"></script>
+  <script src="js/render.js?v=1"></script>
+  <script src="js/game.js?v=1"></script>
+  <script src="js/input.js?v=1"></script>
+  <script src="js/ui.js?v=1"></script>
+  <script src="js/main.js?v=1"></script>
+  <script>SGS.main.boot();</script>
+  <script src="js/fs.js?v=arc1"></script>
+</body>
+</html>

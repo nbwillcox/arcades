@@ -1,6 +1,6 @@
 # Nic's Arcade
 
-One space-themed arcade cabinet that holds all 29 of the free neon games: pick a game from the main menu with a controller, keyboard, mouse or finger, and jump back to the menu without ever touching the address bar.
+One space-themed arcade cabinet that holds all 30 of the free neon games: pick a game from the main menu with a controller, keyboard, mouse or finger, and jump back to the menu without ever touching the address bar.
 
 **Play it in your browser:** https://nbwillcox.github.io/arcades/
 
@@ -25,7 +25,7 @@ Add it to your phone's home screen (*Add to Home Screen* / *Install*) for a full
 
 Shooters: Space Gala Shooter, Space Centi Shooter, Space Vader Shooter, Space Stroids, Space Command, Space Robo Shooter, Space Side Pews, Space Tube, Space Harrier, Space Fox, Space Duck Hunter.
 Action: Space Troid, Space Drake, Space Contra, Space Bobble, Space Kong, Space Dug, Space Joust, Stick Brawl, Space Frogger.
-Puzzle and maze: Space Pac, Space Qix, Space Bricks, Space Tris, Space Bert.
+Puzzle and maze: Space Pac, Space Qix, Space Bricks, Space Tris, Space Bert, Space Jong.
 Racing and driving: F-Space Zero, Spy Space Hunter, Space Marble, Light Cycles.
 
 Each game keeps its own scores, settings and saves in your browser. Space Drake is built for a controller and has no touch controls.

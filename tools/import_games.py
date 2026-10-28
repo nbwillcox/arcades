@@ -15,7 +15,7 @@ GAMES = {
     'tris': 'SpaceTris', 'troid': 'SpaceTroid', 'spy': 'SpySpaceHunter',
     'pac': 'SpacePac', 'tube': 'SpaceTube', 'qix': 'SpaceQix', 'joust': 'SpaceJoust',
     'kong': 'SpaceKong', 'brawl': 'StickBrawl', 'marble': 'SpaceMarble',
-    'bert': 'SpaceBert', 'fox': 'SpaceFox', 'drake': 'SpaceDrake', 'duck': 'SpaceDuckHunter',
+    'bert': 'SpaceBert', 'jong': 'SpaceJong', 'fox': 'SpaceFox', 'drake': 'SpaceDrake', 'duck': 'SpaceDuckHunter',
 }
 # only these top-level entries of the root game are the game itself
 ROOT_ONLY = {'index.html', 'js', 'css', 'icons', 'manifest.json'}

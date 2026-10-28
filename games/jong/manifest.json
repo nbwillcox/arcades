@@ -1,0 +1,18 @@
+{
+  "name": "SpaceJong",
+  "short_name": "SpaceJong",
+  "description": "SpaceJong - a free glass Mahjong solitaire game with refractive crystal tiles, sci-fi glyphs and twelve boards.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#04050f",
+  "theme_color": "#04050f",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
