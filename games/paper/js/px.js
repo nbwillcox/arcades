@@ -101,6 +101,62 @@
     const t = target || 0, o = (1 - k) * t, n = buf.length;
     for (let i = 0; i < n; i++) { const c = buf[i]; buf[i] = (4278190080 | ((((c >> 16) & 255) * k + o) << 16) | ((((c >> 8) & 255) * k + o) << 8) | (((c & 255) * k + o) | 0)) >>> 0; }
   };
+  /* ---- bitmaps: sprites (alpha-keyed) and tiling textures, decoded once from images ---- */
+  px.bitmap = function (im) {
+    const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height);
+    const src = new Uint32Array(d.data.buffer), out = new Uint32Array(src.length);
+    for (let i = 0; i < src.length; i++) out[i] = (src[i] >>> 24) > 127 ? (src[i] | 0xff000000) >>> 0 : 0;
+    return { w: c.width, h: c.height, data: out };
+  };
+  /* recolour the near-white body of a sprite to a hue (cars) */
+  px.recolor = function (s, hue, sat) {
+    const out = new Uint32Array(s.data.length);
+    for (let i = 0; i < s.data.length; i++) {
+      const c = s.data[i]; if (!c) continue; const r = c & 255, gg = (c >> 8) & 255, b = (c >> 16) & 255, mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 510;
+      out[i] = (mx - mn < 40 && l > 0.42) ? px.hsl(hue, sat || 68, l * 82) : c;
+    }
+    return { w: s.w, h: s.h, data: out };
+  };
+  /* draw a sprite with its bottom-centre at (x, y); k < 1 darkens, flip mirrors */
+  px.spr = function (s, x, y, flip, k) {
+    if (!s) return; x = Math.round(x - s.w / 2); y = Math.round(y - s.h);
+    const x0 = Math.max(0, -x), x1 = Math.min(s.w, W - x), y0 = Math.max(0, -y), y1 = Math.min(s.h, H - y);
+    for (let j = y0; j < y1; j++) {
+      const row = (y + j) * W + x, sr = j * s.w;
+      for (let i = x0; i < x1; i++) {
+        let c = s.data[sr + (flip ? s.w - 1 - i : i)]; if (!c) continue;
+        if (k !== undefined && k !== 1) c = (4278190080 | ((((c >> 16) & 255) * k) << 16) | ((((c >> 8) & 255) * k) << 8) | (((c & 255) * k) | 0)) >>> 0;
+        buf[row + i] = c;
+      }
+    }
+  };
+  /* texture-mapped polygon: (u, v) = affine(X, Y) via A = [a, b, c, d, e, f]; texture wraps (power-of-two sizes);
+     tint multiplies the texel by a colour, k scales brightness */
+  px.texPoly = function (p, t, A, tint, k) {
+    const n = p.length >> 1; let y0 = 1e9, y1 = -1e9; for (let i = 1; i < p.length; i += 2) { if (p[i] < y0) y0 = p[i]; if (p[i] > y1) y1 = p[i]; }
+    const ya = Math.max(0, Math.ceil(y0 - 0.5)), yb = Math.min(H - 1, Math.floor(y1 - 0.5)), tw = t.w - 1, th = t.h - 1, td = t.data;
+    const tr = tint ? (tint & 255) / 255 * (k || 1) : (k || 1), tg = tint ? ((tint >> 8) & 255) / 255 * (k || 1) : (k || 1), tb = tint ? ((tint >> 16) & 255) / 255 * (k || 1) : (k || 1);
+    const plain = !tint && (!k || k === 1);
+    for (let y = ya; y <= yb; y++) {
+      const yc = y + 0.5; let m = 0;
+      for (let i = 0; i < n; i++) { const j = (i + 1) % n, ax = p[i * 2], ay = p[i * 2 + 1], bx = p[j * 2], by = p[j * 2 + 1]; if ((ay <= yc && by > yc) || (by <= yc && ay > yc)) { const x = ax + (yc - ay) * (bx - ax) / (by - ay); let q = m++; while (q > 0 && xs[q - 1] > x) { xs[q] = xs[q - 1]; q--; } xs[q] = x; } }
+      for (let q = 0; q + 1 < m; q += 2) {
+        const xa = Math.max(0, Math.ceil(xs[q] - 0.5)), xb = Math.min(W - 1, Math.ceil(xs[q + 1] - 0.5) - 1), row = y * W;
+        let u = A[0] * (xa + 0.5) + A[1] * yc + A[2], v = A[3] * (xa + 0.5) + A[4] * yc + A[5];
+        for (let x = xa; x <= xb; x++, u += A[0], v += A[3]) {
+          const c = td[((Math.floor(v) & th) * t.w) + (Math.floor(u) & tw)];
+          buf[row + x] = plain ? c : (4278190080 | (Math.min(255, (((c >> 16) & 255) * tb) | 0) << 16) | (Math.min(255, (((c >> 8) & 255) * tg) | 0) << 8) | Math.min(255, ((c & 255) * tr) | 0)) >>> 0;
+        }
+      }
+    }
+  };
+  /* affine (X, Y) -> (u, v) through three screen points with their uv */
+  px.affine = function (X1, Y1, u1, v1, X2, Y2, u2, v2, X3, Y3, u3, v3) {
+    const det = X1 * (Y2 - Y3) - Y1 * (X2 - X3) + (X2 * Y3 - X3 * Y2); if (Math.abs(det) < 1e-6) return null;
+    const s = (a1, a2, a3) => [((a1 * (Y2 - Y3) + a2 * (Y3 - Y1) + a3 * (Y1 - Y2)) / det), ((a1 * (X3 - X2) + a2 * (X1 - X3) + a3 * (X2 - X1)) / det), ((a1 * (X2 * Y3 - X3 * Y2) + a2 * (X3 * Y1 - X1 * Y3) + a3 * (X1 * Y2 - X2 * Y1)) / det)];
+    const U = s(u1, u2, u3), V = s(v1, v2, v3); return [U[0], U[1], U[2], V[0], V[1], V[2]];
+  };
   /* vignette: darkens the corners so the eye goes to the middle of the screen (where the rider is) */
   let vig = null;
   px.vignette = function (cx0, cy0, strength) {

@@ -8,7 +8,8 @@
   const OUT = hsl(250, 45, 10), BLACK = px.rgb(10, 6, 30);
   const flash = (h, s, l, f) => (f > 0 ? R(h, 8, 86) : R(h, s, l));
   const plane = (x, zc, yc, rz, ry, n, rot) => { const a = []; for (let i = 0; i < n; i++) { const t = (i / n) * 6.2832 + (rot || 0); a.push(x, zc + Math.cos(t) * rz, yc + Math.sin(t) * ry); } return a; };
-  const DEP = 48;
+  const SP = (n) => G.art && G.art.spr && G.art.spr[n];
+  const DEP = 48, KZ = 0.75, KY = 1.3;
   /* back garden behind each house: picket fence, a tree, sometimes a pool or a shed */
   function backyard(h, WX) {
     const BX = WX - DEP - 16, z0 = h.z0 - 15, z1 = h.z1 + 15, f = R(40, 14, 62);
@@ -24,27 +25,35 @@
     backyard(h, WX);
     g.cast(WX - DEP, z0, WX, z1, 52, 0.3);
     /* end wall (-z side) */
-    g.pf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wall.b);
-    const sd = px.mix(wall.b, wall.a, 0.55);
-    for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX - DEP, z0, v, sd);
+    const TX = G.art && G.art.tex, brick = h.id % 3 === 1, wtex = TX && (brick ? TX.brick : TX.siding), wtint = brick ? null : wall.e, rtex = TX && TX.roof;
+    if (!g.tpf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wtex, [0, 0, DEP * KZ, 0, DEP * KZ, -H * KY], wtint, lit ? 0.62 : 0.5)) {
+      g.pf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wall.b);
+      const sd = px.mix(wall.b, wall.a, 0.55);
+      for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX - DEP, z0, v, sd);
+    }
     /* facade */
-    g.pf([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.c);
-    const sc = px.mix(wall.c, wall.b, 0.5);
-    for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX, z1, v, sc);
+    if (!g.tpf([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wtex, [z0 * KZ, 0, z1 * KZ, 0, z1 * KZ, -H * KY], wtint, lit ? 0.95 : 0.72)) {
+      g.pf([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.c);
+      const sc = px.mix(wall.c, wall.b, 0.5);
+      for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX, z1, v, sc);
+    }
+    /* eave shadow + ground contact darkening */
+    px.blendPoly(g.sp([WX, z0, H - 5, WX, z1, H - 5, WX, z1, H, WX, z0, H]), BLACK, 0.3);
     g.pf([WX, z0, 0, WX, z1, 0, WX, z1, 4.5, WX, z0, 4.5], stone.c, stone.b, 1);
     g.ln(WX, z0, 4.5, WX, z1, 4.5, stone.a);
     g.ln(WX, z0, 0, WX, z0, H, wall.d); g.ln(WX, z1, 0, WX, z1, H, wall.b);
     g.po([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.a);
     if (h.style === 0) {
-      g.pf([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.c);
-      for (let k = 1; k < 7; k++) { const t = k / 7; g.ln(WX + 3 - (DEP / 2 + 3) * t, z0 - 3, H - 1 + 19 * t, WX + 3 - (DEP / 2 + 3) * t, z1 + 3, H - 1 + 19 * t, k % 2 ? roof.b : roof.d); }
+      const rp = [WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18];
+      if (g.tpf(rp, rtex, [z0 * KZ, 0, z1 * KZ, 0, z1 * KZ, -34], roof.e, 1.05)) { /* textured */ } else g.pf(rp, roof.c);
+      if (!rtex) for (let k = 1; k < 7; k++) { const t = k / 7; g.ln(WX + 3 - (DEP / 2 + 3) * t, z0 - 3, H - 1 + 19 * t, WX + 3 - (DEP / 2 + 3) * t, z1 + 3, H - 1 + 19 * t, k % 2 ? roof.b : roof.d); }
       g.po([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.a);
       g.ln(WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, roof.e);
       g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], wall.b); g.po([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], roof.a);
       g.box(WX - 28, z0 + 12, H + 3, 6, 6, 16, R(12, 45, 34));
       g.pr(WX - 25, z0 + 15, H + 22); for (let k = 0; k < 4; k++) px.ell(g.X + Math.sin(time * 2 + k) * 2 + k, g.Y - k * 4 - ((time * 8) % 4), 2 + k * 0.5, 1.5 + k * 0.4, hsl(250, 10, 78 - k * 6), hsl(250, 10, 60), 1);
     } else if (h.style === 1) {
-      g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP, z1, H, WX, z1, H], roof.d);
+      if (!g.tpf([WX, z0, H, WX - DEP, z0, H, WX - DEP, z1, H, WX, z1, H], TX && TX.stone, [z0 * KZ, 0, z0 * KZ, DEP, z1 * KZ, DEP], roof.e, 0.8)) g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP, z1, H, WX, z1, H], roof.d);
       g.pf([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.d); g.po([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.a);
       g.ln(WX, z0, H + 3.5, WX, z1, H + 3.5, hsl(185 + Math.sin(time * 2) * 12, 95, 62));
       g.pf([WX - 4, z0 + 6, H, WX - 22, z0 + 6, H, WX - 22, z0 + 26, H, WX - 4, z0 + 26, H], hsl(218, 70, 32)); g.ln(WX - 13, z0 + 6, H, WX - 13, z0 + 26, H, hsl(218, 60, 52));
@@ -52,8 +61,9 @@
     } else {
       /* front-facing gable: triangle on the facade, slopes running back */
       const RH = H + 24;
-      g.pf([WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, WX - DEP - 2, zc, RH, WX - DEP - 2, z0 - 3, H - 1], roof.c);
-      for (let k = 1; k < 6; k++) { const t = k / 6; g.ln(WX + 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, WX - DEP - 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, k % 2 ? roof.b : roof.d); }
+      const gp = [WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, WX - DEP - 2, zc, RH, WX - DEP - 2, z0 - 3, H - 1];
+      if (!g.tpf(gp, rtex, [0, 0, 0, -48, (DEP + 4) * 1.2, -48], roof.e, 1.05)) g.pf(gp, roof.c);
+      if (!rtex) for (let k = 1; k < 6; k++) { const t = k / 6; g.ln(WX + 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, WX - DEP - 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, k % 2 ? roof.b : roof.d); }
       g.po([WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, WX - DEP - 2, zc, RH, WX - DEP - 2, z0 - 3, H - 1], roof.a);
       g.pf([WX, z0, H, WX, z1, H, WX, zc, RH - 2], wall.d); g.po([WX, z0, H, WX, z1, H, WX, zc, RH - 2], wall.a);
       g.pf([WX, zc - 4, H + 6, WX, zc + 4, H + 6, WX, zc + 4, H + 14, WX, zc - 4, H + 14], lit ? hsl(47, 95, 72) : hsl(205, 55, 26)); g.po([WX, zc - 4, H + 6, WX, zc + 4, H + 6, WX, zc + 4, H + 14, WX, zc - 4, H + 14], trim.a);
@@ -122,6 +132,12 @@
 
   Sp.mailbox = function (h, time) {
     const m = h.mailbox, x = m.x, z = m.z, bob = m.hit ? Math.round(Math.sin(time * 40)) * 0.8 : 0;
+    if (SP('mailbox')) {
+      g.shadow(x + 3, z - 2, 5, 0.62); g.spr(SP('mailbox'), x, z, bob, false, h.sub && !h.cancelled ? 1 : 0.62);
+      if (h.sub && !h.delivered && !h.cancelled) { g.pr(x, z, 30 + Math.round(Math.sin(time * 5) * 2)); px.poly([g.X - 3, g.Y - 3, g.X + 3, g.Y - 3, g.X, g.Y + 2], hsl(50, 95, 62)); px.outline([g.X - 3, g.Y - 3, g.X + 3, g.Y - 3, g.X, g.Y + 2], OUT); }
+      if (m.flag) { g.pr(x + 4, z, 22); px.rect(g.X, g.Y - 4, 4, 3, hsl(0, 85, 54)); px.rect(g.X - 1, g.Y - 4, 1, 6, OUT); }
+      return;
+    }
     g.shadow(x, z, 4, 0.6);
     g.box(x - 0.8, z - 0.8, 0, 1.6, 1.6, 9, R(30, 25, 30));
     const c = h.sub ? (h.cancelled ? R(0, 55, 40) : R(210, 70, 52)) : R(270, 15, 46);
@@ -146,6 +162,18 @@
       return;
     }
     const lean = P.lean * 2, th = P.throwT;
+    if (SP('rider')) {
+      g.spr(SP('rider'), x + lean, z, y - 2);
+      g.pr(x + lean * 0.5, z, y + 27); const sx = g.X, sy = g.Y;
+      if (th > 0) {
+        const k = 1 - th / 0.28, reach = Math.sin(Math.min(1, k * 1.4) * 1.57) * 15 * P.throwSide; g.pr(x + reach, z + 1, y + 29); const ex = g.X, ey = g.Y;
+        px.line(sx, sy, ex, ey, OUT); px.line(sx, sy + 1, ex, ey + 1, OUT); px.line(sx, sy, ex, ey, skin.c); px.rect(ex - 1, ey - 1, 3, 3, skin.c);
+        if (k < 0.45) { px.rect(ex - 2, ey - 3, 6, 4, OUT); px.rect(ex - 1, ey - 2, 4, 2, hsl(48, 25, 96)); px.rect(ex, ey - 2, 1, 2, hsl(0, 75, 50)); }
+      }
+      if (P.pw.shield > 0) { const a = P.pw.shield < 2 ? (Math.floor(time * 12) % 2 ? 0.45 : 0.1) : 0.38; g.pr(x, z, y + 18); px.blendEll(g.X, g.Y, 24, 26, hsl(195, 90, 68), a * 0.6); px.ring(g.X, g.Y, 24, 26, hsl(190, 90, 84), 1); }
+      if (P.pw.speed > 0) for (let k = 1; k < 4; k++) { g.pr(x, z - k * 11, y + 8); px.line(g.X - 6, g.Y, g.X + 6, g.Y - 4, hsl(30, 100, 78 - k * 8)); }
+      return;
+    }
     /* board: deck, rails, thrusters */
     B(-3.6, -11, 3, 7.2, 22, 2.2, board); B(-3.9, -11.5, 2.4, 7.8, 1.4, 1.2, R(188, 40, 30)); B(-3.9, 10.2, 2.4, 7.8, 1.4, 1.2, R(188, 40, 30));
     g.ln(x - 3.6 * K, z - 10 * K, y + 5.2 * K, x - 3.6 * K, z + 10 * K, y + 5.2 * K, board.e);
@@ -181,6 +209,12 @@
     const body = R(c.hue, 78, 50), glass = R(205, 55, 52), dy = c.dead ? Math.min(40, (c.fly || 1) * 18) : 0, dark = R(250, 20, 18);
     g.shadow(c.x, c.z, Math.max(Wd, L / 2) * 0.8, 0.6);
     g.pr(c.x, c.z, 1); px.blendEll(g.X, g.Y + 2, L * 0.3, Wd * 0.34, hsl(185, 100, 68), 0.34);
+    const cs = G.art && G.art.car && G.art.car(c.cross ? 'car_side' : c.vz < 0 ? 'car_toward' : 'car_away', c.hue);
+    if (cs) {
+      px.spr(cs, g.X, g.Y + 4 - dy * g.HS, c.cross && c.vx < 0, 1);
+      if (c.honk > 0) { g.pr(c.x, c.z, 30); px.text('HONK!', g.X, g.Y - 3, 1, hsl(50, 95, 64), 'center', OUT); }
+      return;
+    }
     if (c.cross) {
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.box(c.x + sx * L * 0.32 - 2, c.z + sz * Wd / 2 - (sz > 0 ? 1 : 0), 0.5 + dy, 4, 1.6, 3, dark);
       g.box(c.x - L / 2, c.z - Wd / 2, 2 + dy, L, Wd, hh, body);
@@ -217,6 +251,7 @@
 
   Sp.mover = function (m, time) {
     if (m.dead) return;
+    if (m.t === 'skater' && SP('skater')) { g.shadow(m.x, m.z, 6, 0.6); g.spr(SP('skater'), m.x, m.z, 0, m.vz < 0); return; }
     if (m.t === 'skater') {
       const sk = R(m.hue, 70, 48);
       g.shadow(m.x, m.z, 6, 0.6); g.box(m.x - 2.5, m.z - 6, 1.6, 5, 12, 1.4, sk); g.box(m.x - 1.5, m.z - 2, 3, 3, 4, 7, R(m.hue + 120, 60, 46)); g.ball(m.x, m.z, 13, 3.3, R(26, 55, 74)); g.box(m.x - 3.4, m.z - 3.5, 15.6, 6.8, 7, 1.8, sk);
@@ -237,6 +272,7 @@
       g.ring(u.x, u.z, 0, 22, hsl(165, 100, 82), 1);
     }
     g.shadow(u.x, u.z, 14, 0.78);
+    if (SP('ufo')) { g.pr(u.x, u.z, y); px.spr(SP('ufo'), g.X, g.Y + 10); return; }
     g.pr(u.x, u.z, y); const cx = g.X, cy = g.Y, hull = R(225, 22, 62);
     px.ell(cx, cy + 1, 17, 6, hull.a); px.ell(cx, cy, 16, 5, hull.c); px.ell(cx, cy + 2, 14, 2.5, hull.b); px.ell(cx - 3, cy - 1, 10, 2, hull.d);
     px.ell(cx, cy - 4, 8, 6, hsl(170, 70, 70)); px.ring(cx, cy - 4, 8, 6, hull.a); px.pix(cx - 3, cy - 7, hsl(170, 50, 96)); px.rect(cx - 1, cy - 5, 3, 3, hsl(100, 80, 55));
@@ -246,6 +282,12 @@
   /* ---------------- props ---------------- */
   Sp.deco = function (o, time) {
     if (o.dead) return;
+    const ds = { tree: SP('tree_' + 'abc'[o.kind || 0]), gnome: SP('gnome'), trash: SP('trash'), hydrant: SP('hydrant'), cone: SP('cone'), ramp: SP('ramp') }[o.t];
+    if (ds) {
+      if (o.t === 'tree') g.shadow(o.x + 9, o.z - 6, 12, 0.66); else if (o.t === 'ramp') g.shadow(o.x, o.z, 12, 0.62); else g.shadow(o.x + 1, o.z - 1, 4, 0.62);
+      g.spr(ds, o.x, o.z, 0, false); return;
+    }
+    if (o.t === 'parked') { const cs = G.art && G.art.car && G.art.car('car_away', o.hue); if (cs) { g.cast(o.x - 7, o.z - 11, o.x + 7, o.z + 11, 12, 0.3); g.pr(o.x, o.z, 0); px.spr(cs, g.X + (o.hit > 0 ? Math.round(Math.sin(time * 40)) : 0), g.Y + 4); if (o.hit > 0) { g.pr(o.x, o.z, 26); px.text('BEEP!', g.X, g.Y - 3, 1, hsl(50, 95, 64), 'center', OUT); } return; } }
     switch (o.t) {
       case 'tree': {
         const k = o.kind, hue = [160, 300, 45][k], cr = R(hue, 58, 46), sway = Math.round(Math.sin(time * 1.4 + o.z));
@@ -299,6 +341,7 @@
     if (k.taken) return;
     const bob = Math.round(Math.sin(time * 4 + k.z) * 2);
     g.shadow(k.x, k.z, 7, 0.6);
+    if (k.t === 'bundle' && SP('bundle')) { g.ring(k.x, k.z, 0, 10 + Math.sin(time * 5) * 1.5, hsl(0, 0, 92)); g.spr(SP('bundle'), k.x, k.z, 2 + bob * 0.5); g.pr(k.x, k.z, 22 + bob); px.text('+8', g.X, g.Y - 3, 1, hsl(0, 0, 100), 'center', OUT); return; }
     if (k.t === 'bundle') {
       g.ring(k.x, k.z, 0, 10 + Math.sin(time * 5) * 1.5, hsl(0, 0, 92));
       for (let q = 0; q < 3; q++) g.cyl(k.x + (q - 1) * 3.4, k.z, 1 + (q === 1 ? 5 : 0), 2.1, 7, R(48, 25, 90));
@@ -345,6 +388,17 @@
   Sp.boss = function (b, time) {
     const x = b.x, z = b.z, f = b.flash, dead = b.hp <= 0, jit = dead ? Math.round(Math.sin(time * 60)) * 1.5 : 0;
     g.shadow(x, z, b.type === 'mower' ? 26 : 22, 0.62);
+    const bs = SP('boss_' + b.type);
+    if (bs) {
+      if (!(f > 0 && Math.floor(time * 30) % 2)) g.spr(bs, x + jit, z, b.type === 'gorp' ? b.y - 10 : 0, b.side > 0);
+      g.pr(x, z, 0); const by = g.Y - bs.h;
+      if (b.state === 'warn') { const a = 0.4 + 0.3 * Math.sin(time * 24); px.blendPoly(g.sp([-C.CURB, z - 8, 0, C.CURB, z - 8, 0, C.CURB, z + 8, 0, -C.CURB, z + 8, 0]), hsl(0, 95, 56), a); g.pr(0, z, 8); px.text(b.type === 'rex' ? 'CHARGE!' : 'JUMP THE BLADE!', g.X, g.Y - 8, b.type === 'rex' ? 2 : 1, hsl(5, 95, 66), 'center', OUT); }
+      if (b.state === 'dizzy') for (let k = 0; k < 4; k++) { const a = time * 6 + k * 1.57; g.pr(x, z, 0); px.text('*', g.X + Math.cos(a) * 16 - 2, by + Math.sin(a) * 4 - 2, 1, hsl(50, 95, 64), 'left', OUT); }
+      if (b.state === 'vent') { g.pr(x, z, 0); px.text('WEAK SPOT!', g.X, by - 10, 1, hsl(50, 95, 64), 'center', OUT); }
+      if (b.shield) { g.pr(x, z, b.y); px.blendEll(g.X, g.Y - 20, 46, 40, hsl(190, 90, 72), 0.2 + 0.08 * Math.sin(time * 10)); px.ring(g.X, g.Y - 20, 46, 40, hsl(190, 90, 86), 1); }
+      if (b.type === 'mower' && b.state === 'sweep') { g.pr(x - b.side * 18, z - 4, 50); const pts = []; for (let k = 0; k < 8; k++) { const a = time * 30 + k / 8 * 6.2832, r = k % 2 ? 6 : 14; pts.push(g.X + Math.cos(a) * r, g.Y + Math.sin(a) * r * 0.55); } px.poly(pts, hsl(220, 14, 88)); px.outline(pts, OUT); }
+      return;
+    }
     if (b.type === 'rex') {
       const run = b.state === 'charge' || b.state === 'trot' ? Math.sin(time * 14) * 4 : 0, steel = flash(215, 18, 56, f), dark = flash(220, 22, 34, f), red = flash(0, 80, 50, f), white = flash(0, 0, 82, f);
       for (const q of [[-9, -12, 1], [9, -12, -1], [-9, 12, -1], [9, 12, 1]]) g.box(x + q[0] - 3 + jit, z + q[1] - 3 + run * q[2] * 0.6, 0, 6, 6, 10, dark);

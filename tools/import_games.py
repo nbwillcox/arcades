@@ -29,7 +29,7 @@ def keep(name, is_dir, top):
     if name.startswith('_') or name.startswith('.'):
         return False
     if is_dir:
-        return name not in DROP_DIRS
+        return name not in DROP_DIRS and not name.startswith('raw')
     if name in DROP_FILES:
         return False
     return os.path.splitext(name)[1].lower() not in DROP_EXT

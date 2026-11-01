@@ -13,6 +13,17 @@
     g.X = Math.round((x * RX + z * FX) * SC) - cx0 + g.OX + g.shx; g.Y = Math.round((x * RY + z * FY) * SC - (y || 0) * HS) - cy0 + g.OY + g.shy;
   };
   g.key = (x, z) => x * RY + z * FY;
+  /* textured world polygon: uv given for the first three vertices (texels) */
+  const prf = (x, z, y) => [(x * RX + z * FX) * SC - cx0 + g.OX + g.shx, (x * RY + z * FY) * SC - (y || 0) * HS - cy0 + g.OY + g.shy];
+  g.tpf = function (pts, tex, uv, tint, k) {
+    if (!tex) return false;
+    g.pr(pts[0], pts[1], pts[2]);   /* refreshes the camera offset */
+    const a = prf(pts[0], pts[1], pts[2]), b = prf(pts[3], pts[4], pts[5]), c = prf(pts[6], pts[7], pts[8]);
+    const A = px.affine(a[0], a[1], uv[0], uv[1], b[0], b[1], uv[2], uv[3], c[0], c[1], uv[4], uv[5]); if (!A) return false;
+    px.texPoly(g.sp(pts), tex, A, tint, k); return true;
+  };
+  /* sprite with bottom-centre on world point */
+  g.spr = function (s, x, z, y, flip, k) { if (!s) return false; g.pr(x, z, y || 0); px.spr(s, g.X, g.Y, flip, k); return true; };
   g.hash = (n) => { n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); n ^= n >>> 13; n = Math.imul(n, 0xc2b2ae35); n ^= n >>> 16; return (n >>> 0) / 4294967296; };
   const tmp = [];
   /* world polygon [x,z,y,...] -> screen */
@@ -128,23 +139,28 @@
       g.pf([ER, z, -40, ER, z + 26, -40, ER, z + 13, -40 - d], rk.b); g.po([ER, z, -40, ER, z + 13, -40 - d, ER, z + 26, -40], rk.a);
       g.pf([ER, z + 5, -8, ER, z + 11, -8, ER, z + 8, -24], rk.d, rk.c, 3);
     }
-    /* lawns + mowing stripes */
-    g.pf([-EL, z0, 0, -C.SIDEW, z0, 0, -C.SIDEW, z1, 0, -EL, z1, 0], lawn.c);
-    g.pf([C.SIDEW, z0, 0, ER, z0, 0, ER, z1, 0, C.SIDEW, z1, 0], lawn.c);
+    /* lawns + mowing stripes (AI pixel texture when loaded, flat colour otherwise) */
+    const TX = G.art && G.art.tex;
+    const gt = (pts, t, k) => g.tpf(pts, t, [pts[1] * 0.9, pts[0] * 0.8, pts[4] * 0.9, pts[3] * 0.8, pts[7] * 0.9, pts[6] * 0.8], null, k);
+    const lawnQ = (xa, xb, a, b, k, c, c2, pat) => { const q = [xa, a, 0, xb, a, 0, xb, b, 0, xa, b, 0]; if (!(TX && gt(q, TX.grass, k))) g.pf(q, c, c2, pat); };
+    lawnQ(-EL, -C.SIDEW, z0, z1, 0.74, lawn.c); lawnQ(C.SIDEW, ER, z0, z1, 0.74, lawn.c);
     for (let z = z0 - (((z0 % 200) + 200) % 200); z < z1; z += 200) {
       const a = Math.max(z, z0), b = Math.min(z + 100, z1); if (b <= a) continue;
-      g.pf([-EL, a, 0, -C.SIDEW, a, 0, -C.SIDEW, b, 0, -EL, b, 0], lawn2.c, lawn.c, 1);
-      g.pf([C.SIDEW, a, 0, ER, a, 0, ER, b, 0, C.SIDEW, b, 0], lawn2.c, lawn.c, 1);
+      lawnQ(-EL, -C.SIDEW, a, b, 0.66, lawn2.c, lawn.c, 1); lawnQ(C.SIDEW, ER, a, b, 0.66, lawn2.c, lawn.c, 1);
     }
     /* sidewalks with tile joints */
-    g.pf([-C.SIDEW, z0, 0, -C.CURB, z0, 0, -C.CURB, z1, 0, -C.SIDEW, z1, 0], walk.d);
-    g.pf([C.CURB, z0, 0, C.SIDEW, z0, 0, C.SIDEW, z1, 0, C.CURB, z1, 0], walk.d);
-    for (let z = z0; z <= z1; z += 20) for (const s of [-1, 1]) { g.ln(s * C.CURB, z, 0, s * C.SIDEW, z, 0, walk.b); }
+    const wl = [-C.SIDEW, z0, 0, -C.CURB, z0, 0, -C.CURB, z1, 0, -C.SIDEW, z1, 0], wr = [C.CURB, z0, 0, C.SIDEW, z0, 0, C.SIDEW, z1, 0, C.CURB, z1, 0];
+    if (!(TX && gt(wl, TX.walk, 1) && gt(wr, TX.walk, 1))) {
+      g.pf(wl, walk.d); g.pf(wr, walk.d);
+      for (let z = z0; z <= z1; z += 20) for (const s of [-1, 1]) { g.ln(s * C.CURB, z, 0, s * C.SIDEW, z, 0, walk.b); }
+    }
     for (const s of [-1, 1]) { g.ln(s * C.SIDEW, z0, 0, s * C.SIDEW, z1, 0, walk.c); g.ln(s * (C.SIDEW - 1), z0, 0, s * (C.SIDEW - 1), z1, 0, walk.e); }
     /* road + speckle */
-    g.pf([-C.CURB, z0, 0, C.CURB, z0, 0, C.CURB, z1, 0, -C.CURB, z1, 0], road.c);
+    const rq = [-C.CURB, z0, 0, C.CURB, z0, 0, C.CURB, z1, 0, -C.CURB, z1, 0];
+    const roadTex = TX && gt(rq, TX.road, 1);
+    if (!roadTex) g.pf(rq, road.c);
     const rd = px.hsl(T.road[0] + 6, T.road[1], T.road[2] + 5), rd2 = px.hsl(T.road[0] - 6, T.road[1] + 4, T.road[2] - 5);
-    for (let z = z0; z < z1; z += 5) for (let x = -C.CURB + 3; x < C.CURB; x += 7) { const h = g.hash((z | 0) * 131 + (x | 0) * 7); if (h < 0.42) dot(x + h * 4, z + h * 3, 0, h < 0.2 ? rd : rd2); }
+    if (!roadTex) for (let z = z0; z < z1; z += 5) for (let x = -C.CURB + 3; x < C.CURB; x += 7) { const h = g.hash((z | 0) * 131 + (x | 0) * 7); if (h < 0.42) dot(x + h * 4, z + h * 3, 0, h < 0.2 ? rd : rd2); }
     /* crossings */
     for (const o of R.deco) {
       if (o.t !== 'crossroad' || o.z1 < z0 || o.z > z1) continue;
@@ -162,7 +178,7 @@
     g.pf([-C.CURB, z0, 0, -C.CURB, z1, 0, -C.CURB, z1, 2, -C.CURB, z0, 2], walk.b); g.ln(-C.CURB, z0, 2, -C.CURB, z1, 2, walk.e);
     /* world-locked grass texture: short blades in two tones */
     const gl = lawn.d, gd = lawn.b;
-    for (let z = z0 - (((z0 % 6) + 6) % 6); z < z1; z += 6) {
+    if (!(TX && TX.grass)) for (let z = z0 - (((z0 % 6) + 6) % 6); z < z1; z += 6) {
       for (let k = 0; k < 5; k++) {
         const hs = g.hash((z | 0) * 9 + k), hx = g.hash((z | 0) * 5 + k * 77), s = k < 3 ? -1 : 1;
         const x = s * (C.SIDEW + 2 + hx * (s < 0 ? 240 : 170)), zz = z + hs * 6;
