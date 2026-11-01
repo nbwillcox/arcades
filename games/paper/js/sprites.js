@@ -310,7 +310,7 @@
   /* ---------------- props ---------------- */
   Sp.deco = function (o, time) {
     if (o.dead) return;
-    const ds = { tree: SP('tree_' + 'abc'[o.kind || 0]), gnome: SP('gnome'), trash: SP('trash'), hydrant: SP('hydrant'), cone: SP('cone'), ramp: SP('ramp') }[o.t];
+    const ds = { tree: SP('tree_' + 'abc'[o.kind || 0]), gnome: SP('gnome'), trash: SP('trash'), hydrant: SP('hydrant'), cone: SP('cone') }[o.t];
     if (ds) {
       const hy = (o.t === 'tree' ? 7 : 5) + Math.sin(time * 1.8 + o.z) * 1.4;
       const hs = o.t === 'tree' ? SP('hplant_' + 'abc'[o.kind || 0]) : o.t === 'trash' ? SP('htrash') : null;
@@ -343,11 +343,16 @@
         for (let k = 0; k < 6; k++) { const a = time * 3 + o.ph + k * 1.05, r = 9 + (k % 2) * 3; for (let s = 1; s <= 4; s++) { const t = s / 4; g.pr(o.x + Math.cos(a) * r * t, o.z + Math.sin(a) * r * t, 3 + Math.sin(t * 3.14) * 6); px.pix(g.X, g.Y, hsl(195, 90, 82)); } }
         break; }
       case 'ramp': {
-        const x0 = o.x - 11, x1 = o.x + 11, z0 = o.z - 9, z1 = o.z + 9, rp = R(30, 80, 48);
-        g.shadow(o.x, o.z, 12, 0.62);
-        g.pf([x1, z0, 0, x1, z1, 0, x1, z1, 9, x1, z0, 0.5], rp.b); g.pf([x0, z0, 0.5, x1, z0, 0.5, x1, z1, 9, x0, z1, 9], rp.d, rp.c, 1);
-        g.po([x0, z0, 0.5, x1, z0, 0.5, x1, z1, 9, x0, z1, 9], rp.a); g.ln(x1, z0, 0, x1, z1, 0, rp.a); g.ln(x1, z0, 0, x1, z0, 0.5, rp.a); g.ln(x1, z1, 0, x1, z1, 9, rp.a); g.ln(x0, z1, 9, x1, z1, 9, rp.e);
-        for (let k = 1; k < 4; k++) g.ln(x0 + k * 5.5, z0 + 1, 1.2, x0 + k * 5.5, z1 - 1, 8.4, hsl(0, 0, 96));
+        /* launch ramp sitting on the road: low edge at z0, 10 high at z1; metal deck with hazard chevrons and a glowing lip */
+        const x0 = o.x - 11, x1 = o.x + 11, z0 = o.z - 10, z1 = o.z + 10, H = 10, side = R(220, 14, 44), deck = R(220, 10, 66);
+        g.cast(x0, z0 + 6, x1, z1, 7, 0.34);
+        g.pf([x1, z0, 0, x1, z1, 0, x1, z1, H], side.c); g.po([x1, z0, 0, x1, z1, 0, x1, z1, H], side.a);
+        for (let k = 1; k < 4; k++) { const z = z0 + k * 5; g.ln(x1, z, 0, x1, z, H * k * 5 / 20, side.b); }
+        g.pf([x0, z0, 0, x1, z0, 0, x1, z1, H, x0, z1, H], deck.c);
+        for (let k = 0; k < 5; k++) { const t0 = k / 5, t1 = (k + 0.5) / 5; g.pf([x0, z0 + 20 * t0, H * t0, x1, z0 + 20 * t0, H * t0, x1, z0 + 20 * t1, H * t1, x0, z0 + 20 * t1, H * t1], hsl(48, 95, 56)); }
+        g.ln(o.x, z0, 0, o.x, z1, H, deck.e);
+        g.po([x0, z0, 0, x1, z0, 0, x1, z1, H, x0, z1, H], deck.a);
+        g.ln(x0, z1, H, x1, z1, H, hsl(185, 100, 70 + Math.sin(time * 6) * 10)); g.ln(x0, z1, H + 0.6, x1, z1, H + 0.6, hsl(185, 100, 86));
         break; }
       case 'pothole': g.pr(o.x, o.z, 0); px.ell(g.X, g.Y, o.r * 1.1 + 2, o.r * 0.5 + 1, hsl(275, 60, 40), hsl(275, 60, 28), 1); px.ell(g.X, g.Y, o.r * 1.0, o.r * 0.44, hsl(255, 60, 6)); px.ring(g.X, g.Y, o.r * 1.1 + 2, o.r * 0.5 + 1, hsl(285, 80, 66 + Math.sin(time * 4) * 10), 1); break;
       case 'hoop': {
