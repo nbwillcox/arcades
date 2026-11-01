@@ -16,11 +16,11 @@
     const R = Game.route; if (!R) return;
     const cam = Game.cam;
     cam.z += ((P.z + 38) - cam.z) * Math.min(1, 0.25);
-    cam.x += ((P.x * 0.45) - cam.x) * 0.12;
+    cam.x += ((P.x * 0.2) - cam.x) * 0.12;
     g.camX = cam.x; g.camZ = cam.z;
     const sk = Game.fx.shake * (S.shake && !S.reduced ? 1 : 0);
     g.shx = sk ? (Math.random() - 0.5) * sk : 0; g.shy = sk ? (Math.random() - 0.5) * sk : 0;
-    const zA = cam.z - 150, zB = cam.z + 560;
+    const zA = cam.z - 170, zB = cam.z + 430;
     g.backdrop(t);
     g.ground(R, zA, zB, t);
     /* ground decals */

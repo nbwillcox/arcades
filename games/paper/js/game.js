@@ -315,10 +315,11 @@
     d.anim += dt * 10; d.bark = Math.max(0, d.bark - dt);
     const dzp = d.z - P.z;
     if (d.state === 'stunned') { d.stun -= dt; if (d.stun <= 0) d.state = 'return'; return; }
-    if (d.state === 'idle') { if (dzp < 200 && dzp > -30 && P.crash <= 0) { d.state = 'chase'; d.bark = 0.5; sfx('bark', d.hue); } return; }
-    const R = Game.route, sp = (70 + R.d * 12) * (S.difficulty === 'cozy' ? 0.8 : 1);
+    if (d.cool > 0) d.cool -= dt;
+    if (d.state === 'idle') { if (d.cool > 0) return; if (dzp < 110 && dzp > -20 && Math.abs(P.x - d.x) < 120 && P.crash <= 0) { d.state = 'chase'; d.bark = 0.5; sfx('bark', d.hue); } return; }
+    const R = Game.route, sp = (44 + R.d * 8) * (S.difficulty === 'cozy' ? 0.8 : S.difficulty === 'hard' ? 1.2 : 1);
     let tx, tz;
-    if (d.state === 'chase') { tx = P.x; tz = P.z + P.speed * 0.45; if (dzp < -90 || P.crash > 0) d.state = 'return'; }
+    if (d.state === 'chase') { tx = P.x; tz = P.z; d.chaseT = (d.chaseT || 0) + dt; if (dzp < -35 || P.crash > 0 || d.chaseT > 4 || Math.abs(P.x - d.x) > 150) { d.state = 'return'; d.chaseT = 0; d.cool = 3; } }
     if (d.state === 'return') { tx = d.hx; tz = d.hz; if (Math.hypot(d.x - tx, d.z - tz) < 6) { d.state = 'idle'; } }
     const dx = tx - d.x, dz = tz - d.z, m = Math.hypot(dx, dz) || 1, s2 = d.state === 'chase' ? sp : 55;
     d.vx = dx / m * s2; d.vz = dz / m * s2; d.x += d.vx * dt; d.z += d.vz * dt;

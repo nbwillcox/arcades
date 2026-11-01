@@ -2,8 +2,8 @@
 (function (G) {
   'use strict';
   const C = G.C;
-  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 290, OY: 392 });
-  const SC = 2.2, RX = 0.819, RY = 0.344, FX = 0.574, FY = -0.491, HS = 2.0;
+  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 480, OY: 335 });
+  const SC = 2.0, RX = 0.95, RY = 0.2, FX = 0.3, FY = -0.76, HS = 1.9;
   g.SC = SC; g.RX = RX; g.RY = RY; g.FX = FX; g.FY = FY; g.HS = HS;
   let ctx = null;
   g.setCtx = (c) => { ctx = c; };
