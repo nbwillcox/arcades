@@ -8,28 +8,30 @@
   const OUT = hsl(250, 45, 10), BLACK = px.rgb(10, 6, 30);
   const flash = (h, s, l, f) => (f > 0 ? R(h, 8, 86) : R(h, s, l));
   const plane = (x, zc, yc, rz, ry, n, rot) => { const a = []; for (let i = 0; i < n; i++) { const t = (i / n) * 6.2832 + (rot || 0); a.push(x, zc + Math.cos(t) * rz, yc + Math.sin(t) * ry); } return a; };
-  const DEP = 36;
+  const DEP = 48;
+  /* back garden behind each house: picket fence, a tree, sometimes a pool or a shed */
+  function backyard(h, WX, time) {
+    const hs = (k) => g.hash(h.id * 31 + k), BX = WX - DEP - 18, z0 = h.z0 - 15, z1 = h.z1 + 15, f = R(40, 18, 80);
+    if (hs(1) < 0.45) { const pz = h.z0 + 12 + hs(2) * 30; g.pf([BX + 4, pz, 0, BX + 15, pz, 0, BX + 15, pz + 26, 0, BX + 4, pz + 26, 0], hsl(195, 80, 52), hsl(190, 85, 66), Math.floor(time * 2) % 2 ? 3 : 4); g.po([BX + 4, pz, 0, BX + 15, pz, 0, BX + 15, pz + 26, 0, BX + 4, pz + 26, 0], hsl(0, 0, 92)); }
+    else if (hs(3) < 0.5) g.box(BX - 22, h.z0 + 20, 0, 12, 16, 12, R(28 + hs(4) * 60, 40, 44));
+    const tz = h.z0 + hs(5) * 60, tc = R([160, 300, 45, 120][Math.floor(hs(6) * 4)], 55, 42);
+    g.cyl(BX - 30, tz, 0, 2, 12, R(28, 45, 30)); g.ball(BX - 30, tz, 22, 9, tc); g.ball(BX - 27, tz + 3, 27, 5, R(tc === undefined ? 160 : 160, 60, 54));
+    for (let z = z0; z < z1; z += 4) g.box(BX - 1, z, 0, 1.6, 1.6, 7, f);
+    g.box(BX - 1, z0, 4.5, 1.4, z1 - z0, 1.2, R(40, 18, 70));
+    g.ln(BX, z0, 0, WX - 6, z0, 0, px.hsl(140, 30, 24));
+  }
   const stone = R(228, 10, 52), stone2 = R(228, 8, 62);
 
   /* ---------------- houses ---------------- */
   Sp.house = function (h, time) {
     const WX = -C.WALL, z0 = h.z0, z1 = h.z1, zc = h.zc, H = 46 + (h.style === 1 ? 4 : 0), lit = h.sub && !h.cancelled;
     const w = h.wall, wall = R(w[0], w[1] * (lit ? 1 : 0.8), w[2] + (lit ? 0 : -4)), roof = R(h.roof[0], h.roof[1], h.roof[2]), trim = R(h.trim[0], h.trim[1], h.trim[2]);
+    backyard(h, WX, time);
     px.blendPoly(g.sp([WX + 1, z0 - 2, 0, WX + 18, z0 + 10, 0, WX + 18, z1 + 12, 0, WX + 1, z1 + 2, 0]), BLACK, 0.26);
     /* end wall (-z side) */
     g.pf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wall.b);
     const sd = px.mix(wall.b, wall.a, 0.55);
     for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX - DEP, z0, v, sd);
-    /* roof (behind the facade for the dome) */
-    if (h.style === 2) {
-      const pts = []; for (let i = 0; i <= 14; i++) { const a = i / 14 * Math.PI; pts.push(WX - 4, zc - 38 * Math.cos(a), H + 26 * Math.sin(a)); }
-      g.pf(pts, roof.c); g.pf(plane(WX - 4, zc, H + 3, 0, 0, 3), roof.c);
-      const hi = []; for (let i = 3; i <= 9; i++) { const a = i / 14 * Math.PI; hi.push(WX - 4, zc - 34 * Math.cos(a), H + 22 * Math.sin(a)); } for (let i = 9; i >= 3; i--) { const a = i / 14 * Math.PI; hi.push(WX - 4, zc - 28 * Math.cos(a), H + 17 * Math.sin(a)); }
-      g.pf(hi, roof.d, roof.e, 1);
-      for (let i = 0; i < 14; i++) g.ln(pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2], pts[i * 3 + 3], pts[i * 3 + 4], pts[i * 3 + 5], roof.a);
-      g.ln(WX - 4, zc, H + 26, WX - 4, zc, H + 40, hsl(220, 10, 80));
-      g.pr(WX - 4, zc, H + 41); px.rect(g.X - 1, g.Y - 1, 3, 3, (Math.floor(time * 3 + h.id) % 2) ? hsl(0, 90, 60) : hsl(50, 95, 62));
-    }
     /* facade */
     g.pf([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.c);
     const sc = px.mix(wall.c, wall.b, 0.5);
@@ -40,18 +42,28 @@
     g.po([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.a);
     if (h.style === 0) {
       g.pf([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.c);
-      for (let k = 1; k < 7; k++) { const t = k / 7; g.ln(WX + 3 - 33 * t, z0 - 3, H - 1 + 19 * t, WX + 3 - 33 * t, z1 + 3, H - 1 + 19 * t, k % 2 ? roof.b : roof.d); }
+      for (let k = 1; k < 7; k++) { const t = k / 7; g.ln(WX + 3 - (DEP / 2 + 3) * t, z0 - 3, H - 1 + 19 * t, WX + 3 - (DEP / 2 + 3) * t, z1 + 3, H - 1 + 19 * t, k % 2 ? roof.b : roof.d); }
       g.po([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.a);
       g.ln(WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, roof.e);
       g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], wall.b); g.po([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], roof.a);
       g.box(WX - 28, z0 + 12, H + 3, 6, 6, 16, R(12, 45, 34));
-      g.pr(WX - 41, z0 + 15, H + 22); for (let k = 0; k < 4; k++) px.ell(g.X + Math.sin(time * 2 + k) * 2 + k, g.Y - k * 4 - ((time * 8) % 4), 2 + k * 0.5, 1.5 + k * 0.4, hsl(250, 10, 78 - k * 6), hsl(250, 10, 60), 1);
+      g.pr(WX - 25, z0 + 15, H + 22); for (let k = 0; k < 4; k++) px.ell(g.X + Math.sin(time * 2 + k) * 2 + k, g.Y - k * 4 - ((time * 8) % 4), 2 + k * 0.5, 1.5 + k * 0.4, hsl(250, 10, 78 - k * 6), hsl(250, 10, 60), 1);
     } else if (h.style === 1) {
       g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP, z1, H, WX, z1, H], roof.d);
       g.pf([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.d); g.po([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.a);
       g.ln(WX, z0, H + 3.5, WX, z1, H + 3.5, hsl(185 + Math.sin(time * 2) * 12, 95, 62));
       g.pf([WX - 4, z0 + 6, H, WX - 22, z0 + 6, H, WX - 22, z0 + 26, H, WX - 4, z0 + 26, H], hsl(218, 70, 32)); g.ln(WX - 13, z0 + 6, H, WX - 13, z0 + 26, H, hsl(218, 60, 52));
       g.pr(WX - 24, zc + 14, H + 2); px.blendEll(g.X, g.Y - 3, 11, 8, hsl(170, 80, 70), 0.55); px.ring(g.X, g.Y - 3, 11, 8, hsl(170, 60, 86)); px.line(g.X - 4, g.Y - 7, g.X - 1, g.Y - 9, hsl(170, 50, 96));
+    } else {
+      /* front-facing gable: triangle on the facade, slopes running back */
+      const RH = H + 24;
+      g.pf([WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, WX - DEP - 2, zc, RH, WX - DEP - 2, z0 - 3, H - 1], roof.c);
+      for (let k = 1; k < 6; k++) { const t = k / 6; g.ln(WX + 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, WX - DEP - 2, z0 - 3 + (zc - z0 + 3) * t, H - 1 + 25 * t, k % 2 ? roof.b : roof.d); }
+      g.po([WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, WX - DEP - 2, zc, RH, WX - DEP - 2, z0 - 3, H - 1], roof.a);
+      g.pf([WX, z0, H, WX, z1, H, WX, zc, RH - 2], wall.d); g.po([WX, z0, H, WX, z1, H, WX, zc, RH - 2], wall.a);
+      g.pf([WX, zc - 4, H + 6, WX, zc + 4, H + 6, WX, zc + 4, H + 14, WX, zc - 4, H + 14], lit ? hsl(47, 95, 72) : hsl(205, 55, 26)); g.po([WX, zc - 4, H + 6, WX, zc + 4, H + 6, WX, zc + 4, H + 14, WX, zc - 4, H + 14], trim.a);
+      g.ln(WX + 2, z0 - 3, H - 1, WX + 2, zc, RH, roof.e); g.ln(WX + 2, zc, RH, WX + 2, z1 + 3, H - 1, roof.a);
+      g.box(WX - DEP + 6, z1 - 16, H + 4, 6, 6, 18, R(12, 45, 34));
     }
     /* windows */
     for (const wd of h.windows) {
