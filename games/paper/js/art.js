@@ -3,7 +3,7 @@
 (function (G) {
   'use strict';
   const A = { boss: {}, spr: {}, tex: {}, ready: false };
-  const SPR = ['rider', 'car_away', 'car_toward', 'car_side', 'tree_a', 'tree_b', 'tree_c', 'mailbox', 'trash', 'cone', 'gnome', 'hydrant', 'bundle', 'ufo', 'skater', 'ramp', 'boss_rex', 'boss_gorp', 'boss_mower', 'hmail', 'htrash', 'hplant_a', 'hplant_b', 'hplant_c'];
+  const SPR = ['rider', 'car_away', 'car_toward', 'car_side', 'tree_a', 'tree_b', 'tree_c', 'mailbox', 'trash', 'cone', 'gnome', 'hydrant', 'bundle', 'ufo', 'skater', 'boss_rex', 'boss_gorp', 'boss_mower', 'hmail', 'htrash', 'hplant_a', 'hplant_b', 'hplant_c'];
   const TEX = ['grass', 'walk', 'road', 'siding', 'brick', 'roof', 'stone'];
   const CAR_HUES = [0, 20, 45, 120, 180, 210, 270, 320];
   const img = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
