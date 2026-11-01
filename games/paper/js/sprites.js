@@ -275,10 +275,9 @@
       case 'ramp': {
         const x0 = o.x - 11, x1 = o.x + 11, z0 = o.z - 9, z1 = o.z + 9;
         g.shadow(o.x, o.z, 12, 0.25);
-        g.poly([x1, z0, 0, x1, z1, 0, x1, z1, 0.5, x1, z0, 9], hsl(30, 80, 46), g.EDGE);
-        g.poly([x0, z0, 0, x1, z0, 0, x1, z0, 9, x0, z0, 9], hsl(30, 80, 38), g.EDGE);
-        g.poly([x0, z0, 9, x1, z0, 9, x1, z1, 0.5, x0, z1, 0.5], hsl(30, 85, 58), g.EDGE);
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); for (let k = 1; k < 4; k++) { g.pr(x0 + k * 5.5, z0 + 1, 8.4); ctx.moveTo(g.X, g.Y); g.pr(x0 + k * 5.5, z1 - 1, 0.8); ctx.lineTo(g.X, g.Y); } ctx.stroke();
+        g.poly([x1, z0, 0, x1, z1, 0, x1, z1, 9, x1, z0, 0.5], hsl(30, 80, 46), g.EDGE);
+        g.poly([x0, z0, 0.5, x1, z0, 0.5, x1, z1, 9, x0, z1, 9], hsl(30, 85, 58), g.EDGE);
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); for (let k = 1; k < 4; k++) { g.pr(x0 + k * 5.5, z0 + 1, 1.2); ctx.moveTo(g.X, g.Y); g.pr(x0 + k * 5.5, z1 - 1, 8.4); ctx.lineTo(g.X, g.Y); } ctx.stroke();
         break; }
       case 'pothole': { g.pr(o.x, o.z, 0); ctx.beginPath(); ctx.ellipse(g.X, g.Y, o.r * 2.1, o.r * 1.05, 0, 0, 6.2832); const gr = ctx.createRadialGradient(g.X, g.Y, 1, g.X, g.Y, o.r * 2.1); gr.addColorStop(0, '#000'); gr.addColorStop(0.7, '#150838'); gr.addColorStop(1, 'rgba(120,60,200,0.7)'); ctx.fillStyle = gr; ctx.fill(); ctx.strokeStyle = 'rgba(190,120,255,' + (0.5 + 0.3 * Math.sin(time * 4)).toFixed(2) + ')'; ctx.lineWidth = 1.6; ctx.stroke(); break; }
       case 'hoop': {

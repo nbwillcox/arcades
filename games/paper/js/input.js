@@ -26,7 +26,7 @@
   window.addEventListener('keyup', (e) => { const d = MOVE[e.code]; if (d) held[d] = false; if (e.code === 'Space') I.hopHeld = false; });
   window.addEventListener('blur', () => I.clear());
   I.bind = function (canvas) {
-    canvas.addEventListener('pointerdown', () => { I._any = true; });
+    canvas.addEventListener('pointerdown', (e) => { I._any = true; if (e.pointerType === 'mouse') { if (e.button === 0) I._tl = 1; else if (e.button === 2) I._tr = 1; e.preventDefault(); } });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   };
   I.poll = function () {
