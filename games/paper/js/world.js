@@ -66,7 +66,7 @@
       if (d >= 0.3 && rng() < 0.12 * dm) { const s = rng() < 0.5 ? -1 : 1; R.movers.push({ t: 'skater', x: s * 74, z: lot.z0 + 40 + rng() * 40, vz: (rng() < 0.5 ? -1 : 1) * (24 + rng() * 10), r: 6, hue: rng.int(0, 360), lo: lot.z0 + 4, hi: lot.z0 + 96, hp: 1, anim: 0 }); }
       bundleGap++;
       if (bundleGap >= 3 && rng() < 0.7) { bundleGap = 0; R.pickups.push({ t: 'bundle', x: (rng() < 0.5 ? -1 : 1) * (rng() < 0.5 ? 70 + rng() * 10 : 10 + rng() * 40), z: lot.z0 + 20 + rng() * 60, n: 8 }); }
-      if (lot.i > 1 && lot.i % 4 === 2 && rng() < 0.85) R.pickups.push({ t: 'pu', k: rng.pick(['speed', 'double', 'omni', 'shield', 'inf']), x: (rng() - 0.5) * 100, z: lot.z0 + 15 + rng() * 70 });
+      if (lot.i > 1 && lot.i % 4 === 2 && rng() < 0.85) R.pickups.push({ t: 'pu', k: rng.pick(['speed', 'omni', 'shield', 'inf']), x: (rng() - 0.5) * 100, z: lot.z0 + 15 + rng() * 70 });
       if (lot.i === Math.floor(lotsPer * 0.55)) R.pickups.push({ t: 'up', x: (rng() - 0.5) * 60, z: lot.z0 + 40 });
     }
     const rl = R.lots[Math.max(1, Math.floor(lotsPer * 0.3))];

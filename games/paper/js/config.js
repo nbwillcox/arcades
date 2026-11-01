@@ -12,7 +12,7 @@
     RIDE_R: 112,
     RIDE_MAX: 148,       /* furthest the rider can go sideways */
     CRUISE: 62, FAST: 108, SLOW: 30, SUPER: 175,
-    G: 260, TV: 165, TVY: 92,   /* paper gravity, lateral speed, lift */
+    G: 520, TV: 330, TVY: 100,   /* paper gravity, lateral speed, lift */
     DAYS: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'],
     SCORE: { mailbox: 100, porch: 250, patio: 150, window: 150, nsMail: 50, door: 50, dog: 100, gnome: 75, kid: 50, car: 25, ufo: 300, meteor: 200, hop: 25, ramp: 500, hoop: 300, perfect: 1000, bundle: 10 },
   };

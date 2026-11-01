@@ -6,9 +6,9 @@
   G.bot = {
     drive(game) {
       const P = game.p, R = game.route, tl = 0.84; let tx = 0, thr = 0; if (game.t < (this.last || 0)) { this.last = 0; this.cd = 0; }
-      const aim = P.z + P.speed * tl;
+      const aim = P.z + 2;
       if (R.kind === 'route') {
-        for (const h of R.houses) { if (h.z1 < P.z - 20) continue; if (h.z0 > P.z + 120) break; if (h.cancelled) continue; if (h.sub && !h.delivered) { tx = h.side * 6; if (Math.abs(h.zc - aim) < 4) { thr = h.side; } break; } }
+        for (const h of R.houses) { if (h.z1 < P.z - 20) continue; if (h.z0 > P.z + 120) break; if (h.cancelled) continue; if (h.sub && !h.delivered) { tx = h.side * -19; if (Math.abs(h.zc - aim) < 4) { thr = h.side; } break; } }
         if (!thr && !R.houses.some((q) => q.sub && !q.delivered && !q.cancelled && q.zc > P.z - 10 && q.zc < aim + 30)) for (const h of R.houses) { if (h.sub || h.z0 > P.z + 70 || h.z1 < P.z) continue; const w = h.windows[0]; if (w && !w.broken && Math.abs(w.z - aim) < 5 && P.papers > 6) { tx = h.side * 30; thr = h.side; break; } }
       } else if (R.kind === 'course') {
         for (const o of R.deco) { if (o.t === 'target' && !o.hit && o.z > P.z - 10 && o.z < P.z + 110) { tx = 0; if (Math.abs(o.z - aim) < 6) thr = o.side; break; } }

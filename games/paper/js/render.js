@@ -58,7 +58,7 @@
   function guide() {
     const y0 = 14 + P.y, vy = C.TVY + P.y * 0.2, tl = (vy + Math.sqrt(vy * vy + 2 * C.G * y0)) / C.G;
     for (const side of [-1, 1]) {
-      const lx = P.x + side * C.TV * tl, lz = P.z + P.speed * tl;
+      const lx = P.x + side * C.TV * tl, lz = P.z;
       g.ring(Math.max(-C.WALL + 2, Math.min(C.EDGE_R - 2, lx)), lz, 0, 6, px.hsl(0, 0, 96), Math.floor(time * 8) % 2 ? 1 : 0);
       if (Math.abs(lx) <= C.WALL) { g.pr(lx, lz, 0); px.pix(g.X, g.Y, WHITE); }
     }
@@ -80,7 +80,7 @@
     px.poly([404, 14, 418, 10, 420, 17, 406, 21], OUT); px.poly([405, 14.5, 417, 11.5, 418.5, 16.5, 407, 19.5], px.hsl(48, 30, 94)); px.rect(411, 13, 2, 6, px.hsl(0, 78, 50));
     px.text(P.pw.inf > 0 ? '@' : String(P.papers), 471, 11, 2, P.pw.inf > 0 ? px.hsl(140, 80, 66) : P.papers <= 3 ? px.hsl(5, 90, 64) : WHITE, 'right', null);
     let py = 50;
-    for (const k in P.pw) if (P.pw[k] > 0) { const pw = G.POWER[k], max = { speed: 8, double: 12, omni: 12, shield: 10, inf: 12 }[k], c = col(pw.col); panel(4, py, 78, 13); px.rect(6, py + 2, Math.round(74 * Math.min(1, P.pw[k] / max)), 9, c); px.text(pw.name, 8, py + 3, 1, WHITE, 'left', OUT); py += 15; }
+    for (const k in P.pw) if (P.pw[k] > 0) { const pw = G.POWER[k], max = { speed: 8, omni: 12, shield: 10, inf: 12 }[k], c = col(pw.col); panel(4, py, 78, 13); px.rect(6, py + 2, Math.round(74 * Math.min(1, P.pw[k] / max)), 9, c); px.text(pw.name, 8, py + 3, 1, WHITE, 'left', OUT); py += 15; }
     const cx = 240;
     if (R.kind === 'route') {
       const subs = R.houses.filter((h) => h.sub), n = subs.length, wd = Math.min(150, n * 11 + 14);
