@@ -20,7 +20,7 @@
     g.camX = cam.x; g.camZ = cam.z;
     const sk = Game.fx.shake * (S.shake && !S.reduced ? 0.5 : 0);
     g.shx = sk ? Math.round((Math.random() - 0.5) * sk) : 0; g.shy = sk ? Math.round((Math.random() - 0.5) * sk) : 0;
-    const zA = cam.z - 160, zB = cam.z + 460;
+    const zA = cam.z - 120, zB = cam.z + 400;
     g.backdrop(t);
     g.ground(R, zA, zB, t);
     for (const h of R.houses) { if (h.z1 < zA) continue; if (h.z0 > zB) break; Sp.houseGround(h, t); }

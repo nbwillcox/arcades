@@ -3,8 +3,8 @@
 (function (G) {
   'use strict';
   const C = G.C, px = G.px;
-  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 120, OY: 200 });
-  const SC = 1.0, RX = 0.52, RY = 0.52, FX = 0.86, FY = -0.42, HS = 1.05;
+  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 235, OY: 205 });
+  const SC = 1.0, RX = 0.62, RY = 0.28, FX = 0.56, FY = -0.7, HS = 1.15;
   g.SC = SC; g.RX = RX; g.RY = RY; g.FX = FX; g.FY = FY; g.HS = HS;
   g.pr = function (x, z, y) { const a = x - g.camX, b = z - g.camZ; g.X = Math.round(g.OX + g.shx + (a * RX + b * FX) * SC); g.Y = Math.round(g.OY + g.shy + (a * RY + b * FY) * SC - (y || 0) * HS); };
   g.key = (x, z) => x * RY + z * FY;

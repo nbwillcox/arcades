@@ -8,6 +8,7 @@
   const OUT = hsl(250, 45, 10), BLACK = px.rgb(10, 6, 30);
   const flash = (h, s, l, f) => (f > 0 ? R(h, 8, 86) : R(h, s, l));
   const plane = (x, zc, yc, rz, ry, n, rot) => { const a = []; for (let i = 0; i < n; i++) { const t = (i / n) * 6.2832 + (rot || 0); a.push(x, zc + Math.cos(t) * rz, yc + Math.sin(t) * ry); } return a; };
+  const DEP = 36;
   const stone = R(228, 10, 52), stone2 = R(228, 8, 62);
 
   /* ---------------- houses ---------------- */
@@ -16,9 +17,9 @@
     const w = h.wall, wall = R(w[0], w[1] * (lit ? 1 : 0.8), w[2] + (lit ? 0 : -4)), roof = R(h.roof[0], h.roof[1], h.roof[2]), trim = R(h.trim[0], h.trim[1], h.trim[2]);
     px.blendPoly(g.sp([WX + 1, z0 - 2, 0, WX + 18, z0 + 10, 0, WX + 18, z1 + 12, 0, WX + 1, z1 + 2, 0]), BLACK, 0.26);
     /* end wall (-z side) */
-    g.pf([WX, z0, 0, WX - 60, z0, 0, WX - 60, z0, H, WX, z0, H], wall.b);
+    g.pf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wall.b);
     const sd = px.mix(wall.b, wall.a, 0.55);
-    for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX - 60, z0, v, sd);
+    for (let v = 5; v < H; v += 3.4) g.ln(WX, z0, v, WX - DEP, z0, v, sd);
     /* roof (behind the facade for the dome) */
     if (h.style === 2) {
       const pts = []; for (let i = 0; i <= 14; i++) { const a = i / 14 * Math.PI; pts.push(WX - 4, zc - 38 * Math.cos(a), H + 26 * Math.sin(a)); }
@@ -38,19 +39,19 @@
     g.ln(WX, z0, 0, WX, z0, H, wall.d); g.ln(WX, z1, 0, WX, z1, H, wall.b);
     g.po([WX, z0, 0, WX, z1, 0, WX, z1, H, WX, z0, H], wall.a);
     if (h.style === 0) {
-      g.pf([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - 30, z1 + 3, H + 18, WX - 30, z0 - 3, H + 18], roof.c);
+      g.pf([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.c);
       for (let k = 1; k < 7; k++) { const t = k / 7; g.ln(WX + 3 - 33 * t, z0 - 3, H - 1 + 19 * t, WX + 3 - 33 * t, z1 + 3, H - 1 + 19 * t, k % 2 ? roof.b : roof.d); }
-      g.po([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - 30, z1 + 3, H + 18, WX - 30, z0 - 3, H + 18], roof.a);
+      g.po([WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, WX - DEP / 2, z1 + 3, H + 18, WX - DEP / 2, z0 - 3, H + 18], roof.a);
       g.ln(WX + 3, z0 - 3, H - 1, WX + 3, z1 + 3, H - 1, roof.e);
-      g.pf([WX, z0, H, WX - 60, z0, H, WX - 30, z0, H + 18], wall.b); g.po([WX, z0, H, WX - 60, z0, H, WX - 30, z0, H + 18], roof.a);
-      g.box(WX - 44, z0 + 12, H + 3, 6, 6, 16, R(12, 45, 34));
+      g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], wall.b); g.po([WX, z0, H, WX - DEP, z0, H, WX - DEP / 2, z0, H + 18], roof.a);
+      g.box(WX - 28, z0 + 12, H + 3, 6, 6, 16, R(12, 45, 34));
       g.pr(WX - 41, z0 + 15, H + 22); for (let k = 0; k < 4; k++) px.ell(g.X + Math.sin(time * 2 + k) * 2 + k, g.Y - k * 4 - ((time * 8) % 4), 2 + k * 0.5, 1.5 + k * 0.4, hsl(250, 10, 78 - k * 6), hsl(250, 10, 60), 1);
     } else if (h.style === 1) {
-      g.pf([WX, z0, H, WX - 60, z0, H, WX - 60, z1, H, WX, z1, H], roof.d);
+      g.pf([WX, z0, H, WX - DEP, z0, H, WX - DEP, z1, H, WX, z1, H], roof.d);
       g.pf([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.d); g.po([WX, z0, H, WX, z1, H, WX, z1, H + 4, WX, z0, H + 4], wall.a);
       g.ln(WX, z0, H + 3.5, WX, z1, H + 3.5, hsl(185 + Math.sin(time * 2) * 12, 95, 62));
-      g.pf([WX - 6, z0 + 6, H, WX - 24, z0 + 6, H, WX - 24, z0 + 26, H, WX - 6, z0 + 26, H], hsl(218, 70, 32)); g.ln(WX - 15, z0 + 6, H, WX - 15, z0 + 26, H, hsl(218, 60, 52));
-      g.pr(WX - 38, zc + 14, H + 2); px.blendEll(g.X, g.Y - 3, 11, 8, hsl(170, 80, 70), 0.55); px.ring(g.X, g.Y - 3, 11, 8, hsl(170, 60, 86)); px.line(g.X - 4, g.Y - 7, g.X - 1, g.Y - 9, hsl(170, 50, 96));
+      g.pf([WX - 4, z0 + 6, H, WX - 22, z0 + 6, H, WX - 22, z0 + 26, H, WX - 4, z0 + 26, H], hsl(218, 70, 32)); g.ln(WX - 13, z0 + 6, H, WX - 13, z0 + 26, H, hsl(218, 60, 52));
+      g.pr(WX - 24, zc + 14, H + 2); px.blendEll(g.X, g.Y - 3, 11, 8, hsl(170, 80, 70), 0.55); px.ring(g.X, g.Y - 3, 11, 8, hsl(170, 60, 86)); px.line(g.X - 4, g.Y - 7, g.X - 1, g.Y - 9, hsl(170, 50, 96));
     }
     /* windows */
     for (const wd of h.windows) {
