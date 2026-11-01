@@ -80,7 +80,7 @@
     px.poly([404, 14, 418, 10, 420, 17, 406, 21], OUT); px.poly([405, 14.5, 417, 11.5, 418.5, 16.5, 407, 19.5], px.hsl(48, 30, 94)); px.rect(411, 13, 2, 6, px.hsl(0, 78, 50));
     px.text(P.pw.inf > 0 ? '@' : String(P.papers), 471, 11, 2, P.pw.inf > 0 ? px.hsl(140, 80, 66) : P.papers <= 3 ? px.hsl(5, 90, 64) : WHITE, 'right', null);
     let py = 50;
-    for (const k in P.pw) if (P.pw[k] > 0) { const pw = G.POWER[k], max = { speed: 8, omni: 12, shield: 10, inf: 12 }[k], c = col(pw.col); panel(4, py, 78, 13); px.rect(6, py + 2, Math.round(74 * Math.min(1, P.pw[k] / max)), 9, c); px.text(pw.name, 8, py + 3, 1, WHITE, 'left', OUT); py += 15; }
+    for (const k in P.pw) if (P.pw[k] > 0) { const pw = G.POWER[k], max = { speed: 8, shield: 10, inf: 12 }[k], c = col(pw.col); panel(4, py, 78, 13); px.rect(6, py + 2, Math.round(74 * Math.min(1, P.pw[k] / max)), 9, c); px.text(pw.name, 8, py + 3, 1, WHITE, 'left', OUT); py += 15; }
     const cx = 240;
     if (R.kind === 'route') {
       const subs = R.houses.filter((h) => h.sub), n = subs.length, wd = Math.min(150, n * 11 + 14);

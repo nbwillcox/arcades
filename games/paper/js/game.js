@@ -31,7 +31,7 @@
     if (idle) { Game.phase = 'idle'; Game.setRoute(W.route(1, 1, 8, { diff: S.difficulty })); Game.spawnPlayer(); Game.cam.z = 30; return; }
   };
   Game.spawnPlayer = function () {
-    Object.assign(P, { x: 0, z: Game.route.start, y: 0, vy: 0, vx: 0, speed: C.CRUISE, crash: 0, inv: 0, lean: 0, throwT: 0, throwSide: 1, hopT: 0, slip: 0, papers: Game.route.papers || 12, pw: { speed: 0, omni: 0, shield: 0, inf: 0 }, air: 0, stun: 0, anim: 0, abduct: 0, ramps: 0, dying: false, ramp: 0 });
+    Object.assign(P, { x: 0, z: Game.route.start, y: 0, vy: 0, vx: 0, speed: C.CRUISE, crash: 0, inv: 0, lean: 0, throwT: 0, throwSide: 1, hopT: 0, slip: 0, papers: Game.route.papers || 12, pw: { speed: 0, shield: 0, inf: 0 }, air: 0, stun: 0, anim: 0, abduct: 0, ramps: 0, dying: false, ramp: 0 });
     Game.cars = []; Game.papersL = []; Game.haz = []; Game.crossT = {}; Game.meteorT = 3; Game.fx.pops.length = 0; Game.fx.parts.length = 0; Game.boss = null; Game.cd = 0;
   };
   Game.setRoute = function (R) {
@@ -97,11 +97,7 @@
       Game.papersL.push({ x: P.x, z: P.z + dz, y: 14 + P.y, vx, vz, vy: C.TVY * (vyk || 1) + P.y * 0.2, spin: Math.random() * 6, life: 4, batch, dead: 0, bounce: 0 });
       batch.n++;
     };
-    if (P.pw.omni > 0) { for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; mk(a, 0, a % Math.PI === 0 ? 1 : 0.75); } }
-    else {
-      const a = side > 0 ? 0 : Math.PI;
-      mk(a, 0, 1);
-    }
+    mk(side > 0 ? 0 : Math.PI, 0, 1);
     Game.batches = (Game.batches || []); Game.batches.push(batch);
   }
   Game.autoSide = function () {
@@ -302,11 +298,11 @@
       k.taken = 1; sfx('pickup');
       if (k.t === 'bundle') { P.papers = Math.min(60, P.papers + k.n); Game.pop(k.x, k.z, 24, '+' + k.n + ' PAPERS', '#fff'); Game.addScore(C.SCORE.bundle); }
       else if (k.t === 'up') { Game.lives = Math.min(9, Game.lives + 1); Game.pop(k.x, k.z, 30, '1UP!', '#7dff9e'); sfx('oneup'); }
-      else { P.pw[k.k] = ({ speed: 8, omni: 12, shield: 10, inf: 12 }[k.k]) * (S.difficulty === 'cozy' ? 1.4 : 1); Game.pop(k.x, k.z, 30, G.POWER[k.k].name, G.POWER[k.k].col); sfx('power'); Game.addScore(100); }
+      else { P.pw[k.k] = ({ speed: 8, shield: 10, inf: 12 }[k.k]) * (S.difficulty === 'cozy' ? 1.4 : 1); Game.pop(k.x, k.z, 30, G.POWER[k.k].name, G.POWER[k.k].col); sfx('power'); Game.addScore(100); }
       Game.burst(k.x, k.z, 12, 10, '#fff', 60, 60);
     }
   }
-  G.POWER = { speed: { name: 'SUPER SPEED', col: '#ff9a3d', ico: 'S' }, omni: { name: 'OMNI TOSS', col: '#ff5ad0', ico: 'O' }, shield: { name: 'INVINCIBLE', col: '#5ad0ff', ico: 'I' }, inf: { name: 'INFINITE PAPERS', col: '#7dff9e', ico: '8' } };
+  G.POWER = { speed: { name: 'SUPER SPEED', col: '#ff9a3d', ico: 'S' }, shield: { name: 'INVINCIBLE', col: '#5ad0ff', ico: 'I' }, inf: { name: 'INFINITE PAPERS', col: '#7dff9e', ico: '8' } };
 
   function updateDog(d, dt) {
     if (d.dead) return;
