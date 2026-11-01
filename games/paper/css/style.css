@@ -94,3 +94,4 @@ select { font: 700 14px var(--font); color: #e6fff0; background: rgba(8, 24, 36,
 .howlist p { margin: 4px 0; }
 @media (max-height: 560px) { .titleright { width: min(28vw, 54vh); } .overimg { height: 52vh; } .howlist { font-size: 12px; padding: 8px 14px; max-height: 66vh; overflow-y: auto; } }
 @media (max-width: 760px) and (orientation: portrait) { .titlewrap { flex-direction: column-reverse; } .titleright { width: 46vw; } #gameover { flex-direction: column; } .overimg { height: 28vh; } }
+#heroImg, #overImg { image-rendering: pixelated; image-rendering: crisp-edges; }

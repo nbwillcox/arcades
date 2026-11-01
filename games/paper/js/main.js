@@ -38,10 +38,9 @@
     ctx.fillStyle = '#090420'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(rs * view.s, 0, 0, rs * view.s, view.ox * rs, view.oy * rs);
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
-    ctx.imageSmoothingEnabled = true;
-    G.render.scene(ctx, M.time);
-    G.render.hud(ctx, M.time);
-    G.render.overlay(ctx, M.time);
+    G.render.scene(M.time); G.render.hud(M.time); G.render.overlay(M.time);
+    G.px.flush(); ctx.imageSmoothingEnabled = false; ctx.drawImage(G.px.cv, 0, 0, W, H);
+    G.render.post(ctx, G.art);
     ctx.restore();
     ctx.setTransform(rs, 0, 0, rs, 0, 0);
     ctx.strokeStyle = 'rgba(160,140,255,0.45)'; ctx.lineWidth = 1.5; ctx.strokeRect(view.ox, view.oy, W * view.s, H * view.s);
@@ -101,7 +100,7 @@
 
   function boot() {
     resize();
-    const hero = 'assets/hero.webp?v=1', over = 'assets/over.webp?v=1';
+    const hero = 'assets/hero.webp?v=2', over = 'assets/over.webp?v=2';
     document.getElementById('heroImg').src = hero; document.getElementById('overImg').src = over;
     Art.load().then(() => {
       Game.reset(true); M.mode = 'title'; UI.show('title');

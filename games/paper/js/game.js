@@ -411,7 +411,7 @@
     P.speed += (target - P.speed) * Math.min(1, dt * (P.pw.speed > 0 ? 3 : 2.4));
     const tvx = I.ax * 128 * (P.slip > 0 ? 0.3 : 1);
     P.vx += (tvx - P.vx) * Math.min(1, dt * (P.slip > 0 ? 2 : 9));
-    P.x = U.clamp(P.x + P.vx * dt, -C.RIDE_MAX, C.RIDE_MAX);
+    P.x = U.clamp(P.x + P.vx * dt, -C.RIDE_MAX, C.RIDE_R);
     P.lean += (P.vx / 128 - P.lean) * Math.min(1, dt * 10);
     P.z += P.speed * dt;
     /* hop */

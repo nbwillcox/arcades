@@ -12,14 +12,14 @@
   const CAR_HUES = [0, 20, 45, 120, 180, 210, 270, 320];
 
   function mkHouse(rng, side, z0, sub, id) {
-    const wall = rng.pick(sub ? SUB_WALLS : NS_WALLS), zc = z0 + 29;
-    const h = { id, side, z0, z1: z0 + 58, zc, sub, style: rng.int(0, 2), wall, roof: rng.pick(ROOFS), trim: sub ? [48, 30, 90] : [260, 10, 55], doorHue: rng.int(0, 360),
-      windows: [], door: { z: zc, w: 12, hit: 0 }, mailbox: { x: side * 92, z: z0 + rng.int(10, 40), hit: 0, flag: false },
+    const wall = rng.pick(sub ? SUB_WALLS : NS_WALLS), zc = z0 + 35;
+    const h = { id, side, z0, z1: z0 + 70, zc, sub, style: rng.int(0, 2), wall, roof: rng.pick(ROOFS), trim: sub ? [48, 30, 90] : [260, 10, 55], doorHue: rng.int(0, 360),
+      windows: [], door: { z: zc, w: 13, hit: 0 }, mailbox: { x: side * 92, z: z0 + rng.int(10, 40), hit: 0, flag: false },
       delivered: false, cancelled: false, mailHit: false, porchHit: false, face: 0, faceT: 0, mood: 0, happy: 0, wob: 0 };
     const nw = h.style === 1 ? 3 : 2;
-    h.windows.push({ z: z0 + 11, y0: 17, y1: 35, w: 12, broken: 0 });
-    h.windows.push({ z: z0 + 47, y0: 17, y1: 35, w: 12, broken: 0 });
-    if (nw === 3) h.windows.push({ z: zc, y0: 44, y1: 56, w: 12, broken: 0, high: true });
+    h.windows.push({ z: z0 + 13, y0: 17, y1: 35, w: 14, broken: 0 });
+    h.windows.push({ z: z0 + 57, y0: 17, y1: 35, w: 14, broken: 0 });
+    if (nw === 3) h.windows.push({ z: zc, y0: 44, y1: 56, w: 14, broken: 0, high: true });
     return h;
   }
 
@@ -38,7 +38,7 @@
     for (let i = 0; i < lotsPer; i++) {
       const z = z0 + i * C.LOT, cross = crossAt.has(i);
       R.lots.push({ i, z0: z, z1: z + C.LOT, cross });
-      if (!cross) for (const side of [-1, 1]) total.push({ side, z: z + 21, i });
+      if (!cross) total.push({ side: -1, z: z + 12, i });
     }
     const nSub = Math.min(total.length - 2, Math.max(4, subs));
     const idx = total.map((_, k) => k);
@@ -55,14 +55,15 @@
       if (lot.cross) { add({ t: 'crossroad', z: lot.z0, z1: lot.z1, x: 0 }); continue; }
       for (const side of [-1, 1]) {
         const rz = (a, b) => lot.z0 + a + rng() * (b - a);
-        if (rng() < 0.55) add({ t: 'tree', x: side * (96 + rng() * 34), z: rz(66, 96), r: 7, kind: rng.int(0, 2), solid: true });
-        if (rng() < 0.45 * dm) add({ t: 'gnome', x: side * (100 + rng() * 40), z: rz(2, 18), r: 5, hp: 1 });
-        if (d >= 0.1 && rng() < 0.35 * dm) add({ t: 'sprinkler', x: side * (100 + rng() * 30), z: rz(4, 90), r: 12, ph: rng() * 6 });
+        const HS = side < 0;
+        if (rng() < (HS ? 0.5 : 0.8)) add({ t: 'tree', x: side * (96 + rng() * 34), z: rz(66, 96), r: 7, kind: rng.int(0, 2), solid: true });
+        if (HS && rng() < 0.45 * dm) add({ t: 'gnome', x: side * (100 + rng() * 40), z: rz(2, 18), r: 5, hp: 1 });
+        if (HS && d >= 0.1 && rng() < 0.35 * dm) add({ t: 'sprinkler', x: side * (100 + rng() * 30), z: rz(4, 90), r: 12, ph: rng() * 6 });
         if (rng() < 0.3 * dm) add({ t: 'trash', x: side * (66 + rng() * 14), z: rz(0, 98), r: 6, solid: true });
         if (rng() < 0.22) add({ t: 'hydrant', x: side * 62, z: rz(0, 98), r: 4, solid: true });
-        if (rng() < 0.18 * dm) add({ t: 'fence', x: side * 112, z: lot.z0 + 62, z1: lot.z0 + 90, r: 3, solid: true });
-        if (rng() < 0.22) add({ t: 'parked', x: side * 126, z: lot.z0 + 70, r: 12, hue: rng.pick(CAR_HUES), solid: true, hit: 0 });
-        if (rng() < 0.30 * dm + d * 0.04) {
+        if (HS && rng() < 0.18 * dm) add({ t: 'fence', x: side * 112, z: lot.z0 + 62, z1: lot.z0 + 90, r: 3, solid: true });
+        if (HS && rng() < 0.22) add({ t: 'parked', x: side * 126, z: lot.z0 + 70, r: 12, hue: rng.pick(CAR_HUES), solid: true, hit: 0 });
+        if (HS && rng() < 0.30 * dm + d * 0.04) {
           const hx = side * (118 + rng() * 20), dz = rz(8, 80);
           R.dogs.push({ t: 'dog', side, hx, hz: dz, x: hx, z: dz, vz: 0, vx: 0, state: 'idle', stun: 0, r: 7, hue: rng.int(0, 360), bark: 0, anim: rng() * 6, dead: 0 });
         }

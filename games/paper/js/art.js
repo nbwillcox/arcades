@@ -4,7 +4,7 @@
   const A = { boss: {}, ready: false };
   A.load = function () {
     const names = { rex: 'boss1', gorp: 'boss2', mower: 'boss3' };
-    const jobs = Object.keys(names).map((k) => new Promise((res) => { const im = new Image(); im.onload = im.onerror = () => res(); im.decoding = 'async'; im.src = 'assets/' + names[k] + '.webp?v=1'; A.boss[k] = im; }));
+    const jobs = Object.keys(names).map((k) => new Promise((res) => { const im = new Image(); im.onload = im.onerror = () => res(); im.decoding = 'async'; im.src = 'assets/' + names[k] + '.webp?v=2'; A.boss[k] = im; }));
     return Promise.all(jobs).then(() => { A.ready = true; });
   };
   G.art = A;
