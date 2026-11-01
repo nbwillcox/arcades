@@ -3,10 +3,15 @@
 (function (G) {
   'use strict';
   const C = G.C, px = G.px;
-  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 285, OY: 158 });
+  const g = (G.gfx = { X: 0, Y: 0, camX: 0, camZ: 0, shx: 0, shy: 0, OX: 262, OY: 184 });
   const SC = 1.3, RX = 0.62, RY = 0.28, FX = 0.56, FY = -0.7, HS = 1.15;
   g.SC = SC; g.RX = RX; g.RY = RY; g.FX = FX; g.FY = FY; g.HS = HS;
-  g.pr = function (x, z, y) { const a = x - g.camX, b = z - g.camZ; g.X = Math.round(g.OX + g.shx + (a * RX + b * FX) * SC); g.Y = Math.round(g.OY + g.shy + (a * RY + b * FY) * SC - (y || 0) * HS); };
+  /* the camera offset is rounded once, so every vertex snaps to the same pixel grid and nothing shimmers while scrolling */
+  let cx0 = 0, cy0 = 0, lcx = NaN, lcz = NaN;
+  g.pr = function (x, z, y) {
+    if (g.camX !== lcx || g.camZ !== lcz) { lcx = g.camX; lcz = g.camZ; cx0 = Math.round((lcx * RX + lcz * FX) * SC); cy0 = Math.round((lcx * RY + lcz * FY) * SC); }
+    g.X = Math.round((x * RX + z * FX) * SC) - cx0 + g.OX + g.shx; g.Y = Math.round((x * RY + z * FY) * SC - (y || 0) * HS) - cy0 + g.OY + g.shy;
+  };
   g.key = (x, z) => x * RY + z * FY;
   g.hash = (n) => { n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); n ^= n >>> 13; n = Math.imul(n, 0xc2b2ae35); n ^= n >>> 16; return (n >>> 0) / 4294967296; };
   const tmp = [];
@@ -39,6 +44,21 @@
     px.ell(bx, by, rx + 1, ry + 1, rp.a); px.rect(bx - rx - 1, ty, rx * 2 + 3, by - ty, rp.a); px.rect(bx - rx, ty, rx * 2 + 1, by - ty, rp.c);
     px.rect(bx + rx * 0.2, ty, Math.max(1, rx * 0.8 + 1), by - ty, rp.b); px.rect(bx - rx, ty, Math.max(1, rx * 0.35), by - ty, rp.d);
     px.ell(bx, by, rx, ry, rp.c); px.ell(bx, ty, rx + 1, ry + 1, rp.a); px.ell(bx, ty, rx, ry, rp.d); px.ell(bx - rx * 0.2, ty - 0.5, rx * 0.5, ry * 0.5, rp.e);
+  };
+  /* soft cast shadow of a box footprint with height h; the sun sits up-left so shadows fall toward the street */
+  const hull = (p) => {
+    const n = p.length >> 1, idx = []; for (let i = 0; i < n; i++) idx.push(i);
+    idx.sort((a, b) => p[a * 2] - p[b * 2] || p[a * 2 + 1] - p[b * 2 + 1]);
+    const cr = (o, a, b) => (p[a * 2] - p[o * 2]) * (p[b * 2 + 1] - p[o * 2 + 1]) - (p[a * 2 + 1] - p[o * 2 + 1]) * (p[b * 2] - p[o * 2]);
+    const lo = [], up = [];
+    for (const i of idx) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], i) <= 0) lo.pop(); lo.push(i); }
+    for (let k = idx.length - 1; k >= 0; k--) { const i = idx[k]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], i) <= 0) up.pop(); up.push(i); }
+    const out = []; lo.pop(); up.pop(); for (const i of lo.concat(up)) out.push(p[i * 2], p[i * 2 + 1]); return out;
+  };
+  g.cast = function (x0, z0, x1, z1, h, a) {
+    const sx = h * 0.45, sz = -h * 0.32, w = [x0, z0, x1, z0, x1, z1, x0, z1], pts = [];
+    for (let i = 0; i < 8; i += 2) { g.pr(w[i], w[i + 1], 0); pts.push(g.X, g.Y); g.pr(w[i] + sx, w[i + 1] + sz, 0); pts.push(g.X, g.Y); }
+    px.blendPoly(hull(pts), px.rgb(14, 10, 40), a === undefined ? 0.32 : a);
   };
   g.shadow = function (x, z, r, k) { g.pr(x, z, 0); px.darkEll(g.X, g.Y, Math.max(2, r * SC * 0.95), Math.max(1, r * SC * 0.45), k === undefined ? 0.68 : k); };
   g.ring = function (x, z, y, r, c, pat) { g.pr(x, z, y); px.ring(g.X, g.Y, Math.max(2, r * SC * 0.95), Math.max(1, r * SC * 0.47), c, pat); };
@@ -138,13 +158,16 @@
     for (let z = z0 - (((z0 % 24) + 24) % 24); z < z1; z += 24) { g.ln(-1, z, 0, -1, z + 12, 0, yel); g.ln(1, z, 0, 1, z + 12, 0, yel); }
     const cy = px.hsl(185, 90, 60);
     for (const s of [-1, 1]) { g.ln(s * C.CURB, z0, 0, s * C.CURB, z1, 0, cy); g.ln(s * (C.CURB - 1), z0, 0, s * (C.CURB - 1), z1, 0, px.hsl(190, 80, 36)); }
-    /* grass tufts + flowers */
-    for (let z = z0 - (((z0 % 12) + 12) % 12); z < z1; z += 12) {
-      for (let k = 0; k < 3; k++) {
-        const hs = g.hash((z | 0) * 9 + k), hx = g.hash((z | 0) * 5 + k * 77), s = hs < 0.65 ? -1 : 1;
-        const x = s * (90 + hx * (s < 0 ? 138 : 46)), zz = z + g.hash((z | 0) + k * 31) * 12;
-        if (hx < 0.2) { dot(x, zz, 0, px.hsl(300 + hs * 60, 75, 74)); dot(x + 1, zz, 0, px.hsl(50, 90, 66)); }
-        else { dot(x, zz, 0, lawn.d); dot(x, zz, 1, lawn.e); dot(x + 1.5, zz, 0, lawn.d); }
+    /* curb faces (a little height reads as depth) */
+    g.pf([-C.CURB, z0, 0, -C.CURB, z1, 0, -C.CURB, z1, 2, -C.CURB, z0, 2], walk.b); g.ln(-C.CURB, z0, 2, -C.CURB, z1, 2, walk.e);
+    /* world-locked grass texture: short blades in two tones */
+    const gl = lawn.d, gd = lawn.b;
+    for (let z = z0 - (((z0 % 6) + 6) % 6); z < z1; z += 6) {
+      for (let k = 0; k < 5; k++) {
+        const hs = g.hash((z | 0) * 9 + k), hx = g.hash((z | 0) * 5 + k * 77), s = k < 3 ? -1 : 1;
+        const x = s * (C.SIDEW + 2 + hx * (s < 0 ? 240 : 170)), zz = z + hs * 6;
+        if (s < 0 && x > -C.WALL - 70 && x < -C.WALL + 2) continue;
+        g.pr(x, zz, 0); px.pix(g.X, g.Y, hs < 0.5 ? gl : gd); if (hs < 0.25) px.pix(g.X, g.Y - 1, gl);
       }
     }
   };

@@ -56,22 +56,14 @@
       for (const side of [-1, 1]) {
         const rz = (a, b) => lot.z0 + a + rng() * (b - a);
         const HS = side < 0;
-        if (rng() < (HS ? 0.5 : 0.8)) add({ t: 'tree', x: side * (96 + rng() * 34), z: rz(66, 96), r: 7, kind: rng.int(0, 2), solid: true });
-        if (HS && rng() < 0.45 * dm) add({ t: 'gnome', x: side * (100 + rng() * 40), z: rz(2, 18), r: 5, hp: 1 });
-        if (HS && d >= 0.1 && rng() < 0.35 * dm) add({ t: 'sprinkler', x: side * (100 + rng() * 30), z: rz(4, 90), r: 12, ph: rng() * 6 });
-        if (rng() < 0.3 * dm) add({ t: 'trash', x: side * (66 + rng() * 14), z: rz(0, 98), r: 6, solid: true });
-        if (rng() < 0.22) add({ t: 'hydrant', x: side * 62, z: rz(0, 98), r: 4, solid: true });
-        if (HS && rng() < 0.18 * dm) add({ t: 'fence', x: side * 112, z: lot.z0 + 62, z1: lot.z0 + 90, r: 3, solid: true });
-        if (HS && rng() < 0.22) add({ t: 'parked', x: side * 126, z: lot.z0 + 70, r: 12, hue: rng.pick(CAR_HUES), solid: true, hit: 0 });
-        if (HS && rng() < 0.30 * dm + d * 0.04) {
-          const hx = side * (118 + rng() * 20), dz = rz(8, 80);
-          R.dogs.push({ t: 'dog', side, hx, hz: dz, x: hx, z: dz, vz: 0, vx: 0, state: 'idle', stun: 0, r: 7, hue: rng.int(0, 360), bark: 0, anim: rng() * 6, dead: 0 });
-        }
+        if (rng() < (HS ? 0.3 : 0.35)) add({ t: 'tree', x: side * (HS ? 104 + rng() * 22 : 100 + rng() * 26), z: rz(70, 94), r: 7, kind: rng.int(0, 2), solid: true });
+        if (HS && rng() < 0.25 * dm) add({ t: 'gnome', x: side * (100 + rng() * 30), z: rz(2, 14), r: 5, hp: 1 });
+        if (rng() < 0.1 * dm) add({ t: 'trash', x: side * (68 + rng() * 10), z: rz(0, 98), r: 6, solid: true });
+        if (HS && rng() < 0.15) add({ t: 'parked', x: side * 126, z: lot.z0 + 74, r: 12, hue: rng.pick(CAR_HUES), solid: true, hit: 0 });
       }
-      if (rng() < 0.45 * dm) add({ t: 'cone', x: (rng() < 0.5 ? -1 : 1) * (8 + rng() * 40), z: lot.z0 + 20 + rng() * 60, r: 4, solid: true });
-      if (rng() < 0.28 * dm) add({ t: 'pothole', x: (rng() < 0.5 ? -1 : 1) * (6 + rng() * 40), z: lot.z0 + 10 + rng() * 80, r: 9 });
-      if (d >= 0.15 && rng() < 0.30 * dm) { const s = rng() < 0.5 ? -1 : 1; R.movers.push({ t: 'skater', x: s * 74, z: lot.z0 + 40 + rng() * 40, vz: (rng() < 0.5 ? -1 : 1) * (28 + rng() * 14), r: 6, hue: rng.int(0, 360), lo: lot.z0 + 4, hi: lot.z0 + 96, hp: 1, anim: 0 }); }
-      if (d >= 0.3 && rng() < 0.28 * dm) { const s = rng() < 0.5 ? -1 : 1; R.movers.push({ t: 'mower', x: s * 100, z: lot.z0 + 20 + rng() * 60, vx: -s * 30, lo: 94, hi: 142, side: s, r: 9, anim: 0 }); }
+      if (rng() < 0.2 * dm) add({ t: 'cone', x: (rng() < 0.5 ? -1 : 1) * (8 + rng() * 40), z: lot.z0 + 20 + rng() * 60, r: 4, solid: true });
+      if (d >= 0.2 && rng() < 0.12 * dm) add({ t: 'pothole', x: (rng() < 0.5 ? -1 : 1) * (6 + rng() * 40), z: lot.z0 + 10 + rng() * 80, r: 9 });
+      if (d >= 0.3 && rng() < 0.12 * dm) { const s = rng() < 0.5 ? -1 : 1; R.movers.push({ t: 'skater', x: s * 74, z: lot.z0 + 40 + rng() * 40, vz: (rng() < 0.5 ? -1 : 1) * (24 + rng() * 10), r: 6, hue: rng.int(0, 360), lo: lot.z0 + 4, hi: lot.z0 + 96, hp: 1, anim: 0 }); }
       bundleGap++;
       if (bundleGap >= 3 && rng() < 0.7) { bundleGap = 0; R.pickups.push({ t: 'bundle', x: (rng() < 0.5 ? -1 : 1) * (rng() < 0.5 ? 70 + rng() * 10 : 10 + rng() * 40), z: lot.z0 + 20 + rng() * 60, n: 8 }); }
       if (lot.i > 1 && lot.i % 4 === 2 && rng() < 0.85) R.pickups.push({ t: 'pu', k: rng.pick(['speed', 'double', 'omni', 'shield', 'inf']), x: (rng() - 0.5) * 100, z: lot.z0 + 15 + rng() * 70 });
@@ -79,7 +71,7 @@
     }
     const rl = R.lots[Math.max(1, Math.floor(lotsPer * 0.3))];
     if (!rl.cross) add({ t: 'ramp', x: (rng() - 0.5) * 70, z: rl.z0 + 30, r: 14, used: false });
-    if (day >= 3 || week > 1) { const n = 1 + Math.floor(d / 1.5); for (let k = 0; k < Math.min(4, n); k++) { const l = R.lots[3 + Math.floor(rng() * (lotsPer - 5))]; R.ufos.push({ t: 'ufo', x: (rng() - 0.5) * 60, z: l.z0 + 50, y: 52, r: 16, hp: 1, ph: rng() * 6, beam: 0, pull: 0 }); } }
+    if (day >= 4 || week > 1) { const n = 1 + Math.floor(d / 2); for (let k = 0; k < Math.min(2, n); k++) { const l = R.lots[3 + Math.floor(rng() * (lotsPer - 5))]; R.ufos.push({ t: 'ufo', x: (rng() - 0.5) * 60, z: l.z0 + 50, y: 52, r: 16, hp: 1, ph: rng() * 6, beam: 0, pull: 0 }); } }
     R.papers = Math.max(10, 16 - Math.floor(d));
     R.deco.sort((a, b) => a.z - b.z);
     return R;

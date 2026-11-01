@@ -229,7 +229,7 @@
   /* ---------- traffic, hazards ---------- */
   function spawnTraffic(dt) {
     const R = Game.route; if (R.kind !== 'route') return;
-    const rate = (0.32 + R.d * 0.1) * dmOf();
+    const rate = (0.22 + R.d * 0.07) * dmOf();
     Game.carT = (Game.carT || 0) - dt;
     if (Game.carT <= 0) {
       Game.carT = (1.2 + Math.random() * 2.0) / rate;
@@ -292,9 +292,9 @@
     for (const o of R.deco) { if (o.hit > 0) o.hit = Math.max(0, o.hit - dt); }
     for (const h of R.houses) { h.happy = Math.max(0, h.happy - dt); h.mood = Math.max(0, h.mood - dt); h.face = Math.max(0, h.face - dt); }
     /* meteors */
-    if (R.kind === 'route' && (R.day >= 4 || R.week > 1)) {
+    if (R.kind === 'route' && (R.day >= 5 || R.week > 1)) {
       Game.meteorT -= dt;
-      if (Game.meteorT <= 0) { Game.meteorT = (3.2 - Math.min(1.6, R.d * 0.3)) / dmOf() + Math.random() * 2; Game.haz.push({ t: 'meteor', x: (Math.random() - 0.5) * 150, z: P.z + 60 + Math.random() * 190, r: 15, tm: 1.3, y: 0 }); }
+      if (Game.meteorT <= 0) { Game.meteorT = (5.5 - Math.min(2, R.d * 0.3)) / dmOf() + Math.random() * 3; Game.haz.push({ t: 'meteor', x: (Math.random() - 0.5) * 150, z: P.z + 60 + Math.random() * 190, r: 15, tm: 1.3, y: 0 }); }
     }
     for (const hz of Game.haz) updateHaz(hz, dt);
     Game.haz = Game.haz.filter((h) => !h.gone);

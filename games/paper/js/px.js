@@ -101,6 +101,12 @@
     const t = target || 0, o = (1 - k) * t, n = buf.length;
     for (let i = 0; i < n; i++) { const c = buf[i]; buf[i] = (4278190080 | ((((c >> 16) & 255) * k + o) << 16) | ((((c >> 8) & 255) * k + o) << 8) | (((c & 255) * k + o) | 0)) >>> 0; }
   };
+  /* vignette: darkens the corners so the eye goes to the middle of the screen (where the rider is) */
+  let vig = null;
+  px.vignette = function (cx0, cy0, strength) {
+    if (!vig || vig.cx !== cx0) { vig = new Float32Array(W * H); vig.cx = cx0; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const dx = (x - cx0) / (W * 0.62), dy = (y - cy0) / (H * 0.62), d = Math.max(0, Math.sqrt(dx * dx + dy * dy) - 0.45); vig[y * W + x] = Math.max(0, 1 - d * d * strength); } }
+    for (let i = 0; i < buf.length; i++) { const k = vig[i]; if (k > 0.995) continue; const c = buf[i]; buf[i] = (4278190080 | ((((c >> 16) & 255) * k) << 16) | ((((c >> 8) & 255) * k) << 8) | (((c & 255) * k) | 0)) >>> 0; }
+  };
   /* ---- bitmap font 5x7 ---- */
   const F = {
     A: '01110,10001,10001,11111,10001,10001,10001', B: '11110,10001,10001,11110,10001,10001,11110', C: '01110,10001,10000,10000,10000,10001,01110', D: '11110,10001,10001,10001,10001,10001,11110',

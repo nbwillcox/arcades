@@ -1,7 +1,7 @@
 {
   "name": "SpacePaper",
   "short_name": "SpacePaper",
-  "description": "SpacePaper - a free Paperboy-style delivery game on a hoverboard in a floating space suburb. Smash windows, dodge hover-cars and space-dogs, and survive the weekly boss.",
+  "description": "SpacePaper - a free Paperboy-style delivery game on a hoverboard in a floating space suburb. Smash windows, dodge hover-cars and meteors, and survive the weekly boss.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

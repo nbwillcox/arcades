@@ -15,12 +15,12 @@
     time = t;
     const R = Game.route; if (!R) return;
     const cam = Game.cam;
-    cam.z += ((P.z + 34) - cam.z) * Math.min(1, 0.25);
-    cam.x += ((P.x * 0.2 - 45) - cam.x) * 0.12;
+    cam.z += (P.z - cam.z) * 0.35;
+    cam.x += (P.x * 0.8 - cam.x) * 0.2;
     g.camX = cam.x; g.camZ = cam.z;
     const sk = Game.fx.shake * (S.shake && !S.reduced ? 0.5 : 0);
     g.shx = sk ? Math.round((Math.random() - 0.5) * sk) : 0; g.shy = sk ? Math.round((Math.random() - 0.5) * sk) : 0;
-    const zA = cam.z - 110, zB = cam.z + 360;
+    const zA = cam.z - 150, zB = cam.z + 330;
     g.backdrop(t);
     g.ground(R, zA, zB, t);
     for (const h of R.houses) { if (h.z1 < zA) continue; if (h.z0 > zB) break; Sp.houseGround(h, t); }
@@ -50,6 +50,7 @@
     }
     for (const p of Game.fx.parts) { g.pr(p.x, p.z, p.y); const a = 1 - p.t / p.life, sz = p.sz > 2.6 ? 2 : 1; px.rect(g.X, g.Y, sz, sz, a > 0.35 ? col(p.col.length === 7 ? p.col : '#ffffff') : px.hsl(40, 30, 70)); }
     for (const p of Game.fx.pops) { g.pr(p.x, p.z, p.y + p.t * 22); if (p.t < 1.2 || Math.floor(p.t * 20) % 2) px.text(p.txt, g.X, g.Y - 3, 1, p.col.length === 7 ? col(p.col) : WHITE, 'center', OUT); }
+    if (Game.phase !== 'idle') { g.pr(P.x, P.z, 10); px.vignette(250, 165, 1.5); }
     if (Game.fx.flash > 0) px.dim(1 - Math.min(0.5, Game.fx.flash), 255);
     g.shx = g.shy = 0;
   };

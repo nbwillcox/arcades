@@ -68,7 +68,7 @@ window.ARCADE_GAMES = [
     keys: [['Hop', 'Arrows / swipe'], ['Power-up', 'Space / tap'], ['Pause', 'P / Esc']] },
 
   { id: 'paper', name: 'Space Paper', genre: 'action', hue: 45, t: 1, mouse: 0,
-    tag: 'A paperboy on a hoverboard in a floating space suburb: smash windows, dodge hover-cars and space-dogs, beat the weekly boss.',
+    tag: 'A paperboy on a hoverboard in a floating space suburb: deliver, smash windows, dodge hover-cars, beat the weekly boss.',
     keys: [['Steer', 'Arrows / WASD / stick'], ['Throw L / R', 'Z X / LB RB'], ['Hop', 'Space / A'], ['Auto-throw', 'C / Y']] },
 
   // ---- PUZZLE & MAZE ------------------------------------------------------

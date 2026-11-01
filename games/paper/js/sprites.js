@@ -10,15 +10,10 @@
   const plane = (x, zc, yc, rz, ry, n, rot) => { const a = []; for (let i = 0; i < n; i++) { const t = (i / n) * 6.2832 + (rot || 0); a.push(x, zc + Math.cos(t) * rz, yc + Math.sin(t) * ry); } return a; };
   const DEP = 48;
   /* back garden behind each house: picket fence, a tree, sometimes a pool or a shed */
-  function backyard(h, WX, time) {
-    const hs = (k) => g.hash(h.id * 31 + k), BX = WX - DEP - 18, z0 = h.z0 - 15, z1 = h.z1 + 15, f = R(40, 18, 80);
-    if (hs(1) < 0.45) { const pz = h.z0 + 12 + hs(2) * 30; g.pf([BX + 4, pz, 0, BX + 15, pz, 0, BX + 15, pz + 26, 0, BX + 4, pz + 26, 0], hsl(195, 80, 52), hsl(190, 85, 66), Math.floor(time * 2) % 2 ? 3 : 4); g.po([BX + 4, pz, 0, BX + 15, pz, 0, BX + 15, pz + 26, 0, BX + 4, pz + 26, 0], hsl(0, 0, 92)); }
-    else if (hs(3) < 0.5) g.box(BX - 22, h.z0 + 20, 0, 12, 16, 12, R(28 + hs(4) * 60, 40, 44));
-    const tz = h.z0 + hs(5) * 60, tc = R([160, 300, 45, 120][Math.floor(hs(6) * 4)], 55, 42);
-    g.cyl(BX - 30, tz, 0, 2, 12, R(28, 45, 30)); g.ball(BX - 30, tz, 22, 9, tc); g.ball(BX - 27, tz + 3, 27, 5, R(tc === undefined ? 160 : 160, 60, 54));
-    for (let z = z0; z < z1; z += 4) g.box(BX - 1, z, 0, 1.6, 1.6, 7, f);
-    g.box(BX - 1, z0, 4.5, 1.4, z1 - z0, 1.2, R(40, 18, 70));
-    g.ln(BX, z0, 0, WX - 6, z0, 0, px.hsl(140, 30, 24));
+  function backyard(h, WX) {
+    const BX = WX - DEP - 16, z0 = h.z0 - 15, z1 = h.z1 + 15, f = R(40, 14, 62);
+    for (let z = z0; z < z1; z += 5) g.box(BX - 1, z, 0, 1.4, 1.4, 6, f);
+    g.box(BX - 1, z0, 4, 1.2, z1 - z0, 1, R(40, 14, 54));
   }
   const stone = R(228, 10, 52), stone2 = R(228, 8, 62);
 
@@ -26,8 +21,8 @@
   Sp.house = function (h, time) {
     const WX = -C.WALL, z0 = h.z0, z1 = h.z1, zc = h.zc, H = 46 + (h.style === 1 ? 4 : 0), lit = h.sub && !h.cancelled;
     const w = h.wall, wall = R(w[0], w[1] * (lit ? 1 : 0.8), w[2] + (lit ? 0 : -4)), roof = R(h.roof[0], h.roof[1], h.roof[2]), trim = R(h.trim[0], h.trim[1], h.trim[2]);
-    backyard(h, WX, time);
-    px.blendPoly(g.sp([WX + 1, z0 - 2, 0, WX + 18, z0 + 10, 0, WX + 18, z1 + 12, 0, WX + 1, z1 + 2, 0]), BLACK, 0.26);
+    backyard(h, WX);
+    g.cast(WX - DEP, z0, WX, z1, 52, 0.3);
     /* end wall (-z side) */
     g.pf([WX, z0, 0, WX - DEP, z0, 0, WX - DEP, z0, H, WX, z0, H], wall.b);
     const sd = px.mix(wall.b, wall.a, 0.55);
@@ -138,38 +133,46 @@
 
   /* ---------------- rider ---------------- */
   Sp.player = function (P, time) {
-    const x = P.x, z = P.z, y = P.y;
+    const K = 1.35, x = P.x, z = P.z, y = P.y;
+    const B = (x0, z0, y0, w, d, h, r) => g.box(x + x0 * K, z + z0 * K, y + y0 * K, w * K, d * K, h * K, r);
     if (P.inv > 0 && Math.floor(time * 14) % 2 === 0 && P.crash <= 0) return;
-    g.shadow(x, z, 9 - Math.min(5, y * 0.1), y > 12 ? 0.8 : 0.62);
-    g.pr(x, z, y + 1); px.blendEll(g.X, g.Y + 2, 11, 5, hsl(185, 100, 66), 0.3 + 0.1 * Math.sin(time * 14));
-    const board = R(185, 72, 44), skin = R(26, 60, 74), shirt = R(352, 78, 50), pants = R(225, 55, 38);
+    g.shadow(x, z, (10 - Math.min(5, y * 0.1)) * K * 0.8, y > 12 ? 0.78 : 0.55);
+    g.pr(x, z, y + 1); px.blendEll(g.X, g.Y + 2, 15, 6, hsl(185, 100, 66), 0.26 + 0.08 * Math.sin(time * 14));
+    const board = R(188, 70, 46), skin = R(24, 58, 72), shirt = R(355, 74, 50), pants = R(222, 50, 36), shoe = R(20, 30, 92), bag = R(32, 55, 46);
     if (P.crash > 0) {
-      const sp = time * 12; g.box(x - 3.5 + Math.sin(sp) * 6, z - 10 + Math.cos(sp) * 8, y + 3, 7, 22, 2, board);
-      g.ball(x, z, y + 9, 4.2, skin); g.box(x - 2, z - 3, y + 1, 4, 6, 8, shirt);
-      for (let k = 0; k < 4; k++) { const a = sp + k * 1.57; g.pr(x + Math.cos(a) * 9, z + Math.sin(a) * 7, y + 22); px.text('*', g.X - 3, g.Y - 3, 1, hsl(50, 95, 64), 'left', OUT); }
+      const sp = time * 12; B(-3.5 + Math.sin(sp) * 6, -10 + Math.cos(sp) * 8, 3, 7, 22, 2, board);
+      g.ball(x, z, y + 9, 4.2 * K, skin); B(-2, -3, 1, 4, 6, 8, shirt);
+      for (let k = 0; k < 4; k++) { const a = sp + k * 1.57; g.pr(x + Math.cos(a) * 12, z + Math.sin(a) * 9, y + 30); px.text('*', g.X - 3, g.Y - 3, 1, hsl(50, 95, 64), 'left', OUT); }
       return;
     }
-    const lean = P.lean * 2.2, th = P.throwT;
-    g.box(x - 3.5, z - 11, y + 3, 7, 22, 2.4, board);
-    g.box(x - 3.9, z + 6, y + 4, 7.8, 5, 1.6, R(48, 95, 58));
-    g.pr(x, z - 11, y + 4); const fl = (Math.floor(time * 30) % 2) ? 3 : 2; px.rect(g.X - 1, g.Y + 1, 2, fl, hsl(190, 100, 74)); px.rect(g.X, g.Y + 1, 1, fl + 1, hsl(30, 100, 70));
-    g.box(x - 1.6 + lean * 0.3, z - 5, y + 5.4, 2.4, 2.6, 6, pants); g.box(x - 1.6 + lean * 0.3, z + 2.5, y + 5.4, 2.4, 2.6, 6, pants);
-    g.box(x - 2.2 + lean * 0.3, z - 5.5, y + 4.6, 3.4, 3.4, 1.4, R(28, 55, 30)); g.box(x - 2.2 + lean * 0.3, z + 2, y + 4.6, 3.4, 3.4, 1.4, R(28, 55, 30));
-    g.box(x - 4, z - 9.5, y + 10, 6, 3.2, 7.5, R(35, 55, 48));
-    for (let k = 0; k < 3; k++) { g.pr(x - 1 + k * 1.4, z - 11.5, y + 18 + k * 0.5); px.rect(g.X - 1, g.Y - 4, 3, 4, hsl(48, 30, 92)); px.rect(g.X, g.Y - 4, 1, 4, hsl(0, 75, 52)); }
-    g.box(x - 2.4 + lean * 0.6, z - 3.6, y + 11, 4.8, 7.2, 9, shirt); g.box(x - 2.4 + lean * 0.6, z - 3.6, y + 11, 4.8, 7.2, 1.8, R(48, 90, 58));
-    g.pr(x + lean * 0.8, z, y + 18); const shx = g.X, shy = g.Y;
-    const arm = (ex, ey) => { px.line(shx, shy, ex, ey, OUT); px.line(shx, shy + 1, ex, ey + 1, OUT); px.line(shx, shy, ex, ey, skin.c); };
+    const lean = P.lean * 2, th = P.throwT;
+    /* board: deck, rails, thrusters */
+    B(-3.6, -11, 3, 7.2, 22, 2.2, board); B(-3.9, -11.5, 2.4, 7.8, 1.4, 1.2, R(188, 40, 30)); B(-3.9, 10.2, 2.4, 7.8, 1.4, 1.2, R(188, 40, 30));
+    g.ln(x - 3.6 * K, z - 10 * K, y + 5.2 * K, x - 3.6 * K, z + 10 * K, y + 5.2 * K, board.e);
+    g.pr(x, z - 11 * K, y + 3.5 * K); const fl = (Math.floor(time * 30) % 2) ? 4 : 3; px.rect(g.X - 2, g.Y + 1, 4, fl, hsl(190, 100, 74)); px.rect(g.X - 1, g.Y + 1, 2, fl + 2, hsl(48, 100, 86));
+    /* legs + shoes */
+    B(-1.6 + lean * 0.3, -4.5, 5.2, 2.4, 2.6, 6, pants); B(-1.6 + lean * 0.3, 2, 5.2, 2.4, 2.6, 6, pants);
+    B(-2.1 + lean * 0.3, -5, 4.6, 3.4, 3.4, 1.2, shoe); B(-2.1 + lean * 0.3, 1.5, 4.6, 3.4, 3.4, 1.2, shoe);
+    /* paper bag on the back with rolled papers */
+    B(-4 + lean * 0.4, -8.8, 10, 5.6, 3, 7, bag); B(-4 + lean * 0.4, -8.8, 15.6, 5.6, 3, 1.2, R(32, 45, 36));
+    for (let k = 0; k < 3; k++) { g.pr(x - K + k * 1.6 + lean, z - 10 * K, y + 18.5 * K); px.rect(g.X - 1, g.Y - 4, 3, 4, hsl(48, 25, 94)); px.rect(g.X, g.Y - 4, 1, 4, hsl(0, 75, 50)); px.pix(g.X - 1, g.Y - 4, OUT); }
+    /* torso with stripe */
+    B(-2.4 + lean * 0.6, -3.4, 11, 4.8, 6.8, 8.5, shirt); B(-2.4 + lean * 0.6, -3.4, 15, 4.8, 6.8, 1.4, R(48, 90, 60));
+    g.pr(x + lean * 0.8 * K, z, y + 18 * K); const shx = g.X, shy = g.Y;
+    const arm = (ex, ey) => { px.line(shx, shy, ex, ey, OUT); px.line(shx + 1, shy, ex + 1, ey, OUT); px.line(shx, shy + 1, ex, ey + 1, OUT); px.line(shx, shy, ex, ey, skin.c); px.line(shx + 1, shy, ex + 1, ey, skin.d); px.rect(ex - 1, ey - 1, 3, 3, skin.c); };
     if (th > 0) {
-      const k = 1 - th / 0.28, reach = Math.sin(Math.min(1, k * 1.4) * 1.57) * 11 * P.throwSide; g.pr(x + reach, z + 1, y + 20); arm(g.X, g.Y);
-      if (k < 0.45) { px.rect(g.X - 1, g.Y - 1, 4, 3, hsl(48, 30, 94)); px.rect(g.X, g.Y - 1, 1, 3, hsl(0, 75, 52)); }
-    } else { g.pr(x + lean * 0.8 + 2.5, z + 2, y + 12); arm(g.X, g.Y); }
-    g.ball(x + lean, z, y + 25, 4.2, skin); g.pr(x + lean, z, y + 25); const hx = g.X, hy = g.Y;
-    px.rect(hx + 1, hy - 1, 1, 2, OUT); px.rect(hx + 3, hy - 1, 1, 2, OUT); px.line(hx + 1, hy + 2, hx + 3, hy + 2, OUT);
-    px.ring(hx, hy, 7, 7, hsl(190, 70, 86)); px.pix(hx - 4, hy - 4, hsl(0, 0, 100)); px.pix(hx - 3, hy - 5, hsl(0, 0, 100)); px.pix(hx - 5, hy - 3, hsl(0, 0, 100));
-    px.ell(hx, hy - 3, 5, 3, hsl(0, 78, 46)); px.ell(hx - 1, hy - 4, 3, 1.5, hsl(0, 80, 62)); px.rect(hx + 1, hy - 2, 7, 2, hsl(0, 78, 36)); px.rect(hx - 4, hy - 1, 9, 1, hsl(0, 78, 30));
-    if (P.pw.shield > 0) { const a = P.pw.shield < 2 ? (Math.floor(time * 12) % 2 ? 0.45 : 0.1) : 0.4; g.pr(x, z, y + 14); px.blendEll(g.X, g.Y, 17, 17, hsl(195, 90, 68), a * 0.6); px.ring(g.X, g.Y, 17, 17, hsl(190, 90, 84), 1); }
-    if (P.pw.speed > 0) for (let k = 1; k < 4; k++) { g.pr(x, z - k * 9, y + 6); px.line(g.X - 5, g.Y, g.X + 5, g.Y - 3, hsl(30, 100, 78 - k * 8)); }
+      const k = 1 - th / 0.28, reach = Math.sin(Math.min(1, k * 1.4) * 1.57) * 12 * P.throwSide; g.pr(x + reach * K, z + K, y + 21 * K); arm(g.X, g.Y);
+      if (k < 0.45) { px.rect(g.X - 2, g.Y - 2, 6, 4, OUT); px.rect(g.X - 1, g.Y - 1, 4, 2, hsl(48, 25, 96)); px.rect(g.X, g.Y - 1, 1, 2, hsl(0, 75, 50)); }
+    } else { g.pr(x + (lean * 0.8 + 2.4) * K, z + 2 * K, y + 12.5 * K); arm(g.X, g.Y); }
+    /* head, face, bubble helmet, cap */
+    g.ball(x + lean * K, z, y + 25 * K, 4.2 * K, skin); g.pr(x + lean * K, z, y + 25 * K); const hx = g.X, hy = g.Y;
+    px.rect(hx + 1, hy - 1, 1, 2, OUT); px.rect(hx + 4, hy - 1, 1, 2, OUT); px.pix(hx + 2, hy + 3, OUT); px.pix(hx + 3, hy + 3, OUT); px.pix(hx + 1, hy + 2, OUT); px.pix(hx + 4, hy + 2, OUT);
+    px.rect(hx - 4, hy + 1, 2, 1, hsl(5, 70, 72));
+    px.ring(hx, hy, 9, 9, hsl(190, 60, 88), 1); px.ring(hx, hy, 9, 9, hsl(195, 40, 64), 2);
+    px.line(hx - 6, hy - 3, hx - 3, hy - 6, hsl(0, 0, 100)); px.pix(hx - 6, hy - 1, hsl(0, 0, 100));
+    px.ell(hx, hy - 4, 6, 3, OUT); px.ell(hx, hy - 4, 5, 2.5, hsl(0, 78, 46)); px.ell(hx - 1, hy - 5, 3, 1.2, hsl(0, 80, 64)); px.rect(hx + 2, hy - 3, 7, 2, hsl(0, 78, 34)); px.rect(hx + 2, hy - 3, 7, 1, hsl(0, 78, 46));
+    if (P.pw.shield > 0) { const a = P.pw.shield < 2 ? (Math.floor(time * 12) % 2 ? 0.45 : 0.1) : 0.38; g.pr(x, z, y + 16); px.blendEll(g.X, g.Y, 22, 22, hsl(195, 90, 68), a * 0.6); px.ring(g.X, g.Y, 22, 22, hsl(190, 90, 84), 1); }
+    if (P.pw.speed > 0) for (let k = 1; k < 4; k++) { g.pr(x, z - k * 11, y + 8); px.line(g.X - 6, g.Y, g.X + 6, g.Y - 4, hsl(30, 100, 78 - k * 8)); }
   };
 
   /* ---------------- traffic / creatures ---------------- */
@@ -246,7 +249,7 @@
     switch (o.t) {
       case 'tree': {
         const k = o.kind, hue = [160, 300, 45][k], cr = R(hue, 58, 46), sway = Math.round(Math.sin(time * 1.4 + o.z));
-        g.shadow(o.x, o.z, 11, 0.62); g.cyl(o.x, o.z, 0, 2, 13, R(28, 45, 30));
+        g.shadow(o.x + 9, o.z - 6, 11, 0.66); g.cyl(o.x, o.z, 0, 2, 13, R(28, 45, 30));
         g.ball(o.x - 4 + sway, o.z, 22, 7, R(hue + 10, 55, 42)); g.ball(o.x + 5 + sway, o.z, 21, 7, R(hue - 6, 60, 44)); g.ball(o.x + sway, o.z, 29, 9, cr); g.ball(o.x + 3 + sway, o.z, 35, 5, R(hue + 18, 66, 54));
         if (k === 1) for (let q = 0; q < 5; q++) { g.pr(o.x + Math.cos(q * 1.3 + time) * 9, o.z + Math.sin(q * 1.3 + time) * 7, 26 + q * 2); px.rect(g.X, g.Y, 1, 1, hsl(55, 100, 85)); }
         break; }
@@ -256,7 +259,7 @@
       case 'cone': g.shadow(o.x, o.z, 4, 0.6); g.cyl(o.x, o.z, 0, 4, 1.2, R(25, 90, 48)); g.cyl(o.x, o.z, 1, 2.6, 4.5, R(25, 95, 54)); g.cyl(o.x, o.z, 5, 1.4, 3, R(25, 95, 58)); g.pr(o.x, o.z, 4); px.rect(g.X - 2, g.Y - 1, 5, 1, hsl(0, 0, 96)); break;
       case 'fence': { const f = R(40, 20, 86); for (let z = o.z; z < o.z1; z += 4) g.box(o.x - 1, z, 0, 2, 2.4, 8, f); g.box(o.x - 0.8, o.z, 5, 1.6, o.z1 - o.z, 1.6, R(40, 20, 76)); break; }
       case 'parked': { const sh = o.hit > 0 ? Math.sin(time * 40) * 0.8 : 0, b = R(o.hue, 70, 48), gl = R(205, 55, 52);
-        g.shadow(o.x, o.z, 13, 0.62); g.box(o.x - 7 + sh, o.z - 11, 2, 14, 22, 6, b); g.box(o.x - 6 + sh, o.z - 6, 8, 12, 12, 6, gl);
+        g.cast(o.x - 7, o.z - 11, o.x + 7, o.z + 11, 12, 0.3); g.box(o.x - 7 + sh, o.z - 11, 2, 14, 22, 6, b); g.box(o.x - 6 + sh, o.z - 6, 8, 12, 12, 6, gl);
         g.pr(o.x, o.z - 11, 5); px.rect(g.X - 4, g.Y - 1, 3, 2, o.hit > 0 ? hsl(50, 100, 70) : hsl(55, 100, 82)); px.rect(g.X + 2, g.Y - 1, 3, 2, o.hit > 0 ? hsl(50, 100, 70) : hsl(55, 100, 82));
         if (o.hit > 0) { g.pr(o.x, o.z, 24); px.text('BEEP!', g.X, g.Y - 3, 1, hsl(50, 95, 64), 'center', OUT); }
         break; }
