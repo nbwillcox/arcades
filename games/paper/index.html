@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#05071a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SpacePaper">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <title>SpacePaper</title>
+  <meta name="description" content="SpacePaper - a free Paperboy-style delivery game on a hoverboard in a floating space suburb. Smash windows, dodge hover-cars and space-dogs, and survive the weekly boss.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23090420'/%3E%3Crect x='6' y='12' width='20' height='9' rx='3' fill='%23f7f1dc' transform='rotate(-25 16 16)'/%3E%3Crect x='14' y='12' width='4' height='9' fill='%23d33' transform='rotate(-25 16 16)'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/mobile.css?v=3">
+</head>
+<body>
+  <canvas id="game" aria-label="SpacePaper game screen"></canvas>
+  <div id="ui">
+    <section id="loading" class="screen"><p class="loadtxt">PRINTING THE MORNING EDITION&hellip;</p></section>
+
+    <section id="title" class="screen hidden">
+      <div class="titlewrap">
+        <div class="titleleft">
+          <h1 class="logo"><span class="l1">SPACE</span><span class="l2">PAPER</span><span class="l3"></span></h1>
+          <p class="tag">Extra! Extra! Deliver it by hoverboard.</p>
+          <div class="menu">
+            <button id="btnStart" class="primary">START ROUTE</button>
+            <button id="btnHow">HOW TO PLAY</button>
+            <button id="btnScores">HIGH SCORES</button>
+            <button id="btnSettings">SETTINGS</button>
+          </div>
+          <p class="hint desk"><b>Arrows / WASD</b>: steer, faster, brake &middot; <b>Z / Q</b> throw left &middot; <b>X / E</b> throw right &middot; <b>C</b> auto-throw &middot; <b>Space</b> hop &middot; <b>P</b> pause<br><b>Gamepad</b>: stick steers &middot; <b>LB</b> / <b>RB</b> throw &middot; <b>A</b> hop &middot; <b>Y</b> auto-throw</p>
+          <p class="hint touchonly">Left thumb steers &middot; tap <b>THROW</b> buttons to toss a paper &middot; <b>HOP</b> jumps</p>
+        </div>
+        <div class="titleright"><img id="heroImg" alt="A paperboy on a hoverboard throwing a newspaper" decoding="async"></div>
+      </div>
+      <footer class="credit">Free to play and share &middot; <a href="https://github.com/nbwillcox/spacePaper" target="_blank" rel="noopener">github.com/nbwillcox/spacePaper</a> &middot; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></footer>
+    </section>
+
+    <section id="howto" class="screen hidden">
+      <h2>HOW TO PLAY</h2>
+      <div class="howlist">
+        <p>Ride your route Monday to Sunday. <b>Glowing yellow houses</b> are subscribers: land a paper on the <b>welcome mat</b> (250), the patio (150) or in the <b>mailbox</b> (100). The grumpy dark houses are not customers &mdash; <b>smash their windows</b> (150)!</p>
+        <p>Break a <b>subscriber's</b> window, or miss their house, and they cancel (-250). Lose every subscriber and you are fired.</p>
+        <p>Dodge hover-cars, cross traffic, space-dogs (bonk them with a paper!), skaters, mowers, UFO beams and meteors. Hop over low things. Grab paper <b>bundles</b> to restock.</p>
+        <p>Power-ups: <b>S</b> super speed &middot; <b>2</b> double toss &middot; <b>O</b> omni toss (every direction) &middot; <b>I</b> invincible &middot; <b>&infin;</b> infinite papers.</p>
+        <p>Chain hits for a combo multiplier. After each route: the <b>Hover Academy</b> bonus course. Sunday ends with a <b>boss</b>.</p>
+      </div>
+      <div class="menu"><button id="btnHowBack" class="primary">BACK</button></div>
+    </section>
+
+    <section id="pause" class="screen hidden">
+      <h2>PAUSED</h2>
+      <div class="menu">
+        <button id="btnResume" class="primary">RESUME</button>
+        <button id="btnPauseSettings">SETTINGS</button>
+        <button id="btnQuit">QUIT TO TITLE</button>
+      </div>
+    </section>
+
+    <section id="settings" class="screen hidden">
+      <h2>SETTINGS</h2>
+      <div class="panel">
+        <label>Master volume <input id="setMaster" type="range" min="0" max="1" step="0.05"></label>
+        <label>Music volume <input id="setMusic" type="range" min="0" max="1" step="0.05"></label>
+        <label>Effects volume <input id="setSfx" type="range" min="0" max="1" step="0.05"></label>
+        <label>Difficulty (next run)
+          <select id="setDiff"><option value="cozy">Cozy</option><option value="normal">Normal</option><option value="hard">Hard</option></select></label>
+        <label class="check"><input id="setGuide" type="checkbox"> Throw guide (shows where papers land)</label>
+        <label class="check"><input id="setShake" type="checkbox"> Screen shake</label>
+        <label class="check"><input id="setReduced" type="checkbox"> Reduced motion (fewer particles)</label>
+      </div>
+      <div class="menu"><button id="btnSettingsBack" class="primary">BACK</button></div>
+    </section>
+
+    <section id="scores" class="screen hidden">
+      <h2>HIGH SCORES</h2>
+      <ol id="scoreList" class="scorelist"></ol>
+      <div class="menu">
+        <button id="btnScoresPlay" class="primary">PLAY AGAIN</button>
+        <button id="btnScoresBack">TITLE</button>
+      </div>
+    </section>
+
+    <section id="gameover" class="screen hidden">
+      <img id="overImg" class="overimg" alt="" decoding="async">
+      <div class="overbox">
+        <h2 class="over">ROUTE OVER</h2>
+        <p class="final" id="goWhy"></p>
+        <p class="final">Score <b id="goScore">0</b> &middot; Week <b id="goStage">1</b></p>
+        <div id="goEntry" class="entry hidden">
+          <p class="newhs">NEW HIGH SCORE! Enter your initials</p>
+          <input id="goName" type="text" maxlength="3" autocomplete="off" spellcheck="false" aria-label="Your initials">
+          <div class="menu"><button id="btnSaveScore" class="primary">SAVE SCORE</button></div>
+        </div>
+        <div id="goButtons" class="menu">
+          <button id="btnRetry" class="primary">PLAY AGAIN</button>
+          <button id="btnGoTitle">TITLE</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <noscript><p style="color:#fff;padding:2rem">SpacePaper needs JavaScript enabled.</p></noscript>
+
+  <script src="js/util.js?v=3"></script>
+  <script src="js/config.js?v=3"></script>
+  <script src="js/audio.js?v=3"></script>
+  <script src="js/input.js?v=3"></script>
+  <script src="js/scores.js?v=3"></script>
+  <script src="js/world.js?v=3"></script>
+  <script src="js/boss.js?v=3"></script>
+  <script src="js/gfx.js?v=3"></script>
+  <script src="js/sprites.js?v=3"></script>
+  <script src="js/game.js?v=3"></script>
+  <script src="js/bot.js?v=3"></script>
+  <script src="js/art.js?v=3"></script>
+  <script src="js/render.js?v=3"></script>
+  <script src="js/ui.js?v=3"></script>
+  <script src="js/touchcfg.js?v=3"></script>
+  <script src="js/mobile.js?v=3"></script>
+<script src="js/padcfg.js?v=3"></script>
+<script src="js/pad.js?v=3"></script>
+<script src="js/main.js?v=3"></script>
+  <script src="js/fs.js?v=arc1"></script>
+</body>
+</html>

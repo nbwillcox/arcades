@@ -15,11 +15,11 @@ GAMES = {
     'tris': 'SpaceTris', 'troid': 'SpaceTroid', 'spy': 'SpySpaceHunter',
     'pac': 'SpacePac', 'tube': 'SpaceTube', 'qix': 'SpaceQix', 'joust': 'SpaceJoust',
     'kong': 'SpaceKong', 'brawl': 'StickBrawl', 'marble': 'SpaceMarble',
-    'bert': 'SpaceBert', 'jong': 'SpaceJong', 'fox': 'SpaceFox', 'drake': 'SpaceDrake', 'duck': 'SpaceDuckHunter',
+    'bert': 'SpaceBert', 'jong': 'SpaceJong', 'fox': 'SpaceFox', 'drake': 'SpaceDrake', 'duck': 'SpaceDuckHunter', 'paper': 'SpacePaper',
 }
 # only these top-level entries of the root game are the game itself
 ROOT_ONLY = {'index.html', 'js', 'css', 'icons', 'manifest.json'}
-DROP_DIRS = {'.git', '.claude', 'tools', 'tests', 'docs', 'node_modules', 'assets_src'}
+DROP_DIRS = {'raw', '.git', '.claude', 'tools', 'tests', 'docs', 'node_modules', 'assets_src'}
 DROP_FILES = {'README.md', 'DESIGN.md', 'LICENSE', '.gitignore', '.nojekyll', 'package.json',
               'package-lock.json', 'sheet.html', 'tiles.html'}
 DROP_EXT = {'.py', '.md', '.map', '.psd', '.blend', '.log'}

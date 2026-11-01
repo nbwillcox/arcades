@@ -67,6 +67,10 @@ window.ARCADE_GAMES = [
     tag: 'Dodge space traffic, ride drifting wreckage over the void and dock in all five bays.',
     keys: [['Hop', 'Arrows / swipe'], ['Power-up', 'Space / tap'], ['Pause', 'P / Esc']] },
 
+  { id: 'paper', name: 'Space Paper', genre: 'action', hue: 45, t: 1, mouse: 0,
+    tag: 'A paperboy on a hoverboard in a floating space suburb: smash windows, dodge hover-cars and space-dogs, beat the weekly boss.',
+    keys: [['Steer', 'Arrows / WASD / stick'], ['Throw L / R', 'Z X / LB RB'], ['Hop', 'Space / A'], ['Auto-throw', 'C / Y']] },
+
   // ---- PUZZLE & MAZE ------------------------------------------------------
   { id: 'pac', name: 'Space Pac', genre: 'puzzle', hue: 55, t: 1, mouse: 0,
     tag: 'Gobble every star-dust pellet while four drones hunt you, each in its own way.',
