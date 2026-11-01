@@ -160,7 +160,8 @@
     const m = h.mailbox, x = m.x, z = m.z, bob = m.hit ? Math.round(Math.sin(time * 40)) * 0.8 : 0;
     if (SP('mailbox')) {
       const hy = 11 + Math.sin(time * 2 + z) * 1.5, mh = SP('mailbox_head') || SP('mailbox');
-      const top = hover(x, z, hy, 7, time, false); g.pr(x, z, 0); px.spr(mh, g.X, top + 2 + bob, false, h.sub && !h.cancelled ? 1 : 0.62);
+      if (SP('hmail')) { g.pr(x, z, 0); px.darkEll(g.X, g.Y, 7, 3, 0.66); g.pr(x, z, hy - 6); px.blendEll(g.X, g.Y, 6, 3, hsl(185, 100, 70), 0.3 + 0.12 * Math.sin(time * 8 + z)); px.spr(SP('hmail'), g.X, g.Y + 2 + bob, false, h.sub && !h.cancelled ? 1 : 0.62); }
+      else { const top = hover(x, z, hy, 7, time, false); g.pr(x, z, 0); px.spr(mh, g.X, top + 2 + bob, false, h.sub && !h.cancelled ? 1 : 0.62); }
       if (h.sub && !h.delivered && !h.cancelled) { g.pr(x, z, 36 + Math.round(Math.sin(time * 5) * 2)); px.poly([g.X - 3, g.Y - 3, g.X + 3, g.Y - 3, g.X, g.Y + 2], hsl(50, 95, 62)); px.outline([g.X - 3, g.Y - 3, g.X + 3, g.Y - 3, g.X, g.Y + 2], OUT); }
       if (m.flag) { g.pr(x + 4, z, 28 + hy - 11); px.rect(g.X, g.Y - 4, 4, 3, hsl(0, 85, 54)); px.rect(g.X - 1, g.Y - 4, 1, 6, OUT); }
       return;
@@ -312,6 +313,8 @@
     const ds = { tree: SP('tree_' + 'abc'[o.kind || 0]), gnome: SP('gnome'), trash: SP('trash'), hydrant: SP('hydrant'), cone: SP('cone'), ramp: SP('ramp') }[o.t];
     if (ds) {
       const hy = (o.t === 'tree' ? 7 : 5) + Math.sin(time * 1.8 + o.z) * 1.4;
+      const hs = o.t === 'tree' ? SP('hplant_' + 'abc'[o.kind || 0]) : o.t === 'trash' ? SP('htrash') : null;
+      if (hs) { g.pr(o.x, o.z, 0); px.darkEll(g.X, g.Y, o.t === 'tree' ? 10 : 6, o.t === 'tree' ? 4.5 : 3, 0.66); g.pr(o.x, o.z, hy - 4); px.blendEll(g.X, g.Y, 7, 3, hsl(185, 100, 70), 0.28 + 0.1 * Math.sin(time * 8 + o.z)); px.spr(hs, g.X, g.Y + 2); return; }
       if (o.t === 'tree') { g.pr(o.x, o.z, hy); const cx = g.X; g.shadow(o.x + 9, o.z - 6, 11, 0.72); const top = hover(o.x, o.z, hy, 8, time, true, 1); px.spr(ds, cx, top + 5); hover(o.x, o.z, hy, 8, time, true, 2); return; }
       if (o.t === 'trash') { const top = hover(o.x, o.z, hy, 6, time, false); g.pr(o.x, o.z, 0); px.spr(ds, g.X, top + 1); return; }
       if (o.t === 'ramp') g.shadow(o.x, o.z, 12, 0.62); else g.shadow(o.x + 1, o.z - 1, 4, 0.62);

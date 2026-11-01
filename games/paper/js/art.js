@@ -3,15 +3,15 @@
 (function (G) {
   'use strict';
   const A = { boss: {}, spr: {}, tex: {}, ready: false };
-  const SPR = ['rider', 'car_away', 'car_toward', 'car_side', 'tree_a', 'tree_b', 'tree_c', 'mailbox', 'trash', 'cone', 'gnome', 'hydrant', 'bundle', 'ufo', 'skater', 'ramp', 'boss_rex', 'boss_gorp', 'boss_mower'];
+  const SPR = ['rider', 'car_away', 'car_toward', 'car_side', 'tree_a', 'tree_b', 'tree_c', 'mailbox', 'trash', 'cone', 'gnome', 'hydrant', 'bundle', 'ufo', 'skater', 'ramp', 'boss_rex', 'boss_gorp', 'boss_mower', 'hmail', 'htrash', 'hplant_a', 'hplant_b', 'hplant_c'];
   const TEX = ['grass', 'walk', 'road', 'siding', 'brick', 'roof', 'stone'];
   const CAR_HUES = [0, 20, 45, 120, 180, 210, 270, 320];
   const img = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
   A.load = function () {
     const names = { rex: 'boss1', gorp: 'boss2', mower: 'boss3' };
     const jobs = Object.keys(names).map((k) => img('assets/' + names[k] + '.webp?v=2').then((im) => { if (im) A.boss[k] = im; }));
-    for (const n of SPR) jobs.push(img('assets/spr/' + n + '.png?v=5').then((im) => { if (im) A.spr[n] = G.px.bitmap(im); }));
-    for (const n of TEX) jobs.push(img('assets/tex/' + n + '.png?v=5').then((im) => { if (im) A.tex[n] = G.px.bitmap(im); }));
+    for (const n of SPR) jobs.push(img('assets/spr/' + n + '.png?v=6').then((im) => { if (im) A.spr[n] = G.px.bitmap(im); }));
+    for (const n of TEX) jobs.push(img('assets/tex/' + n + '.png?v=6').then((im) => { if (im) A.tex[n] = G.px.bitmap(im); }));
     return Promise.all(jobs).then(() => {
       const mb = A.spr.mailbox; if (mb) { const hh = Math.round(mb.h * 0.56); A.spr.mailbox_head = { w: mb.w, h: hh, data: mb.data.slice(0, mb.w * hh) }; }
       A.cars = {};
