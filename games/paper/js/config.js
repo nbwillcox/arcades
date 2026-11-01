@@ -7,8 +7,8 @@
     WALL: 158,           /* |x| of the street-facing house wall */
     CURB: 58,            /* |x| where the street ends */
     SIDEW: 86,           /* |x| where the sidewalk ends and lawn begins */
-    EDGE: 232,           /* -x platform edge (house side) */
-    EDGE_R: 140,         /* +x platform edge (no houses on this side) */
+    EDGE: 560,           /* -x platform edge (house side) */
+    EDGE_R: 420,         /* +x platform edge (no houses on this side) */
     RIDE_R: 112,
     RIDE_MAX: 148,       /* furthest the rider can go sideways */
     CRUISE: 62, FAST: 108, SLOW: 30, SUPER: 175,

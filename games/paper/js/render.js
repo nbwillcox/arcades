@@ -16,11 +16,11 @@
     const R = Game.route; if (!R) return;
     const cam = Game.cam;
     cam.z += ((P.z + 34) - cam.z) * Math.min(1, 0.25);
-    cam.x += ((P.x * 0.2 - 55) - cam.x) * 0.12;
+    cam.x += ((P.x * 0.2 - 45) - cam.x) * 0.12;
     g.camX = cam.x; g.camZ = cam.z;
     const sk = Game.fx.shake * (S.shake && !S.reduced ? 0.5 : 0);
     g.shx = sk ? Math.round((Math.random() - 0.5) * sk) : 0; g.shy = sk ? Math.round((Math.random() - 0.5) * sk) : 0;
-    const zA = cam.z - 120, zB = cam.z + 400;
+    const zA = cam.z - 110, zB = cam.z + 360;
     g.backdrop(t);
     g.ground(R, zA, zB, t);
     for (const h of R.houses) { if (h.z1 < zA) continue; if (h.z0 > zB) break; Sp.houseGround(h, t); }
