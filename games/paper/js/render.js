@@ -130,10 +130,10 @@
       px.text(tip, 340, 160, 1, px.hsl(255, 40, 80), 'center', OUT); hint('PRESS ANY KEY');
     } else if (ph === 'routeend' || ph === 'courseend' || ph === 'bossend' || ph === 'weekend') {
       px.dim(0.4); const T = Game.tally; if (!T) return;
-      const k = Math.min(1, Game.t / 0.3), h = Math.round(196 * k); panel(cx - 130, 135 - h / 2, 260, h);
+      const k = Math.min(1, Game.t / 0.3), h = Math.round(196 * k); panel(cx - 165, 135 - h / 2, 330, h);
       if (k < 1) return;
       px.text(T.title, cx, 50, 2, px.hsl(50, 95, 66), 'center', OUT);
-      T.lines.forEach((l, i) => { if (Game.t < 0.35 + i * 0.18) return; px.text(l[0], cx - 120, 76 + i * 16, 1, px.hsl(255, 40, 76), 'left', null); px.text(l[1], cx + 120, 76 + i * 16, 1, WHITE, 'right', null); });
+      T.lines.forEach((l, i) => { if (Game.t < 0.35 + i * 0.18) return; px.text(l[0], cx - 155, 76 + i * 16, 1, px.hsl(255, 40, 76), 'left', null); px.text(l[1], cx + 155, 76 + i * 16, 1, WHITE, 'right', null); });
       if (Game.t > 1.5) px.text('BONUS +' + U.fmt(T.bonus), cx, 190, 2, px.hsl(140, 80, 66), 'center', OUT);
       if (Game.t > 1.2) hint('PRESS ANY KEY');
     } else if (ph === 'dead') { px.dim(1 - Math.min(0.6, Game.t * 0.5)); px.text('ROUTE OVER', cx, 120, 4, px.hsl(0, 90, 66), 'center', OUT); }
