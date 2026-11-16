@@ -296,6 +296,7 @@
       case 'select': sfx('menu_back'); return show('title');
       case 'shop': sfx('menu_back'); return shopDone();
       case 'settings': sfx('menu_back'); if (stack.length > 1) return pop(); return show('title');
+      case 'loadout': sfx('menu_back'); if (stack.length > 1) return pop(); return show('select');
       case 'pause': pendingResume = { now: true }; return doResume();
       case 'results': return resultsContinue();
       case 'howto': case 'credits': sfx('menu_back'); return show('title');
