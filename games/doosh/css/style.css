@@ -1,0 +1,38 @@
+/* Stick Doosh - base layout (core). Screens/menus are styled in ui.css (UI agent). */
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  background: #141018; color: #fff; overflow: hidden;
+  touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+  font-family: 'Bangers', Impact, 'Arial Black', sans-serif;
+}
+body { height: 100dvh; }
+canvas#game {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: block; background: #141018; touch-action: none; outline: none;
+  image-rendering: auto;
+}
+/* aim: the comic crosshair replaces the system cursor while playing with mouse aim (menus keep the normal cursor) */
+body.sd-nocursor, body.sd-nocursor canvas#game { cursor: none; }
+#ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+#ui > * { pointer-events: auto; }
+[hidden] { display: none !important; }
+#toast {
+  position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top)); transform: translateX(-50%) rotate(-2deg);
+  z-index: 50; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background: #ffe14d; color: #141018; border: 4px solid #141018; box-shadow: 5px 5px 0 #141018;
+  padding: 6px 16px; font-size: 22px; letter-spacing: 1px; white-space: nowrap;
+}
+#toast.show { opacity: 1; }
+#rotate {
+  display: none; position: fixed; inset: 0; z-index: 100; background: #ffe14d; color: #141018;
+  align-items: center; justify-content: center; text-align: center; font-size: 34px; padding: 20px;
+}
+#rotate span { font-size: 20px; }
+@media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+#loading {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 40px; color: #ffe14d; z-index: 90; background: #141018; letter-spacing: 2px;
+  text-shadow: 3px 3px 0 #e8173a;
+}
+#loading.gone { display: none; }

@@ -71,6 +71,10 @@ window.ARCADE_GAMES = [
     tag: 'A paperboy on a hoverboard in a floating space suburb: deliver, smash windows, dodge hover-cars, beat the weekly boss.',
     keys: [['Steer', 'Arrows / WASD / stick'], ['Throw L / R', 'Z X / LB RB'], ['Hop', 'Space / A'], ['Auto-throw', 'C / Y']] },
 
+  { id: 'doosh', name: 'Stick Doosh', genre: 'action', hue: 12, t: 1, mouse: 1,
+    tag: 'Silly comic-book stick-figure run-and-gun: five goofy dudes, 12 themed levels, wild bosses, mouth-sound guns and a gold shop.',
+    keys: [['Move / Jump', 'WASD / stick, Space / A'], ['Aim + Fire', 'Mouse / right stick'], ['Special', 'Right click / B'], ['Cycle', 'Q / LB RB']] },
+
   // ---- PUZZLE & MAZE ------------------------------------------------------
   { id: 'pac', name: 'Space Pac', genre: 'puzzle', hue: 55, t: 1, mouse: 0,
     tag: 'Gobble every star-dust pellet while four drones hunt you, each in its own way.',
