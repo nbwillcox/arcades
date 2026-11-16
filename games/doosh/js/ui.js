@@ -261,6 +261,9 @@
     stack.push(name);
     if (wasEmpty) padLatch = true; // ignore pad buttons still held from gameplay
     render(name, opts);
+    if ((name === 'title' || name === 'loadout') && window.SD_BUILD) { // build stamp so we can tell which version a player is running
+      const n = node(name); let bs = n.querySelector('.sd-build'); if (!bs) { bs = el('div', 'sd-build'); n.appendChild(bs); } bs.textContent = 'build ' + window.SD_BUILD;
+    }
     showEl(name);
     if (name !== 'vs') focusFirst(name);
     if (name === 'title') music('title');

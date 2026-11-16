@@ -497,3 +497,5 @@ body.sd-ui #title, body.sd-ui #select, body.sd-ui #vs, body.sd-ui #shop, body.sd
 .sd-lo-sup.on { background: #7dff7a; outline: 4px solid #fff; }
 .sd-lo-sup.locked { filter: grayscale(1); opacity: .55; }
 .sd-lo-slot b, .sd-lo-slot small, .sd-lo-sup b, .sd-lo-sup small, .sd-lo-sup i { display: block; }
+
+.sd-build { position: absolute; right: 10px; bottom: 6px; font-size: 11px; opacity: .65; color: #fff; text-shadow: 0 1px 0 #141018; pointer-events: none; }
