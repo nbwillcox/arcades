@@ -122,8 +122,14 @@
         kind: 'pickup', id, x, y, w: 18, h: 18, vx: pop ? U.rand(-40, 40) : 0, vy: pop ? -260 : 0, baseY: y, life: 25,
         update(dt) {
           this.t += dt; this.life -= dt; if (this.life <= 0) { this.dead = true; return; }
-          if (pop && this.t < 0.5) { S.Phys && S.Phys.move(this, dt); this.baseY = this.y; if (this.t >= 0.45) { this.vx = 0; this.vy = 0; } }
-          else this.y = this.baseY + Math.sin(this.t * 3) * 3;
+          // power-ups must come down to player ground level (bug fix: they used to freeze in mid-air)
+          if (!this.landed) {
+            if (!pop && !this._snap) { this._snap = true; const g = S.Terrain && S.Terrain.groundBelow ? S.Terrain.groundBelow(this.x, this.y, 1400) : null; if (g != null) { this.y = g; this.baseY = g; this.landed = true; } }
+            if (!this.landed) {
+              this.vx *= Math.pow(0.02, dt); S.Phys && S.Phys.move(this, dt);
+              if (this.onGround || this.t > 4) { this.landed = true; this.vx = 0; this.vy = 0; this.baseY = this.y; }
+            }
+          } else this.y = this.baseY - (1 + Math.sin(this.t * 3)) * 1.5;
           const p = player();
           if (p && U.overlap(this, p, 4)) {
             this.dead = true;
