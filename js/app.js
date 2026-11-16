@@ -4,6 +4,7 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const GAMES = window.ARCADE_GAMES, GENRES = window.ARCADE_GENRES;
+  GAMES.sort((x, y) => x.name.localeCompare(y.name, 'en', { sensitivity: 'base' })); // default order: alphabetical
   const byId = Object.fromEntries(GAMES.map((g) => [g.id, g]));
   const GENRE_NAME = { shoot: 'Shooter', action: 'Action', puzzle: 'Puzzle & Maze', race: 'Racing & Driving' };
 
