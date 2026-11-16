@@ -74,7 +74,16 @@
         panel(ctx, pad, sy - 9, 18, 18, cur.color || (cur.super ? '#c77dff' : '#ffb81c'), -0.05);
         text(ctx, String(cur.icon || '*').slice(0, 1), pad + 9, sy + 1, 13, '#ffffff', 'center');
         text(ctx, cur.name + '  x' + n, pad + 24, sy, 13, n > 0 ? '#ffffff' : '#9a96b0');
-        if (sel.length > 1) text(ctx, '[' + (S.Input && S.Input.keyName((S.Save.settings.input.keys.cycle || [])[0])) + '] SWITCH', pad + 24, sy + 14, 10, '#ffe14d');
+        if (sel.length > 1) {
+          text(ctx, '[' + (S.Input && S.Input.keyName((S.Save.settings.input.keys.cycle || [])[0])) + '] SWITCH   1-' + sel.length + ' PICK', pad + 24, sy + 14, 10, '#ffe14d');
+          const si = p.selected % sel.length;   // loadout slot chips: 1 = dude special, 2.. = equipped supers
+          for (let i = 0; i < sel.length; i++) {
+            const cx = pad + i * 25, cy = sy + 26;
+            panel(ctx, cx, cy, 21, 21, sel[i].color || (sel[i].super ? '#c77dff' : '#ffb81c'), 0);
+            text(ctx, String(i + 1), cx + 10.5, cy + 11, 12, '#141018', 'center');
+            if (i === si) { ctx.save(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.strokeRect(cx - 3, cy - 3, 27, 27); ctx.restore(); }
+          }
+        }
       }
       // ---- gold + time (top right) ----
       const gx = W - pad - 4 - (mob ? 54 : 0);

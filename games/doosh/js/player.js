@@ -424,13 +424,35 @@
       const sp = S.Specials && S.Specials[d.special];
       if (sp) out.push({ id: d.special, name: sp.name, def: sp, super: false, icon: sp.icon || '*' });
       if (S.Supers && S.Save) {
-        for (const id in S.Supers) {
+        // LOADOUT: only equipped supers (Save.data.loadout, max 3) are in the cycle; no saved loadout yet = first 3 unlocked
+        for (const id of Player.equipped()) {
           const sd = S.Supers[id];
-          if (sd && typeof sd.use === 'function' && S.Save.data.beaten[sd.themeId || id]) out.push({ id, name: sd.name || id, def: sd, super: true, icon: sd.icon || '*', color: sd.color });
+          out.push({ id, name: sd.name || id, def: sd, super: true, icon: sd.icon || '*', color: sd.color });
         }
       }
       return out;
     },
+    SLOTS: 3,
+    owned() { // unlocked super ids (boss beaten), in catalogue order
+      const out = [];
+      if (S.Supers && S.Save) for (const id in S.Supers) { const sd = S.Supers[id]; if (sd && typeof sd.use === 'function' && S.Save.data.beaten[sd.themeId || id]) out.push(id); }
+      return out;
+    },
+    equipped() {
+      const own = Player.owned(); let lo = S.Save && S.Save.data.loadout;
+      if (!Array.isArray(lo)) return own.slice(0, Player.SLOTS);
+      return lo.filter((id, i) => own.indexOf(id) >= 0 && lo.indexOf(id) === i).slice(0, Player.SLOTS);
+    },
   };
   Player.PICK2GUN = PICK2GUN;
+  // number keys 1-4 pick a special/super slot directly (slot 1 = the dude's own special)
+  if (typeof window !== 'undefined' && window.addEventListener && !window.__sdSlotKeys) {
+    window.__sdSlotKeys = 1;
+    window.addEventListener('keydown', (e) => {
+      const m = /^(?:Digit|Numpad)([1-4])$/.exec(e.code || ''); if (!m) return;
+      const G = S.Game, p = G && G.player; if (!p || p.dead || (S.UI && S.UI.isOpen && S.UI.isOpen())) return;
+      const list = Player.selectables(), k = +m[1] - 1; if (k >= list.length) return;
+      p.selected = k; word(list[k].name + '!', p.x, p.y - 54, { size: 16, color: '#ffffff' }); sfx('menu_move', { vol: 0.5 });
+    });
+  }
 })();

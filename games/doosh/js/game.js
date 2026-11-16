@@ -307,6 +307,7 @@
         firstClear = !save.beaten[id]; save.beaten[id] = true;
         if (!save.best[id] || time < save.best[id]) { save.best[id] = Math.round(time * 10) / 10; newBest = true; }
         if (firstClear && S.Supers) for (const k in S.Supers) { const sd = S.Supers[k]; if (sd && (sd.themeId || k) === id) newSuper = k; }
+        if (newSuper && Array.isArray(save.loadout) && save.loadout.length < 3 && save.loadout.indexOf(newSuper) < 0) save.loadout.push(newSuper); // auto-equip into a free slot
       } else kept = Math.floor(earned * 0.5);
       save.gold += kept; save.stats.gold += kept; save.stats.rescues += G.rescues;
       S.Save.save(true);

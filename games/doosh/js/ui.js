@@ -58,7 +58,7 @@
   const SOLD = ['KA-CHING!', 'SOLD!', 'DOOSHED IT!', 'CHA-CHING!', 'BOUGHT IT!'];
   const KONAMI = ['u', 'u', 'd', 'd', 'l', 'r', 'l', 'r', 'b', 'a'];
   const IDS = { title: 'title', select: 'select', vs: 'vs', shop: 'shop', settings: 'settings', pause: 'pause', results: 'results',
-    howto: 'howto', credits: 'credits', confirm: 'sd-confirm', capture: 'sd-capture' };
+    howto: 'howto', credits: 'credits', loadout: 'loadout', confirm: 'sd-confirm', capture: 'sd-capture' };
   const BASE = ['title', 'select', 'vs', 'shop', 'results', 'howto', 'credits'];
   const MODAL = ['confirm', 'capture']; // drawn on top of the screen below (which stays visible)
 
@@ -315,6 +315,7 @@
       case 'results': return opts.restore ? null : renderResults(opts);
       case 'howto': return renderHowto();
       case 'credits': return renderCredits();
+      case 'loadout': return renderLoadout();
       case 'confirm': return renderConfirm(opts);
       case 'capture': return renderCapture(opts);
       default: return null;
@@ -457,6 +458,7 @@
     header(root, 'SELECT YOUR VICTIM', back, '< TITLE', [
       bc, goldChip(),
       btn('SHOP', 'small', () => { sfx('menu_ok'); show('shop', { from: 'select' }); }, 'shop'),
+      btn('LOADOUT', 'small', () => { sfx('menu_ok'); show('loadout'); }, 'loadout'),
       btn('SETTINGS', 'small', () => { sfx('menu_ok'); show('settings'); }, 'settings')
     ]);
     const grid = el('div', 'sd-grid');
@@ -938,6 +940,7 @@
     const r = btn('RESUME', 'primary', () => { pendingResume = { now: true }; doResume(); }, 'resume'); r.setAttribute('data-autofocus', '');
     box.append(r,
       btn('RESTART LEVEL', '', () => confirmBox('RESTART?', 'Start this level over from the top.', 'RESTART', 'NO', () => restartLevel()), 'restart'),
+      btn('SUPER LOADOUT', '', () => { sfx('menu_ok'); show('loadout'); }, 'loadout'),
       btn('SETTINGS', '', () => { sfx('menu_ok'); show('settings'); }, 'settings'),
       btn('QUIT TO LEVEL SELECT', '', () => confirmBox('BAIL OUT?', 'Leave this level and head back to the map.', 'QUIT', 'STAY', () => quitLevel()), 'quit'));
     box.appendChild(el('p', null, 'Esc / P / Start to resume'));
@@ -1077,6 +1080,45 @@
     }
     box.appendChild(g); root.appendChild(box);
   }
+  // ------------------------------------------------------------------ super loadout (carry up to 3 boss supers)
+  function equipList() { return (S.Player && S.Player.equipped) ? S.Player.equipped() : []; }
+  function setLoadout(arr) { D().loadout = arr.slice(0, 3); save(); }
+  function renderLoadout() {
+    const root = node('loadout');
+    root.className = 'sd-screen sd-halftone-blue sd-loadout';
+    root.innerHTML = '';
+    header(root, 'SUPER LOADOUT', back, '< BACK');
+    const eq = equipList();
+    root.appendChild(el('p', 'sd-lo-help', 'Carry up to 3 boss supers into a level. In the game: [Q] / LB-RB / mouse wheel cycles, or press 1-4 to pick one directly (slot 1 is your own dude special).'));
+    const slots = el('div', 'sd-lo-slots');
+    for (let i = 0; i < 3; i++) {
+      const id = eq[i], lab = el('span');
+      lab.innerHTML = id ? '<b>' + esc(superName(id)) + '</b><small>tap to remove</small>' : '<b>EMPTY SLOT</b><small>pick a super below</small>';
+      slots.appendChild(btn(lab, 'sd-lo-slot' + (id ? ' full' : ''), () => {
+        if (!id) { toast('Pick an unlocked super below', {}); return; }
+        setLoadout(eq.filter(x => x !== id)); sfx('menu_back'); renderLoadout(); refocus('slot' + i);
+      }, 'slot' + i));
+    }
+    root.appendChild(slots);
+    const grid = el('div', 'sd-lo-grid');
+    Object.keys(SUPERS).filter(id => SUPERS[id][1]).forEach(id => {
+      const th = SUPERS[id][1], inf = info(th), own = superOwned(id), on = eq.indexOf(id) >= 0;
+      const lab = el('span');
+      lab.innerHTML = '<b>' + esc(superName(id)) + '</b><small>' + (own ? (on ? 'EQUIPPED - tap to remove' : 'tap to equip') : 'LOCKED - beat ' + esc(inf.boss)) + '</small><i>from ' + esc(inf.boss) + '</i>';
+      const b = btn(lab, 'sd-lo-sup' + (own ? '' : ' locked') + (on ? ' on' : ''), () => {
+        if (!own) { toast('Beat ' + inf.boss + ' to unlock ' + superName(id), {}); sfx('nope'); return; }
+        if (on) setLoadout(eq.filter(x => x !== id));
+        else if (eq.length >= 3) { toast('Slots full - tap a slot above to remove one', {}); sfx('nope'); return; }
+        else setLoadout(eq.concat([id]));
+        sfx(on ? 'menu_back' : 'menu_ok'); renderLoadout(); refocus(id);
+      }, id);
+      b.style.setProperty('--c', inf.c);
+      grid.appendChild(b);
+    });
+    root.appendChild(grid);
+  }
+  function refocus(k) { const e = node('loadout').querySelector('[data-k="' + k + '"]'); if (e) focusEl(e); }
+
   function renderCredits() {
     const root = node('credits');
     root.className = 'sd-screen sd-halftone-blue sd-credits';
