@@ -224,6 +224,14 @@
         if (layer !== 'front' && c.cvB) ctx.drawImage(c.cvB, cx * CW, cy * CW, CW, CW);
         if (layer !== 'back' && !c.empty && c.cv) ctx.drawImage(c.cv, cx * CW, cy * CW, CW, CW);
       }
+      if (layer !== 'front') { // optimisation: pre-bake the ring just outside the view (2/frame) so scrolling never hitches
+        let pb = 2; const mx = Math.ceil(W / CH) - 1, my = Math.ceil(H / CH) - 1;
+        for (let cy = cy0 - 1; cy <= cy1 + 1 && pb > 0; cy++) for (let cx = cx0 - 1; cx <= cx1 + 1 && pb > 0; cx++) {
+          if (cx < 0 || cy < 0 || cx > mx || cy > my || (cx >= cx0 && cx <= cx1 && cy >= cy0 && cy <= cy1)) continue;
+          const k = cx + ',' + cy; if (chunks.has(k)) continue;
+          const c = { cv: null, cvB: null, dirty: true, used: frameNo, cx, cy, empty: false }; chunks.set(k, c); buildChunk(c); pb--;
+        }
+      }
       if (layer !== 'back' && chunks.size > C.CHUNK_CACHE) evict();
     },
     chunkCount() { return chunks.size; },

@@ -470,7 +470,10 @@
   V.update = function (dt) {
     const A = S.Audio;
     if (!A || !A.ready()) return;
-    if (V._autoPre) { V._autoPre = false; V.preload(['announcer', 'goon'].concat(HEROES)); }
+    if (V._autoPre) { V._autoPre = false; V.preload(['announcer', 'goon']); }
+    // optimisation: only the dude currently being played is preloaded (others load when they swap in)
+    const pid = S.Game && S.Game.player && S.Game.player.id;
+    if (pid && pid !== V._lastDude && LINES[pid]) { V._lastDude = pid; V.preload([pid]); }
     if (!V._preQ.length) return;
     V._preAcc = (V._preAcc || 0) + (dt || 0.016);
     if (V._preAcc < 0.12) return;

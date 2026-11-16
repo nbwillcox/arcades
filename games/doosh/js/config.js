@@ -28,7 +28,7 @@
     WORDS_DESK: 40,
     WORDS_MOBILE: 20,
     CHUNK: 8,           // tiles per terrain chunk side
-    CHUNK_CACHE: 56,    // max cached chunk canvases
+    CHUNK_CACHE: 90,    // max cached chunk canvases
     ACTIVE_X: 520,      // enemies update within camera +- this
     ACTIVE_Y: 360,
     INK: '#141018',
