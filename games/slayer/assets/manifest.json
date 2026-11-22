@@ -103,7 +103,159 @@
     "tile_7": "assets/sprites/tile_7.png",
     "tile_8": "assets/sprites/tile_8.png",
     "tile_9": "assets/sprites/tile_9.png",
-    "title_bg": "assets/sprites/title_bg.png"
+    "title_bg": "assets/sprites/title_bg.png",
+    "icon_slug": {
+      "file": "assets/sprites/icon_slug.png",
+      "scale": 1
+    },
+    "icon_drone": {
+      "file": "assets/sprites/icon_drone.png",
+      "scale": 1
+    },
+    "icon_bolt": {
+      "file": "assets/sprites/icon_bolt.png",
+      "scale": 1
+    },
+    "icon_grenade": {
+      "file": "assets/sprites/icon_grenade.png",
+      "scale": 1
+    },
+    "icon_tesla": {
+      "file": "assets/sprites/icon_tesla.png",
+      "scale": 1
+    },
+    "icon_nova": {
+      "file": "assets/sprites/icon_nova.png",
+      "scale": 1
+    },
+    "icon_orbital": {
+      "file": "assets/sprites/icon_orbital.png",
+      "scale": 1
+    },
+    "icon_nanite": {
+      "file": "assets/sprites/icon_nanite.png",
+      "scale": 1
+    },
+    "icon_saw": {
+      "file": "assets/sprites/icon_saw.png",
+      "scale": 1
+    },
+    "icon_turret": {
+      "file": "assets/sprites/icon_turret.png",
+      "scale": 1
+    },
+    "icon_stim": {
+      "file": "assets/sprites/icon_stim.png",
+      "scale": 1
+    },
+    "icon_gunship": {
+      "file": "assets/sprites/icon_gunship.png",
+      "scale": 1
+    },
+    "icon_dronebay": {
+      "file": "assets/sprites/icon_dronebay.png",
+      "scale": 1
+    },
+    "icon_emp": {
+      "file": "assets/sprites/icon_emp.png",
+      "scale": 1
+    },
+    "icon_fabricator": {
+      "file": "assets/sprites/icon_fabricator.png",
+      "scale": 1
+    },
+    "icon_sanctum": {
+      "file": "assets/sprites/icon_sanctum.png",
+      "scale": 1
+    },
+    "icon_litany": {
+      "file": "assets/sprites/icon_litany.png",
+      "scale": 1
+    },
+    "icon_wings": {
+      "file": "assets/sprites/icon_wings.png",
+      "scale": 1
+    },
+    "icon_vanguard_gunner": {
+      "file": "assets/sprites/icon_vanguard_gunner.png",
+      "scale": 1
+    },
+    "icon_vanguard_engineer": {
+      "file": "assets/sprites/icon_vanguard_engineer.png",
+      "scale": 1
+    },
+    "icon_vanguard_priest": {
+      "file": "assets/sprites/icon_vanguard_priest.png",
+      "scale": 1
+    },
+    "icon_sniper_gunner": {
+      "file": "assets/sprites/icon_sniper_gunner.png",
+      "scale": 1
+    },
+    "icon_sniper_engineer": {
+      "file": "assets/sprites/icon_sniper_engineer.png",
+      "scale": 1
+    },
+    "icon_sniper_priest": {
+      "file": "assets/sprites/icon_sniper_priest.png",
+      "scale": 1
+    },
+    "icon_aegis_gunner": {
+      "file": "assets/sprites/icon_aegis_gunner.png",
+      "scale": 1
+    },
+    "icon_aegis_engineer": {
+      "file": "assets/sprites/icon_aegis_engineer.png",
+      "scale": 1
+    },
+    "icon_aegis_priest": {
+      "file": "assets/sprites/icon_aegis_priest.png",
+      "scale": 1
+    },
+    "icon_detonator_gunner": {
+      "file": "assets/sprites/icon_detonator_gunner.png",
+      "scale": 1
+    },
+    "icon_detonator_engineer": {
+      "file": "assets/sprites/icon_detonator_engineer.png",
+      "scale": 1
+    },
+    "icon_detonator_priest": {
+      "file": "assets/sprites/icon_detonator_priest.png",
+      "scale": 1
+    },
+    "icon_fusion_gunner": {
+      "file": "assets/sprites/icon_fusion_gunner.png",
+      "scale": 1
+    },
+    "icon_fusion_engineer": {
+      "file": "assets/sprites/icon_fusion_engineer.png",
+      "scale": 1
+    },
+    "icon_fusion_priest": {
+      "file": "assets/sprites/icon_fusion_priest.png",
+      "scale": 1
+    },
+    "icon_plating": {
+      "file": "assets/sprites/icon_plating.png",
+      "scale": 1
+    },
+    "icon_regen": {
+      "file": "assets/sprites/icon_regen.png",
+      "scale": 1
+    },
+    "icon_deflector": {
+      "file": "assets/sprites/icon_deflector.png",
+      "scale": 1
+    },
+    "icon_thrusters": {
+      "file": "assets/sprites/icon_thrusters.png",
+      "scale": 1
+    },
+    "icon_graviton": {
+      "file": "assets/sprites/icon_graviton.png",
+      "scale": 1
+    }
   },
   "audio": {
     "music_menu": "assets/audio/music_menu.mp3",

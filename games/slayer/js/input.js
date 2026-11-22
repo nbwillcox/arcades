@@ -1,13 +1,13 @@
 /* input: rebindable keyboard, mouse/touch (virtual-resolution coords), gamepad with rebindable buttons, floating/fixed touch stick, haptics */
 (function () {
   var W = CS.W, H = CS.H;
-  var In = CS.In = { keys: {}, held: {}, p: {}, mx: -1, my: -1, taps: [], joy: { on: false, id: -1, ox: 0, oy: 0, x: 0, y: 0 }, joyEnabled: false, pad: null, padPrev: [], lastDev: 'kb', canvas: null, listen: null, map: {}, noJoy: null,
+  var In = CS.In = { keys: {}, held: {}, p: {}, mx: -1, my: -1, taps: [], joy: { on: false, id: -1, ox: 0, oy: 0, x: 0, y: 0 }, joyEnabled: false, pad: null, padPrev: [], lastDev: 'kb', canvas: null, listen: null, map: {}, noJoy: [],
     touch: ('ontouchstart' in window) || (navigator.maxTouchPoints > 0), fixedBase: { x: 120, y: H - 120 } };
 
   /* ---------- bindings ---------- */
-  In.ACTIONS = [['up', 'MOVE UP'], ['down', 'MOVE DOWN'], ['left', 'MOVE LEFT'], ['right', 'MOVE RIGHT'], ['confirm', 'CONFIRM'], ['back', 'BACK'], ['pause', 'PAUSE / MENU'], ['reroll', 'REROLL CARDS']];
-  In.DEF_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], confirm: ['Enter', 'Space'], back: ['Backspace', ''], pause: ['Escape', 'KeyP'], reroll: ['KeyR', ''] };
-  In.DEF_PAD = { confirm: 0, back: 1, pause: 9, reroll: 3 };
+  In.ACTIONS = [['up', 'MOVE UP'], ['down', 'MOVE DOWN'], ['left', 'MOVE LEFT'], ['right', 'MOVE RIGHT'], ['confirm', 'CONFIRM'], ['back', 'BACK'], ['pause', 'PAUSE / MENU'], ['reroll', 'REROLL CARDS'], ['dash', 'DASH']];
+  In.DEF_KEYS = { up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], confirm: ['Enter', 'Space'], back: ['Backspace', ''], pause: ['Escape', 'KeyP'], reroll: ['KeyR', ''], dash: ['ShiftLeft', 'Space'] };
+  In.DEF_PAD = { confirm: 0, back: 1, pause: 9, reroll: 3, dash: 2 };
   In.PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'SELECT', 'START', 'L3', 'R3', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'HOME'];
   In.keyName = function (c) {
     if (!c) return '-- NONE --'; if (c.indexOf('Key') === 0) return c.slice(3); if (c.indexOf('Digit') === 0) return c.slice(5); if (c.indexOf('Arrow') === 0) return c.slice(5).toUpperCase();
@@ -54,7 +54,7 @@
     canvas.addEventListener('pointerdown', function (e) {
       var q = pos(e); In.mx = q.x; In.my = q.y; In.lastDev = e.pointerType === 'mouse' ? 'mouse' : 'touch';
       try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
-      var nj = In.noJoy, inNo = nj && q.x >= nj.x && q.x < nj.x + nj.w && q.y >= nj.y && q.y < nj.y + nj.h, fixed = CS.save.d.set.stick === 'fixed';
+      var inNo = In.noJoy.some(function (nj) { return q.x >= nj.x && q.x < nj.x + nj.w && q.y >= nj.y && q.y < nj.y + nj.h; }), fixed = CS.save.d.set.stick === 'fixed';
       if (In.joyEnabled && e.pointerType !== 'mouse' && !In.joy.on && !inNo && (!fixed || q.x < W * 0.55)) {
         In.joy.on = true; In.joy.id = e.pointerId;
         if (fixed) { In.joy.ox = In.fixedBase.x; In.joy.oy = In.fixedBase.y; In.joy.x = q.x - In.joy.ox; In.joy.y = q.y - In.joy.oy; } else { In.joy.ox = q.x; In.joy.oy = q.y; In.joy.x = 0; In.joy.y = 0; }
@@ -74,9 +74,9 @@
     var b = g.buttons, prev = In.padPrev, any = false, pb = In.padb || In.DEF_PAD;
     function edge(idx) { return idx >= 0 && b[idx] && b[idx].pressed && !prev[idx]; }
     if (In.listen && In.listen.kind === 'pad') { for (i = 0; i < b.length; i++) if (edge(i)) { var f = In.listen.cb; In.listen = null; f(i); break; } for (i = 0; i < b.length; i++) prev[i] = b[i].pressed; return; }
-    if (edge(pb.confirm)) In.p.confirm = true; if (edge(pb.back)) In.p.back = true; if (edge(pb.pause)) In.p.pause = true; if (edge(pb.reroll)) In.p.reroll = true;
+    if (edge(pb.confirm)) In.p.confirm = true; if (edge(pb.back)) In.p.back = true; if (edge(pb.pause)) In.p.pause = true; if (edge(pb.reroll)) In.p.reroll = true; if (edge(pb.dash) || edge(5)) In.p.dash = true;
     if (edge(12)) In.p.up = true; if (edge(13)) In.p.down = true; if (edge(14)) In.p.left = true; if (edge(15)) In.p.right = true;
-    if (edge(4)) In.p.d1 = true; if (edge(5)) In.p.d3 = true;
+    if (edge(4)) In.p.d1 = true;
     var ax = g.axes[0] || 0, ay = g.axes[1] || 0, sx = Math.abs(ax) > 0.6 ? Math.sign(ax) : 0, sy = Math.abs(ay) > 0.6 ? Math.sign(ay) : 0;
     if (sx !== (prev.sx || 0) && sx) In.p[sx > 0 ? 'right' : 'left'] = true;
     if (sy !== (prev.sy || 0) && sy) In.p[sy > 0 ? 'down' : 'up'] = true;

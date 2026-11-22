@@ -103,6 +103,7 @@
     ui.bar(8, 26, 170, 12, p.hp / p.maxHp, p.hp < p.maxHp * 0.3 ? '#ff3b4a' : '#e8344e', '#2a0c14'); ui.text(Math.ceil(p.hp) + '/' + p.maxHp, 12, 29, '#fff', 1);
     ui.bar(8, 43, 170, 7, p.shieldMax > 0 ? p.shield / p.shieldMax : 0, '#48a8ff', '#0c1830'); if (p.shieldMax > 0) ui.text('SHIELD ' + Math.ceil(p.shield), 12, 52, '#9fd0ff', 1, 'left', true);
     if (p.holy > 0) ui.bar(8, 43, 170, 3, p.holy / (p.maxHp * 0.35), '#ffe44d', 'rgba(0,0,0,0)');
+    var dr = 1 - U.clamp(p.mdCd / p.mdMax, 0, 1); ui.bar(8, 55, 70, 4, dr, dr >= 1 ? '#9fefff' : '#4a6a88', '#0c1830'); ui.text(dr >= 1 ? 'DASH READY' : 'DASH', 82, 54, dr >= 1 ? '#9fefff' : '#5a6a88', 1, 'left', false);
     // top right: gold / kills / minions
     ui.text(U.num(p.gold) + ' G', W - 8, 14, '#ffd700', 2, 'right'); ui.text('KILLS ' + G.stats.kills, W - 8, 34, '#c9d6ff', 1, 'right'); ui.text('MINIONS ' + G.mn.n + '/' + CS.WP.minionCap(), W - 8, 46, '#ffb347', 1, 'right');
     // timer
@@ -120,6 +121,7 @@
     if (p.magnetT > 0) ui.text('MAGNET ' + Math.ceil(p.magnetT), W >> 1, 74, '#ff5a7a', 1, 'center');
     if (p.staticT > 0) ui.text('STATIC INTERFERENCE', W >> 1, 84, '#d48bff', 1, 'center');
     // pause icon for touch
+    if (In.touch || In.lastDev === 'touch') { var dcx = W - 56, dcy = H - 62, rdy = p.mdCd <= 0; ctx.fillStyle = rdy ? 'rgba(40,120,160,.55)' : 'rgba(10,14,28,.55)'; ctx.beginPath(); ctx.arc(dcx, dcy, 34, 0, 6.283); ctx.fill(); ctx.strokeStyle = rdy ? '#9fefff' : 'rgba(255,255,255,.3)'; ctx.lineWidth = 2; ctx.stroke(); ui.text('DASH', dcx, dcy - 3, '#fff', 1, 'center'); }
     if (In.touch || In.lastDev === 'touch') { ctx.fillStyle = 'rgba(10,14,28,.6)'; ctx.fillRect(W - 50, 58, 40, 40); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(W - 49.5, 58.5, 39, 39); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillRect(W - 39, 68, 6, 20); ctx.fillRect(W - 27, 68, 6, 20); if (CS.save.d.set.stick === 'fixed' && !In.joy.on) { ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(In.fixedBase.x, In.fixedBase.y, 45, 0, 6.283); ctx.stroke(); } }
     var j = In.joy; if (j.on) { ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(j.ox, j.oy, 45, 0, 6.283); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.4)'; var l = Math.min(45, Math.hypot(j.x, j.y)), an = Math.atan2(j.y, j.x); ctx.beginPath(); ctx.arc(j.ox + Math.cos(an) * l, j.oy + Math.sin(an) * l, 14, 0, 6.283); ctx.fill(); }
     if (CS.fx.flash > 0 && CS.save.d.set.flash !== false) { ctx.globalAlpha = Math.min(0.5, CS.fx.flash * 3); ctx.fillStyle = CS.fx.flashC; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }

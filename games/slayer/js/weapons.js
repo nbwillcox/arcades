@@ -374,6 +374,8 @@
     var p = G.p, lv = it.lv; it.t -= dt; if (it.t > 0) return; it.t = 0.4;
     var R = (70 + 6 * it.pw) * (lv >= 10 ? 1.6 : 1), l = G.nearList(p.x, p.y, R), i, e; it.r = R;
     for (i = 0; i < l.length; i++) { e = l[i]; if (e.dead) continue; if (lv >= 5) e.slow = 0.6; if (lv >= 10) { e.burn = 1.5; e.burnD = 6 * it.pw; } G.hit(e, 6 * sc(it), { src: 'sanctum', type: 'holy', purge: true, noCrit: true, quiet: true }); }
+    it.pulse = 1; for (i = 0; i < l.length; i++) { e = l[i]; if (e.dead) continue; for (var q = 0; q < 2; q++) fx.spark(e.x + U.rr(-5, 5), e.y + U.rr(-3, 5), U.rr(-15, 15), U.rr(-60, -25), 0.55, q ? '#ffe9a0' : '#ff8a2a', 2, -20); }
+    it.sf = (it.sf || 0) - 0.4; if (l.length && it.sf <= 0) { it.sf = 1.6; AU.sfx('nova', 0.35); }
     if (l.length && p.hp < p.maxHp) G.heal((0.25 + 0.08 * it.pw) * Math.min(3, l.length), true);
   };
   UP.litany = function (it, dt) {
@@ -394,6 +396,32 @@
   ['plating', 'regen', 'deflector', 'thrusters', 'graviton'].forEach(function (id) { UP[id] = function () { }; });
   WP.update = function (it, dt) { UP[it.id](it, dt); };
 
+  /* consecrated ground: ground glow, rotating rune rings, flickering holy flames, pulse on every burn tick */
+  WP.drawSanctum = function (ctx, cx, cy, it, p) {
+    var sr = it.r, X = Math.round(p.x - cx), Y = Math.round(p.y - cy), T = G.t, i, a, n, big = it.lv >= 10;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var gg = ctx.createRadialGradient(X, Y, sr * 0.1, X, Y, sr); gg.addColorStop(0, 'rgba(255,210,90,0.20)'); gg.addColorStop(0.75, 'rgba(255,120,30,0.13)'); gg.addColorStop(1, 'rgba(255,200,80,0)');
+    ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(X, Y, sr, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,214,120,0.75)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(X, Y, sr * 0.95, 0, 6.283); ctx.stroke();
+    ctx.beginPath(); ctx.arc(X, Y, sr * 0.62, 0, 6.283); ctx.globalAlpha = 0.4; ctx.stroke(); ctx.globalAlpha = 1;
+    // rune marks on two counter-rotating rings
+    for (i = 0; i < 24; i++) { a = i * 0.2618 + T * 0.5; ctx.fillStyle = i % 3 ? 'rgba(255,200,90,.8)' : 'rgba(255,255,255,.95)'; var rr = i % 3 ? 2 : 4; ctx.fillRect(Math.round(X + Math.cos(a) * sr * 0.95 - 1), Math.round(Y + Math.sin(a) * sr * 0.95 - rr / 2), 2, rr); }
+    for (i = 0; i < 12; i++) { a = -i * 0.5236 - T * 0.8; ctx.fillStyle = 'rgba(255,160,60,.7)'; ctx.fillRect(Math.round(X + Math.cos(a) * sr * 0.62 - 1), Math.round(Y + Math.sin(a) * sr * 0.62 - 1), 3, 3); }
+    // holy flames licking up around the rim and scattered inside
+    n = big ? 26 : 18;
+    for (i = 0; i < n; i++) { a = i * 6.283 / n + Math.sin(T * 0.7) * 0.1; flame(ctx, X + Math.cos(a) * sr * 0.88, Y + Math.sin(a) * sr * 0.88 + 3, (big ? 20 : 15) + 8 * Math.sin(T * 9 + i * 1.7) + 3 * Math.sin(T * 17 + i), i); }
+    var inner = big ? 14 : 9;
+    for (i = 0; i < inner; i++) { a = i * 2.399 + Math.sin(T * 0.3 + i) * 0.3; var d = sr * (0.2 + 0.55 * ((i * 0.618) % 1)); flame(ctx, X + Math.cos(a + T * 0.15) * d, Y + Math.sin(a + T * 0.15) * d, 6 + 4 * Math.sin(T * 8 + i * 2.3), i + 30); }
+    if (it.pulse > 0) { ctx.globalAlpha = it.pulse; ctx.strokeStyle = '#fff3c0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X, Y, sr * (1 - it.pulse * 0.9), 0, 6.283); ctx.stroke(); ctx.fillStyle = 'rgba(255,170,50,' + (it.pulse * 0.18) + ')'; ctx.beginPath(); ctx.arc(X, Y, sr, 0, 6.283); ctx.fill(); it.pulse -= 0.06; }
+    ctx.restore();
+  };
+  function flame(ctx, x, y, h, k) {
+    x = Math.round(x); y = Math.round(y); h = Math.max(3, h); var w = Math.max(2, h * 0.32);
+    ctx.fillStyle = 'rgba(255,90,20,.55)'; ctx.beginPath(); ctx.moveTo(x - w, y); ctx.quadraticCurveTo(x - w * 0.4, y - h * 0.6, x + Math.sin(G.t * 11 + k) * 1.5, y - h); ctx.quadraticCurveTo(x + w * 0.4, y - h * 0.6, x + w, y); ctx.fill();
+    ctx.fillStyle = 'rgba(255,200,70,.75)'; ctx.beginPath(); ctx.moveTo(x - w * 0.55, y); ctx.quadraticCurveTo(x - w * 0.2, y - h * 0.5, x, y - h * 0.72); ctx.quadraticCurveTo(x + w * 0.2, y - h * 0.5, x + w * 0.55, y); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,230,.8)'; ctx.fillRect(x - 1, y - Math.round(h * 0.3), 2, Math.round(h * 0.3));
+  }
+
   /* ---------------- drawing of weapon-owned visuals ---------------- */
   WP.drawPlayerFx = function (ctx, cx, cy) {
     var p = G.p, it = p.items, A = CS.art, i, d;
@@ -401,7 +429,7 @@
     if (it.grenade) it.grenade.sh.forEach(function (s) { if (s.t < 0) return; var u = s.t / s.dur, x = s.x0 + (s.x - s.x0) * u, y = s.y0 + (s.y - s.y0) * u - Math.sin(u * 3.1416) * 60; ctx.fillStyle = '#ff9a3c'; ctx.fillRect(Math.round(x - cx - 2), Math.round(y - cy - 2), 5, 5); ctx.fillStyle = '#fff'; ctx.fillRect(Math.round(x - cx - 1), Math.round(y - cy - 1), 2, 2); ctx.globalAlpha = 0.25; ctx.fillStyle = '#ff9a3c'; ctx.beginPath(); ctx.arc(s.x - cx, s.y - cy, s.r, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1; });
     if (it.turret) it.turret.sh.forEach(function (t) { var X = Math.round(t.x - cx), Y = Math.round(t.y - cy); ctx.fillStyle = '#2a2f40'; ctx.fillRect(X - 5, Y - 3, 10, 7); ctx.fillStyle = '#ffb347'; ctx.fillRect(X - 4, Y - 2, 8, 2); ctx.strokeStyle = '#c0c8d8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X, Y - 3); ctx.lineTo(X + Math.cos(t.ang) * 9, Y - 3 + Math.sin(t.ang) * 9); ctx.stroke(); if (t.life < 2) { ctx.fillStyle = '#f55'; ctx.fillRect(X - 1, Y - 8, 2, 2); } });
     if (it.dronebay) it.dronebay.dr.forEach(function (d, i) { if (d.rt > 0 || !d.init) return; A.draw(ctx, 'drone', d.x - cx, d.y - cy + Math.sin(G.t * 8 + i) * 1.5, false, d.flash > 0, 0.8, 0, d.sp > 0 ? 0.5 : 1); if (d.hp < d.mhp) { ctx.fillStyle = '#000'; ctx.fillRect(Math.round(d.x - cx - 7), Math.round(d.y - cy - 10), 14, 2); ctx.fillStyle = '#4dffb0'; ctx.fillRect(Math.round(d.x - cx - 7), Math.round(d.y - cy - 10), Math.max(1, Math.round(14 * d.hp / d.mhp)), 2); } });
-    if (it.sanctum && it.sanctum.r) { var sr = it.sanctum.r; ctx.globalAlpha = 0.12 + 0.05 * Math.sin(G.t * 4); ctx.fillStyle = '#fff08a'; ctx.beginPath(); ctx.arc(p.x - cx, p.y - cy, sr, 0, 6.283); ctx.fill(); ctx.globalAlpha = 0.5; ctx.strokeStyle = '#fff08a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p.x - cx, p.y - cy, sr, 0, 6.283); ctx.stroke(); ctx.globalAlpha = 1; }
+    if (it.sanctum && it.sanctum.r) WP.drawSanctum(ctx, cx, cy, it.sanctum, p);
     if (p.litanyT > 0) { ctx.strokeStyle = '#c9a3ff'; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(p.x - cx, p.y - cy, 15 + Math.sin(G.t * 10) * 2, 0, 6.283); ctx.stroke(); ctx.globalAlpha = 1; }
 
     if (it.saw && it.saw.lv >= 10) it.saw.orb.forEach(function (o) { A.draw(ctx, 'shot_saw', o.x - cx, o.y - cy, false, false, 1.3, G.t * 14); });

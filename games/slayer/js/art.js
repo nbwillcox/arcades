@@ -162,6 +162,7 @@
 
   /* ---------- icons ---------- */
   A.icon = function (id) {
+    var cl = (CS.save && CS.save.d && CS.save.d.cls) || '', v = A.spr['icon_' + id + '_' + cl]; if (v) return v;
     var key = 'icon_' + id, s = A.spr[key];
     if (s) return s;
     var it = CS.ITEMS[id], c = document.createElement('canvas'); c.width = c.height = 24; var g = c.getContext('2d');
@@ -170,7 +171,7 @@
     g.fillStyle = it.c; for (r = 0; r < 7; r++) for (b = 0; b < 5; b++) if (gl[r] & (16 >> b)) g.fillRect(6 + b * 2, 5 + r * 2 + 1, 2, 1);
     reg(key, c, 1); return A.spr[key];
   };
-  A.drawIcon = function (ctx, id, x, y, sc) { var s = A.icon(id); sc = sc || 1; ctx.drawImage(s.c, 0, 0, s.fw, s.h, Math.round(x), Math.round(y), 24 * sc, 24 * sc); };
+  A.drawIcon = function (ctx, id, x, y, sc) { var s = A.icon(id); sc = sc || 1; if (!s.proc) { ctx.fillStyle = A.hex(CS.ITEMS[id].c, 0.32); ctx.fillRect(Math.round(x), Math.round(y), 24 * sc, 24 * sc); } ctx.drawImage(s.c, 0, 0, s.fw, s.h, Math.round(x), Math.round(y), 24 * sc, 24 * sc); };
 
   /* soft radial glow sprites (cached per colour) for additive blending */
   var GL = {};

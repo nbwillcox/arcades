@@ -7,8 +7,9 @@
   location.search.replace(/[?&]([^=&]+)=([^&]*)/g, function (_, k, v) { q[k] = decodeURIComponent(v); });
 
   function resize() {
-    var dpr = window.devicePixelRatio || 1, vw = window.innerWidth * dpr, vh = window.innerHeight * dpr, s = Math.min(vw / W, vh / H);
-    s = s >= 1 ? Math.floor(s) : s; // integer multiples whenever the window is large enough: zero blur
+    var dpr = window.devicePixelRatio || 1, vw = window.innerWidth * dpr, vh = window.innerHeight * dpr, s = Math.min(vw / W, vh / H), si = Math.floor(s);
+    // pixel-perfect integer scale when it nearly fills the window (or when forced in Settings); otherwise fill the screen
+    if (si >= 1 && (SV.d.set.intscale || s / si < 1.15)) s = si;
     canvas.style.width = (W * s / dpr) + 'px'; canvas.style.height = (H * s / dpr) + 'px';
   }
 
@@ -65,7 +66,7 @@
   function tick(dt, rdt) {
     In.poll();
     if (M.state === 'combat') {
-      In.noJoy = { x: W - 56, y: 50, w: 56, h: 56 };
+      In.noJoy = [{ x: W - 56, y: 50, w: 56, h: 56 }, { x: W - 110, y: H - 120, w: 110, h: 120 }];
       if (In.p.pause || (In.p.blur && SV.d.set.autopause) || portrait()) { M.go('pause'); }
       else if (fx.hitstop <= 0) {
         G.update(dt);
@@ -73,7 +74,7 @@
         else if (G.pendingLv > 0) M.openDraft();
         else if (G.chest) { M.state = 'chest'; ui.focus = ''; In.joyEnabled = false; In.joy.on = false; }
       }
-      if (In.taps.length && M.state === 'combat') { for (var i = 0; i < In.taps.length; i++) { var t = In.taps[i]; if (t.x > W - 56 && t.y > 50 && t.y < 106) M.go('pause'); } }
+      if (In.taps.length && M.state === 'combat') { for (var i = 0; i < In.taps.length; i++) { var t = In.taps[i]; if (t.x > W - 56 && t.y > 50 && t.y < 106) M.go('pause'); else if (t.x > W - 110 && t.y > H - 120) In.p.dash = true; } }
     }
     ticked = true;
   }
@@ -86,13 +87,19 @@
       case 'combat': G.draw(ctx); bloom(ctx); ctx.drawImage(CS.art.vignette(), 0, 0); ui.hud(ctx); fx.drawXp(ctx); break;
       case 'settings': SC.settings(ctx, M); break; case 'draft': SC.draft(ctx, M); break; case 'chest': SC.chest(ctx, M); break; case 'pause': SC.pause(ctx, M); break;
     }
-    if (M.state !== 'combat') { if (M.state !== 'pause' && M.state !== 'settings' || true) ui.hints(M.state); In.endFrame(); } else { In.p = {}; In.taps.length = 0; }
+    if (M.state !== 'combat') { ui.hints(M.state); In.endFrame(); } else if (ticked) { In.p = {}; In.taps.length = 0; ticked = false; }
   }
 
+  M.resize = function () { resize(); };
+  function lockEsc() { try { var k = (window.parent !== window ? window.parent : window).navigator.keyboard; if (k && k.lock && (document.fullscreenElement || (window.parent !== window && window.parent.document.fullscreenElement))) k.lock(['Escape']); } catch (e) { } }
   function boot() {
     canvas = document.getElementById('game'); canvas.width = W; canvas.height = H; ctx = canvas.getContext('2d', { alpha: false }); ctx.imageSmoothingEnabled = false;
     In.attach(canvas); SV.load(); In.loadBindings(); CS.art.init(); G.init(); resize(); window.addEventListener('resize', resize);
-    var unlock = function () { AU.init(); }; ['pointerdown', 'keydown'].forEach(function (e) { window.addEventListener(e, unlock); });
+    var fsDone = false, framed = false; try { framed = window.parent !== window && !!window.parent.ARCADE; } catch (e) { }
+    var unlock = function () { AU.init(); if (!fsDone && !framed && SV.d.set.autofs !== false && document.documentElement.requestFullscreen && !window.matchMedia('(display-mode: fullscreen)').matches) { fsDone = true; document.documentElement.requestFullscreen().catch(function () { }); } lockEsc(); };
+    ['pointerdown', 'keydown'].forEach(function (e) { window.addEventListener(e, unlock); });
+    document.addEventListener('fullscreenchange', function () { lockEsc(); resize(); });
+    try { if (framed) window.parent.document.addEventListener('fullscreenchange', lockEsc); } catch (e) { }
     if (q.cls && CS.CLASSES[q.cls]) SV.d.cls = q.cls;
     CS.art.load();
     if (q.go) { SV.d.intro = true; M.startRun(Math.max(0, (+q.stage || 1) - 1)); } else M.go('title');

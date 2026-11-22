@@ -4,7 +4,7 @@
   var S = CS.save = { d: null };
   function def() {
     return { gold: 0, keys: 0, cleared: {}, unlocked: { 1: true }, shop: { shared: {}, gunner: {}, engineer: {}, priest: {} }, cls: 'gunner', blitz: false,
-      best: {}, set: { music: 0.5, sfx: 0.8, shake: 1, autopause: false, dmgnums: true, bloom: true, flash: true, haptics: true, stick: 'float', deadzone: 0.2, keys: {}, pad: {} }, runs: 0, kills: 0, intro: false };
+      best: {}, set: { music: 0.5, sfx: 0.8, shake: 1, autopause: false, dmgnums: true, intscale: false, autofs: true, bloom: true, flash: true, haptics: true, stick: 'float', deadzone: 0.2, keys: {}, pad: {} }, runs: 0, kills: 0, intro: false };
   }
   S.load = function () {
     var d = def();

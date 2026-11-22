@@ -29,7 +29,7 @@
     fx.reset(); G.hz = { storm: 1.5, laser: 5, ring: 7 }; G.stats = { kills: 0, gold: 0, dmg: {}, taken: 0, bosses: 0, crits: 0, healed: 0 };
     G.hitstopT = 0; G.critStop = 0;
     G.p = { x: 0, y: 0, vx: 0, vy: 0, r: 7, face: 1, hp: 1, maxHp: 1, armor: 0, spd: 0, crit: 0, critMul: 1.5, pick: 0, xp: 0, lv: 1, need: CS.BAL.xpNeed(1), gold: 0, scrap: 0, shield: 0, shieldMax: 0, shieldT: 0, inv: 0, dead: false,
-      items: {}, order: [], dodge: 0, regen: 0, dmgMul: 1, cdMul: 1, xpMul: 1, goldMul: 1, magnetT: 0, staticT: 0, flash: 0, bob: 0, extra: {}, revived: false, aegisT: 0, aegisCd: 0, burstCd: 0, dashCd: 0, trailT: 0, holeCd: 0, slide: false, ovl: 1, mAtk: 1, pickMul: 1, rerolls: 2, kills: 0, tookHit: 0, healT: 0, pulseT: 0, hurtT: 0, lsAcc: 0 };
+      items: {}, order: [], dodge: 0, regen: 0, dmgMul: 1, cdMul: 1, xpMul: 1, goldMul: 1, magnetT: 0, staticT: 0, flash: 0, bob: 0, extra: {}, revived: false, aegisT: 0, aegisCd: 0, burstCd: 0, dashCd: 0, trailT: 0, holeCd: 0, slide: false, dashT: 0, mdCd: 0, mdMax: 1.7, ddx: 0, ddy: 0, ovl: 1, mAtk: 1, pickMul: 1, rerolls: 2, kills: 0, tookHit: 0, healT: 0, pulseT: 0, hurtT: 0, lsAcc: 0 };
     CS.WP.setupRun(C);
     G.p.hp = G.p.maxHp; G.p.shield = G.p.shieldMax;
     G.cam.x = -W / 2; G.cam.y = -H / 2;
@@ -43,7 +43,7 @@
   /* player power S: sum of item power (offense full, defense half). Start of a run is ~2. */
   G.power = function () { var p = G.p, s = 0, id; for (id in p.items) s += p.items[id].pw * (CS.ITEMS[id].cat === 'defense' ? 0.5 : 1); return s; };
   G.hpMul = function () { var m = G.t / 60; return (1 + 0.14 * m + 0.012 * m * m) * (1 + 0.1 * G.stage) * (1 + 0.02 * Math.max(0, G.power() - 2)); };
-  G.dmgScale = function () { return (1 + 0.05 * G.t / 60) * (1 + 0.07 * G.stage); };
+  G.dmgScale = function () { return (1 + 0.075 * G.t / 60) * (1 + 0.07 * G.stage) * 1.5; };
 
   /* ---------------- enemies ---------------- */
   G.spawnEnemy = function (type, x, y, o) {
@@ -186,7 +186,7 @@
       if (dmg <= 0) { p.inv = 0.3; return; }
     }
     var flat = p.armor * 0.5, mit = p.armor / (p.armor + 80); dmg = Math.max(dmg * 0.15, (dmg - flat)) * (1 - mit); dmg = Math.max(1, Math.round(dmg));
-    p.hp -= dmg; p.inv = 0.45; p.flash = 6; p.hurtT = 0.3; G.stats.taken += dmg; fx.num(p.x, p.y - 14, '-' + dmg, '#ff4a5a', 1); AU.sfx('hurt'); fx.shake(0.35, p.x - sx, p.y - sy); fx.flash = 0.12; fx.flashC = '#ff2040'; In.rumble(90, 0.6);
+    p.hp -= dmg; p.inv = 0.36; p.flash = 6; p.hurtT = 0.3; G.stats.taken += dmg; fx.num(p.x, p.y - 14, '-' + dmg, '#ff4a5a', 1); AU.sfx('hurt'); fx.shake(0.35, p.x - sx, p.y - sy); fx.flash = 0.12; fx.flashC = '#ff2040'; In.rumble(90, 0.6);
     if (it.plating && it.plating.lv >= 5) CS.WP.reactive();
     CS.WP.onHurt();
     if (p.hp <= 0) CS.WP.tryDeath();
@@ -240,7 +240,7 @@
   function director(dt) {
     var t = G.t, p = G.p, m = t / 60;
     if (G.stageBoss && G.bossOn && !G.bossOn.dead) { /* during the sector boss fight keep light pressure */ }
-    var rate = (2.6 + 1.5 * m + 0.14 * m * m) * (1 + 0.04 * G.stage) * (1 + 0.008 * Math.max(0, G.power() - 2)) * (G.stageBoss ? 0.45 : 1);
+    var rate = 1.15 * (2.6 + 1.5 * m + 0.14 * m * m) * (1 + 0.04 * G.stage) * (1 + 0.008 * Math.max(0, G.power() - 2)) * (G.stageBoss ? 0.45 : 1);
     var cap = CS.BAL.maxEnemies * Math.min(1, 0.35 + t / 300); if (G.stageBoss) cap *= 0.5;
     G.spawnAcc += rate * dt; var w = weights();
     while (G.spawnAcc >= 1) { G.spawnAcc--; if (G.en.n >= cap) break; var ty = TYPES[U.weighted(w)]; G.spawnRing(ty, 1, 540, { elite: t > (G.stage >= 8 ? 60 : 150) && Math.random() < Math.min(0.05, (t - 60) / 4000) * (G.stage >= 8 ? 3 : 1) }); }
@@ -384,8 +384,11 @@
     for (i = 0; i < G.en.n; i++) { e = G.en.a[i]; if (e.sawCd > 0) e.sawCd -= dt; }
     director(dt); hazards(dt);
     // player movement
-    var mv = In.move(), spd = p.spd * (p.spdMul || 1) * (p.inPool === 2 ? 0.6 : 1), k = p.slide ? 2.4 : 15, f = 1 - Math.exp(-k * dt);
-    p.vx += (mv.x * spd - p.vx) * f; p.vy += (mv.y * spd - p.vy) * f; p.x += p.vx * dt; p.y += p.vy * dt;
+    var mv = In.move(), spd = p.spd * (p.spdMul || 1) * (p.inPool === 2 ? 0.6 : 1), k = p.slide ? 2.4 : 15, f = 1 - Math.exp(-k * dt), thr = p.items.thrusters;
+    p.mdMax = 1.7 * (1 - Math.min(0.4, 0.04 * (thr ? thr.pw : 0))); if (p.mdCd > 0) p.mdCd -= dt;
+    if (In.p.dash && p.mdCd <= 0 && p.dashT <= 0) { var dl = Math.hypot(mv.x, mv.y); p.ddx = dl > 0.1 ? mv.x / dl : p.face; p.ddy = dl > 0.1 ? mv.y / dl : 0; p.dashT = 0.17; p.mdCd = p.mdMax; p.inv = Math.max(p.inv, 0.3); AU.sfx('dodge'); In.rumble(35, 0.3); fx.v('flash', p.x, p.y, { r: 16, c: '#9fefff', life: 0.18 }); }
+    if (p.dashT > 0) { p.dashT -= dt; p.vx = p.ddx * 580; p.vy = p.ddy * 580; fx.spark(p.x + (Math.random() - 0.5) * 8, p.y + (Math.random() - 0.5) * 10, -p.ddx * 40, -p.ddy * 40, 0.3, Math.random() < 0.5 ? '#9fefff' : '#ffffff', 3); p.x += p.vx * dt; p.y += p.vy * dt; }
+    else { p.vx += (mv.x * spd - p.vx) * f; p.vy += (mv.y * spd - p.vy) * f; p.x += p.vx * dt; p.y += p.vy * dt; }
     if (Math.abs(mv.x) > 0.1) p.face = mv.x > 0 ? 1 : -1; p.bob += dt * (Math.hypot(p.vx, p.vy) > 20 ? 12 : 3);
     if (p.dead) { G.over = true; G.won = false; return; }
     // status timers

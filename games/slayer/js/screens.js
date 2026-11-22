@@ -57,7 +57,7 @@
       }
       ctx.drawImage(A.tile(n - 1), 0, 0, Math.min(256, w - 4), Math.min(256, h - 4), x + 2, y + 2, Math.min(256, w - 4), Math.min(256, h - 4));
       ctx.fillStyle = open ? 'rgba(0,0,0,.35)' : 'rgba(0,0,10,.78)'; ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
-      if (open) var bs = A.spr['boss_' + (n - 1)]; A.draw(ctx, 'boss_' + (n - 1), x + w - 44, y + h / 2 - 2, false, false, 78 / Math.max(bs.dw, bs.dh));
+      if (open) { var bs = A.spr['boss_' + (n - 1)]; A.draw(ctx, 'boss_' + (n - 1), x + w - 44, y + h / 2 - 2, false, false, 78 / Math.max(bs.dw, bs.dh)); }
       ui.text(S.sub, x + 8, y + 8, S.pal[2], 1); ui.text(open ? S.n : '???', x + 8, y + 20, open ? '#fff' : '#6a7a98', 1);
       ui.text(clr ? 'CLEARED' : open ? 'READY' : n === 10 ? 'LOCKED' : 'LOCKED - 1 KEY', x + 8, y + h - 14, clr ? '#5cff8a' : open ? '#ffd700' : '#ff7a7a', 1);
     }
@@ -169,12 +169,14 @@
     var d = SV.d, s = d.set, i;
     ui.backdrop(ctx, ['#070a16', '#142040', '#7a8aa8']); ui.title('SETTINGS', 12, '#27e6ff', 3);
     ['GAME & AUDIO', 'KEYBOARD', 'TOUCH & CONTROLLER'].forEach(function (n, k) { if (ui.btn('tab' + k, 60 + k * 276, 50, 268, 26, n, { c: tab === k ? '#ffd700' : '#5a6a88', tc: tab === k ? '#fff' : '#99a' })) { tab = k; pending = null; In.listen = null; } });
-    var y = 88, st = 34;
+    var y = 84, st = 31;
     if (tab === 0) {
       slider('shk', y, 'SCREEN SHAKE', s.shake, [0, 0.25, 0.5, 0.75, 1], PCT, function (v) { s.shake = v; SV.store(); }); y += st;
       toggle('dmg', y, 'DAMAGE NUMBERS', s.dmgnums !== false, function (v) { s.dmgnums = v; SV.store(); }); y += st;
       toggle('fls', y, 'SCREEN FLASHES', s.flash !== false, function (v) { s.flash = v; SV.store(); }, 'HIT FLASH, SIREN AND LOW-HP PULSES'); y += st;
       toggle('blm', y, 'GLOW / BLOOM', s.bloom !== false, function (v) { s.bloom = v; SV.store(); }, 'TURNS ITSELF OFF ON SLOW DEVICES'); y += st;
+      toggle('isc', y, 'PIXEL-PERFECT SCALING', !!s.intscale, function (v) { s.intscale = v; SV.store(); M.resize(); }, 'ON = WHOLE-NUMBER ZOOM (BLACK BARS). OFF = FILL SCREEN.'); y += st;
+      toggle('afs', y, 'AUTO FULLSCREEN ON FIRST CLICK', s.autofs !== false, function (v) { s.autofs = v; SV.store(); }); y += st;
       toggle('ap', y, 'PAUSE WHEN WINDOW LOSES FOCUS', !!s.autopause, function (v) { s.autopause = v; SV.store(); }); y += st;
       slider('mus', y, 'MUSIC VOLUME', s.music, [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], PCT, function (v) { s.music = v; SV.store(); AU.vol(); }); y += st;
       slider('sfx', y, 'SOUND EFFECTS VOLUME', s.sfx, [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], PCT, function (v) { s.sfx = v; SV.store(); AU.vol(); AU.sfx('coin'); }); y += st;
@@ -183,14 +185,14 @@
     } else if (tab === 1) {
       ui.text('CLICK A SLOT, THEN PRESS THE NEW KEY.  ESC CANCELS.  ARROWS, ENTER AND ESC ALWAYS WORK IN MENUS.', 60, 84, '#7a8aa8', 1, 'left', false);
       In.ACTIONS.forEach(function (a, k) {
-        var yy = 100 + k * 33; ui.text(a[1], 60, yy + 8, '#c9d6ff', 1);
+        var yy = 98 + k * 31; ui.text(a[1], 60, yy + 8, '#c9d6ff', 1);
         for (var sl = 0; sl < 2; sl++) {
           (function (sl) { var lis = pending && pending.kind === 'key' && pending.a === a[0] && pending.sl === sl;
             if (ui.btn('k' + k + '_' + sl, 400 + sl * 200, yy, 190, 26, lis ? 'PRESS A KEY...' : In.keyName(In.keyb[a[0]][sl]), { c: lis ? '#ffd700' : '#27e6ff' })) { pending = { kind: 'key', a: a[0], sl: sl }; In.listen = { kind: 'key', cb: function (code) { if (code !== 'Escape' || a[0] === 'pause' || a[0] === 'back') In.setKey(a[0], sl, code); else { /* Escape cancels */ } pending = null; } }; } })(sl);
         }
       });
-      if (ui.btn('rk', 60, 372, 200, 26, 'RESET TO DEFAULTS', { c: '#ff9a3c' })) { In.resetKeys(); AU.sfx('buy'); }
-      ui.text('DRAFT CARDS CAN ALSO BE PICKED WITH 1 / 2 / 3', 60, 410, '#5a6a88', 1, 'left', false);
+      if (ui.btn('rk', 60, 384, 200, 26, 'RESET TO DEFAULTS', { c: '#ff9a3c' })) { In.resetKeys(); AU.sfx('buy'); }
+      ui.text('DRAFT CARDS CAN ALSO BE PICKED WITH 1 / 2 / 3', 60, 424, '#5a6a88', 1, 'left', false);
     } else {
       ui.text('TOUCH', 60, 84, '#ffd700', 1);
       ui.text('STICK STYLE', 60, 108, '#c9d6ff', 1); if (ui.btn('stk', 520, 100, 200, 24, s.stick === 'fixed' ? 'FIXED (LEFT SIDE)' : 'FLOATING', { c: '#27e6ff' })) { s.stick = s.stick === 'fixed' ? 'float' : 'fixed'; SV.store(); }
@@ -198,12 +200,12 @@
       ui.text('CONTROLLER', 60, 176, '#ffd700', 1);
       slider('dz', 192, 'STICK DEADZONE', s.deadzone, [0.1, 0.15, 0.2, 0.25, 0.3, 0.4], PCT, function (v) { s.deadzone = v; SV.store(); });
       ui.text(In.pad ? 'CONTROLLER: ' + String(In.pad.id).slice(0, 40).toUpperCase() : 'NO CONTROLLER DETECTED - PRESS ANY BUTTON', 60, 228, In.pad ? '#5cff8a' : '#ff9a7a', 1, 'left', false);
-      [['confirm', 'CONFIRM / SELECT'], ['back', 'BACK'], ['pause', 'PAUSE / MENU'], ['reroll', 'REROLL CARDS']].forEach(function (a, k) {
-        var yy = 246 + k * 32, lis = pending && pending.kind === 'pad' && pending.a === a[0]; ui.text(a[1], 60, yy + 8, '#c9d6ff', 1);
+      [['confirm', 'CONFIRM / SELECT'], ['back', 'BACK'], ['pause', 'PAUSE / MENU'], ['reroll', 'REROLL CARDS'], ['dash', 'DASH (ALSO RB)']].forEach(function (a, k) {
+        var yy = 246 + k * 30, lis = pending && pending.kind === 'pad' && pending.a === a[0]; ui.text(a[1], 60, yy + 8, '#c9d6ff', 1);
         if (ui.btn('p' + k, 520, yy, 200, 26, lis ? 'PRESS A BUTTON...' : (In.PAD_NAMES[In.padb[a[0]]] || 'NONE'), { c: lis ? '#ffd700' : '#27e6ff' })) { pending = { kind: 'pad', a: a[0] }; In.listen = { kind: 'pad', cb: function (idx) { In.setPad(a[0], idx); pending = null; } }; }
       });
-      if (ui.btn('rp', 60, 378, 200, 26, 'RESET CONTROLLER', { c: '#ff9a3c' })) { In.resetPad(); AU.sfx('buy'); }
-      ui.text('D-PAD / LEFT STICK MOVES AND NAVIGATES MENUS.  LB / RB PICK DRAFT CARDS 1 / 3.', 60, 416, '#5a6a88', 1, 'left', false);
+      if (ui.btn('rp', 60, 408, 200, 26, 'RESET CONTROLLER', { c: '#ff9a3c' })) { In.resetPad(); AU.sfx('buy'); }
+      ui.text('D-PAD / LEFT STICK MOVES AND NAVIGATES MENUS.  LB PICKS DRAFT CARD 1.', 60, 446, '#5a6a88', 1, 'left', false);
     }
     if (ui.btn('back', 60, 486, 200, 30, 'BACK', { c: '#5cff8a', sc: 2 }) || (In.p.back && !In.listen && !pending)) { In.listen = null; pending = null; M.go(M.setBack || 'title'); }
     ui.link('lk', 780, 492, 150, 'NICTOOLS.DEV', CS.LINKS.site);
