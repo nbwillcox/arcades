@@ -176,21 +176,23 @@
 
   /* ---------------- weapon behaviours ---------------- */
   var UP = WP.U = {};
+  /* where shots leave the hero: gun barrel / staff tip, not the body centre */
+  WP.mz = function () { var p = G.p, f = p.face, c = G.cls; return c === 'gunner' ? { x: p.x - f * 18, y: p.y - 21 } : c === 'priest' ? { x: p.x - f * 19, y: p.y - 29 } : { x: p.x + f * 6, y: p.y - 10 }; };
   function target(r) { var p = G.p; return G.nearest(p.x, p.y, r); }
   function muzzle(x, y, c) { CS.V.muzzle(x, y, Math.random() * 3, c || '#fff3b0', 20); }
 
   UP.slug = function (it, dt) {
     var p = G.p; it.cd -= dt; if (it.cd > 0) return; var tg = target(340); if (!tg) { it.cd = 0.08; return; }
     var k = it.pw, lv = it.lv, over = G.cls === 'gunner' ? SV.classRank('gunner', 'overbore') : 0, dmg = 18 * sc(it) * (1 + 0.08 * over), pierce = (lv >= 3 ? 1 : 0) + (lv >= 7 ? 1 : 0) + Math.floor(over / 3);
-    it.cd = cd(it, 1.0, 0.07); var ang = Math.atan2(tg.y - p.y, tg.x - p.x), i, n;
+    it.cd = cd(it, 1.0, 0.07); var mz = WP.mz(), ang = Math.atan2(tg.y - mz.y, tg.x - mz.x), i, n;
     if (lv >= 10) {
       n = 3 + pp(it); AU.sfx('laser');
-      for (i = 0; i < n; i++) { var a = ang + (i - (n - 1) / 2) * 0.24, x2 = p.x + Math.cos(a) * 560, y2 = p.y + Math.sin(a) * 560; G.seg(p.x, p.y, x2, y2, 5, dmg * 2.3, { src: 'slug', kb: 260, type: 'energy' }); fx.v('line', p.x, p.y, { x2: x2, y2: y2, c: '#ffd35a', w: 3, life: 0.22 }); }
-      fx.shake(0.3, Math.cos(ang), Math.sin(ang)); muzzle(p.x + Math.cos(ang) * 12, p.y + Math.sin(ang) * 12, '#ffd35a'); return;
+      for (i = 0; i < n; i++) { var a = ang + (i - (n - 1) / 2) * 0.24, x2 = mz.x + Math.cos(a) * 560, y2 = mz.y + Math.sin(a) * 560; G.seg(mz.x, mz.y, x2, y2, 5, dmg * 2.3, { src: 'slug', kb: 260, type: 'energy' }); fx.v('line', mz.x, mz.y, { x2: x2, y2: y2, c: '#ffd35a', w: 3, life: 0.22 }); }
+      fx.shake(0.3, Math.cos(ang), Math.sin(ang)); muzzle(mz.x + Math.cos(ang) * 6, mz.y + Math.sin(ang) * 6, '#ffd35a'); return;
     }
     n = 1 + pp(it);
-    for (i = 0; i < n; i++) G.shot(p.x, p.y, ang + (i - (n - 1) / 2) * 0.12, 540, dmg, { src: 'slug', pierce: pierce, kb: 340, bounce: lv >= 5 ? (lv >= 8 ? 2 : 1) : 0, spr: 'shot_slug', life: 0.9 });
-    muzzle(p.x + Math.cos(ang) * 12, p.y + Math.sin(ang) * 12); AU.sfx('slug'); fx.shake(0.1, -Math.cos(ang), -Math.sin(ang)); p.vx -= Math.cos(ang) * 14; p.vy -= Math.sin(ang) * 14;
+    for (i = 0; i < n; i++) G.shot(mz.x, mz.y, ang + (i - (n - 1) / 2) * 0.12, 540, dmg, { src: 'slug', pierce: pierce, kb: 340, bounce: lv >= 5 ? (lv >= 8 ? 2 : 1) : 0, spr: 'shot_slug', life: 0.9 });
+    muzzle(mz.x + Math.cos(ang) * 6, mz.y + Math.sin(ang) * 6); AU.sfx('slug'); fx.shake(0.1, -Math.cos(ang), -Math.sin(ang)); p.vx -= Math.cos(ang) * 14; p.vy -= Math.sin(ang) * 14;
   };
 
   UP.drone = function (it, dt) {
@@ -224,7 +226,7 @@
     it.cd = cd(it, 1.0, 0.07); var lv = it.lv, arcs = lv >= 5 ? 3 : 1, jumps = 2 + Math.floor(lv / 3) + (it.bon.chain || 0) + (G.cls === 'priest' ? SV.classRank('priest', 'conduit') : 0), dmg = 22 * sc(it), a;
     for (var q = 0; q < Math.min(arcs, list.length); q++) {
       var e = list[q]; a = Math.atan2(e.y - p.y, e.x - p.x);
-      fx.v('line', p.x, p.y - 4, { x2: e.x, y2: e.y, c: '#ffe44d', w: lv >= 5 ? 3 : 2, life: 0.18 }); fx.v('flash', e.x, e.y, { r: 9, c: '#fff6a0', life: 0.12 });
+      var mz = WP.mz(); fx.v('line', mz.x, mz.y, { x2: e.x, y2: e.y, c: '#ffe44d', w: lv >= 5 ? 3 : 2, life: 0.18 }); fx.v('flash', mz.x, mz.y, { r: 10, c: '#fff6a0', life: 0.1 }); fx.v('flash', e.x, e.y, { r: 9, c: '#fff6a0', life: 0.12 });
       G.hit(e, dmg, { src: 'bolt', type: 'holy', purge: true, kb: 70, dx: Math.cos(a), dy: Math.sin(a), noChain: true });
       G.chain(e, dmg * 0.85, jumps, 115, { src: 'bolt', type: 'holy', purge: true, noChain: true, col: q ? '#27e6ff' : '#ffe44d' });
     }
@@ -242,9 +244,9 @@
     it.cd = cd(it, 2.6, 0.06, 1.0); var lv = it.lv, n = lv >= 10 ? 6 : 1 + Math.floor(lv / 4) + pp(it), c = cluster(tg.x, tg.y), ang = Math.atan2(c.y - p.y, c.x - p.x), dist = Math.hypot(c.x - p.x, c.y - p.y);
     for (i = 0; i < n; i++) {
       var tx, ty; if (lv >= 10) { var dd = Math.min(420, dist + 60) * (0.25 + 0.75 * i / (n - 1)); tx = p.x + Math.cos(ang) * dd; ty = p.y + Math.sin(ang) * dd; } else { tx = c.x + (i ? U.rr(-34, 34) : 0); ty = c.y + (i ? U.rr(-34, 34) : 0); }
-      ar.push({ x0: p.x, y0: p.y, x: tx, y: ty, t: -i * 0.09, dur: 0.6 + (lv >= 10 ? i * 0.06 : 0), dmg: 40 * sc(it, 0.32), r: 56 * (1 + 0.06 * (it.pw - 1)) });
+      ar.push({ x0: WP.mz().x, y0: WP.mz().y, x: tx, y: ty, t: -i * 0.09, dur: 0.6 + (lv >= 10 ? i * 0.06 : 0), dmg: 40 * sc(it, 0.32), r: 56 * (1 + 0.06 * (it.pw - 1)) });
     }
-    AU.sfx('slug'); muzzle(p.x, p.y - 6, '#ff9a3c');
+    AU.sfx('slug'); muzzle(WP.mz().x, WP.mz().y, '#ff9a3c');
   };
   WP.land = function (it, s) {
     var lv = it.lv; G.explode(s.x, s.y, s.r, s.dmg, { src: 'grenade', col: '#ff9a3c' });
@@ -260,7 +262,7 @@
   };
   function discharge(it) {
     var p = G.p, tg = target(280); if (!tg) return; var jumps = Math.min(12, 4 + Math.floor(it.pw * 0.9) + (it.bon.chain || 0)), dmg = 16 * sc(it); if (it.lv >= 10) jumps = 12;
-    fx.v('line', p.x, p.y - 4, { x2: tg.x, y2: tg.y, c: '#27e6ff', w: 3, life: 0.2 }); var a = Math.atan2(tg.y - p.y, tg.x - p.x);
+    var mz = WP.mz(); fx.v('line', mz.x, mz.y, { x2: tg.x, y2: tg.y, c: '#27e6ff', w: 3, life: 0.2 }); var a = Math.atan2(tg.y - p.y, tg.x - p.x);
     G.hit(tg, dmg, { src: 'tesla', type: 'tesla', kb: 50, dx: Math.cos(a), dy: Math.sin(a), noChain: true }); if (it.lv >= 5 && !tg.dead) tg.stun = 0.6;
     G.chain(tg, dmg, jumps - 1, 105, { src: 'tesla', type: 'tesla', noChain: true, stun: it.lv >= 5 ? 0.6 : 0, col: '#7df3ff' }); AU.sfx('zap'); fx.shake(0.08);
   }
@@ -387,7 +389,7 @@
   UP.wings = function (it, dt) {
     var p = G.p, lv = it.lv; it.cd -= dt; if (it.cd > 0) return; var tg = G.nearest(p.x, p.y, 300); if (!tg) { it.cd = 0.15; return; }
     it.cd = cd(it, 2.2, 0.06, 0.9); var n = 3 + Math.floor(lv * 0.8) + pp(it); if (lv >= 10) n *= 2; var base = Math.atan2(tg.y - p.y, tg.x - p.x), i;
-    for (i = 0; i < n; i++) G.shot(p.x, p.y - 4, base + (i - (n - 1) / 2) * 0.22 + U.rr(-0.08, 0.08), 290, 8 * sc(it), { src: 'wings', spr: 'shot_bolt', home: 7, life: 1.6, kb: 40, type: 'holy', purge: true, pierce: lv >= 5 ? (lv >= 10 ? 2 : 1) : 0 });
+    for (i = 0; i < n; i++) G.shot(WP.mz().x, WP.mz().y, base + (i - (n - 1) / 2) * 0.22 + U.rr(-0.08, 0.08), 290, 8 * sc(it), { src: 'wings', spr: 'shot_bolt', home: 7, life: 1.6, kb: 40, type: 'holy', purge: true, pierce: lv >= 5 ? (lv >= 10 ? 2 : 1) : 0 });
     AU.sfx('bolt');
   };
 
