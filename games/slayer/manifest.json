@@ -1,0 +1,11 @@
+{
+  "name": "Cyber Slayer Survivor",
+  "short_name": "Cyber Slayer",
+  "description": "Free pixel-art bullet-heaven minion roguelite. nictools.dev",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#05030c",
+  "theme_color": "#05030c",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

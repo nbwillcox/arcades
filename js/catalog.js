@@ -75,6 +75,10 @@ window.ARCADE_GAMES = [
     tag: 'Silly comic-book stick-figure run-and-gun: five goofy dudes, 12 themed levels, wild bosses, mouth-sound guns and a gold shop.',
     keys: [['Move / Jump', 'WASD / stick, Space / A'], ['Aim + Fire', 'Mouse / right stick'], ['Special', 'Right click / B'], ['Cycle', 'Q / LB RB']] },
 
+  { id: 'slayer', name: 'Cyber Slayer Survivor', genre: 'action', hue: 275, t: 1, mouse: 0,
+    tag: 'Pixel-art bullet-heaven roguelite: pick a slayer, summon minions, level up Lv 1-10 and clear ten cyber-gothic sectors.',
+    keys: [['Move', 'WASD / arrows / stick / touch'], ['Pick card', '1 2 3 / Enter / A'], ['Pause', 'Esc / P / Start'], ['Settings', 'Pause menu']] },
+
   // ---- PUZZLE & MAZE ------------------------------------------------------
   { id: 'pac', name: 'Space Pac', genre: 'puzzle', hue: 55, t: 1, mouse: 0,
     tag: 'Gobble every star-dust pellet while four drones hunt you, each in its own way.',

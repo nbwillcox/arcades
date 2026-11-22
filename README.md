@@ -1,6 +1,6 @@
 # Nic's Arcade
 
-One space-themed arcade cabinet that holds all 32 of the free neon games: pick a game from the main menu with a controller, keyboard, mouse or finger, and jump back to the menu without ever touching the address bar.
+One space-themed arcade cabinet that holds all 33 of the free neon games: pick a game from the main menu with a controller, keyboard, mouse or finger, and jump back to the menu without ever touching the address bar.
 
 **Play it in your browser:** https://nbwillcox.github.io/arcades/
 
