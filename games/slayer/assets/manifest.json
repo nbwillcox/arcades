@@ -268,7 +268,79 @@
     "fx_orb": "assets/sprites/fx_orb.png",
     "fx_beam": "assets/sprites/fx_beam.png",
     "fx_cloud": "assets/sprites/fx_cloud.png",
-    "fx_spark": "assets/sprites/fx_spark.png"
+    "fx_spark": "assets/sprites/fx_spark.png",
+    "drone": {
+      "file": "assets/sprites/drone.png",
+      "scale": 1
+    },
+    "coin": {
+      "file": "assets/sprites/coin.png",
+      "scale": 1
+    },
+    "scrap": {
+      "file": "assets/sprites/scrap.png",
+      "scale": 1
+    },
+    "health": {
+      "file": "assets/sprites/health.png",
+      "scale": 1
+    },
+    "magnet": {
+      "file": "assets/sprites/magnet.png",
+      "scale": 1
+    },
+    "chest": {
+      "file": "assets/sprites/chest.png",
+      "scale": 1
+    },
+    "mn_vanguard_gunner": {
+      "file": "assets/sprites/mn_vanguard_gunner.png",
+      "scale": 1
+    },
+    "mn_sniper_gunner": {
+      "file": "assets/sprites/mn_sniper_gunner.png",
+      "scale": 1
+    },
+    "mn_aegis_gunner": {
+      "file": "assets/sprites/mn_aegis_gunner.png",
+      "scale": 1
+    },
+    "mn_detonator_gunner": {
+      "file": "assets/sprites/mn_detonator_gunner.png",
+      "scale": 1
+    },
+    "mn_vanguard_engineer": {
+      "file": "assets/sprites/mn_vanguard_engineer.png",
+      "scale": 1
+    },
+    "mn_sniper_engineer": {
+      "file": "assets/sprites/mn_sniper_engineer.png",
+      "scale": 1
+    },
+    "mn_aegis_engineer": {
+      "file": "assets/sprites/mn_aegis_engineer.png",
+      "scale": 1
+    },
+    "mn_detonator_engineer": {
+      "file": "assets/sprites/mn_detonator_engineer.png",
+      "scale": 1
+    },
+    "mn_vanguard_priest": {
+      "file": "assets/sprites/mn_vanguard_priest.png",
+      "scale": 1
+    },
+    "mn_sniper_priest": {
+      "file": "assets/sprites/mn_sniper_priest.png",
+      "scale": 1
+    },
+    "mn_aegis_priest": {
+      "file": "assets/sprites/mn_aegis_priest.png",
+      "scale": 1
+    },
+    "mn_detonator_priest": {
+      "file": "assets/sprites/mn_detonator_priest.png",
+      "scale": 1
+    }
   },
   "audio": {
     "music_menu": "assets/audio/music_menu.mp3",
