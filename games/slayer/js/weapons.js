@@ -118,7 +118,7 @@
       if (cs.length) { var pk = cs[U.weighted(cs.map(function (c) { return c.w; }))], card = mkCard(pk, 2); picked[pk.id] = card; cards.push(card); WP.apply(card); continue; }
       var ids = Object.keys(picked);   // nothing new left: would duplicate -> boost an existing reward instead
       if (ids.length && picked[ids[0]]) { var ex = picked[U.pick(ids)]; if (!ex.dbl) { ex.dbl = true; var it2 = G.p.items[ex.id]; if (it2 && it2.lv < 10) { it2.lv++; it2.pw += CS.RAR[ex.rar].m * (it2.lv > 5 ? 1.35 : 1); } if (it2) { it2.pw += CS.RAR[ex.rar].m * 0.5; ex.to = it2.lv; } WP.recalc(); CS.MN.fillAll(); continue; } }
-      G.addGold(200); cards.push({ kind: 'gold', rar: 3, v: 200 });
+      G.addGold(5000); cards.push({ kind: 'gold', rar: 3, v: 5000 });
     }
     return { gold: gold, cards: cards, t: 0 };
   };
