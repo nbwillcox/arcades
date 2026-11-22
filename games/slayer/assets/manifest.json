@@ -340,6 +340,66 @@
     "mn_detonator_priest": {
       "file": "assets/sprites/mn_detonator_priest.png",
       "scale": 1
+    },
+    "obs_0": {
+      "file": "assets/sprites/obs_0.png",
+      "scale": 1
+    },
+    "obs_1": {
+      "file": "assets/sprites/obs_1.png",
+      "scale": 1
+    },
+    "obs_2": {
+      "file": "assets/sprites/obs_2.png",
+      "scale": 1
+    },
+    "obs_3": {
+      "file": "assets/sprites/obs_3.png",
+      "scale": 1
+    },
+    "obs_4": {
+      "file": "assets/sprites/obs_4.png",
+      "scale": 1
+    },
+    "obs_5": {
+      "file": "assets/sprites/obs_5.png",
+      "scale": 1
+    },
+    "obs_6": {
+      "file": "assets/sprites/obs_6.png",
+      "scale": 1
+    },
+    "obs_7": {
+      "file": "assets/sprites/obs_7.png",
+      "scale": 1
+    },
+    "obs_8": {
+      "file": "assets/sprites/obs_8.png",
+      "scale": 1
+    },
+    "obs_9": {
+      "file": "assets/sprites/obs_9.png",
+      "scale": 1
+    },
+    "trap_plate": {
+      "file": "assets/sprites/trap_plate.png",
+      "scale": 1
+    },
+    "trap_spikes": {
+      "file": "assets/sprites/trap_spikes.png",
+      "scale": 1
+    },
+    "trap_vent": {
+      "file": "assets/sprites/trap_vent.png",
+      "scale": 1
+    },
+    "pool_slag": {
+      "file": "assets/sprites/pool_slag.png",
+      "scale": 1
+    },
+    "pool_acid": {
+      "file": "assets/sprites/pool_acid.png",
+      "scale": 1
     }
   },
   "audio": {

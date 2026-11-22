@@ -30,7 +30,7 @@
     G.hitstopT = 0; G.critStop = 0;
     G.p = { x: 0, y: 0, vx: 0, vy: 0, r: 7, face: 1, hp: 1, maxHp: 1, armor: 0, spd: 0, crit: 0, critMul: 1.5, pick: 0, xp: 0, lv: 1, need: CS.BAL.xpNeed(1), gold: 0, scrap: 0, shield: 0, shieldMax: 0, shieldT: 0, inv: 0, dead: false,
       items: {}, order: [], dodge: 0, regen: 0, dmgMul: 1, cdMul: 1, xpMul: 1, goldMul: 1, magnetT: 0, staticT: 0, flash: 0, bob: 0, extra: {}, revived: false, aegisT: 0, aegisCd: 0, burstCd: 0, dashCd: 0, trailT: 0, holeCd: 0, slide: false, dashT: 0, mdCd: 0, mdMax: 1.7, ddx: 0, ddy: 0, ovl: 1, mAtk: 1, pickMul: 1, rerolls: 2, kills: 0, tookHit: 0, healT: 0, pulseT: 0, hurtT: 0, lsAcc: 0 };
-    CS.WP.setupRun(C);
+    CS.LV.reset(stage); CS.WP.setupRun(C);
     G.p.hp = G.p.maxHp; G.p.shield = G.p.shieldMax;
     G.cam.x = -W / 2; G.cam.y = -H / 2;
     for (var i = 0; i < 12; i++) G.spawnRing('skeleton', 1);
@@ -390,6 +390,7 @@
     if (p.dashT > 0) { p.dashT -= dt; p.vx = p.ddx * 580; p.vy = p.ddy * 580; fx.spark(p.x + (Math.random() - 0.5) * 8, p.y + (Math.random() - 0.5) * 10, -p.ddx * 40, -p.ddy * 40, 0.3, Math.random() < 0.5 ? '#9fefff' : '#ffffff', 3); p.x += p.vx * dt; p.y += p.vy * dt; }
     else { p.vx += (mv.x * spd - p.vx) * f; p.vy += (mv.y * spd - p.vy) * f; p.x += p.vx * dt; p.y += p.vy * dt; }
     if (Math.abs(mv.x) > 0.1) p.face = mv.x > 0 ? 1 : -1; p.bob += dt * (Math.hypot(p.vx, p.vy) > 20 ? 12 : 3);
+    CS.LV.push(p); CS.LV.update(dt);
     if (p.dead) { G.over = true; G.won = false; return; }
     // status timers
     if (p.inv > 0) p.inv -= dt; if (p.flash > 0) p.flash--; if (p.hurtT > 0) p.hurtT -= dt; if (p.magnetT > 0) p.magnetT -= dt; p.staticT = Math.max(0, p.staticT - dt);
@@ -414,7 +415,8 @@
     if (G.def.hz.indexOf('slag') >= 0 || G.def.hz.indexOf('acid') >= 0) {
       var acid = G.def.hz.indexOf('acid') >= 0;
       G.poolsVisible(function (px, py, rr) {
-        var X = px - cx, Y = py - cy; ctx.fillStyle = A.hex(pal[2], 0.3); ctx.beginPath(); ctx.ellipse(X, Y, rr + 4, rr * 0.8 + 4, 0, 0, 6.283); ctx.fill();
+        var X = px - cx, Y = py - cy, pk = acid ? 'pool_acid' : 'pool_slag', ps = A.spr[pk]; if (ps && !ps.proc) { A.draw(ctx, pk, X, Y, false, false, rr * 2.6 / ps.dw); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.25 + 0.1 * Math.sin(T * 3 + px); ctx.drawImage(A.glow(acid ? '#6bff3c' : '#ff7a1a'), Math.round(X - rr * 1.5), Math.round(Y - rr * 1.2), Math.round(rr * 3), Math.round(rr * 2.4)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; return; }
+        ctx.fillStyle = A.hex(pal[2], 0.3); ctx.beginPath(); ctx.ellipse(X, Y, rr + 4, rr * 0.8 + 4, 0, 0, 6.283); ctx.fill();
         ctx.globalAlpha = 0.75; ctx.fillStyle = acid ? '#3fd02a' : pal[2]; ctx.beginPath(); ctx.ellipse(X, Y, rr, rr * 0.8, 0, 0, 6.283); ctx.fill();
         ctx.globalAlpha = 1; ctx.fillStyle = acid ? '#b8ff6a' : pal[3]; for (var b = 0; b < 4; b++) { var ph = (T * 0.8 + b * 0.27 + px * 0.01) % 1; ctx.fillRect(Math.round(X + Math.cos(b * 2 + px) * rr * 0.5), Math.round(Y - ph * 10 + Math.sin(b * 3) * rr * 0.3), 2, 2); }
       });
@@ -459,7 +461,7 @@
     var p = G.p, cx = G.cam.x, cy = G.cam.y, i, e, X, Y;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
     ctx.save(); ctx.translate(fx.ox, fx.oy);
-    drawFloor(ctx); drawZones(ctx, cx, cy, false); drawLoot(ctx, cx, cy);
+    drawFloor(ctx); drawZones(ctx, cx, cy, false); drawLoot(ctx, cx, cy); CS.LV.drawGround(ctx, cx, cy);
     var a = G.en.a, n = G.en.n;
     for (i = 0; i < n; i++) {
       e = a[i]; if (e.dead) continue; X = e.x - cx; Y = e.y - cy; if (X < -80 || X > W + 80 || Y < -80 || Y > H + 80) continue;
@@ -475,7 +477,9 @@
     var psp = A.spr[G.cls], foot = psp ? psp.dh / 2 - 3 : 10; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(Math.round(X), Math.round(Y + foot), 10, 3, 0, 0, 6.283); ctx.fill();
     if (p.shield > 0 || p.holy > 0) { ctx.globalAlpha = 0.25 + 0.15 * Math.sin(G.t * 6); ctx.strokeStyle = p.holy > 0 && p.shield <= 0 ? '#ffe44d' : '#48a8ff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(X, Y, 18, 0, 6.283); ctx.stroke(); ctx.globalAlpha = 1; }
     if (p.aegisT > 0) { ctx.globalAlpha = 0.5; ctx.strokeStyle = '#ffd35a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X, Y, 20 + Math.sin(G.t * 20), 0, 6.283); ctx.stroke(); ctx.globalAlpha = 1; }
+    CS.V.heroBelow(ctx, X, Y, p, G.cls, psp);
     if (!(p.inv > 0 && Math.floor(G.t * 20) % 2 && p.aegisT <= 0)) A.draw(ctx, G.cls, X, Y - Math.abs(Math.sin(p.bob)) * 2, p.face < 0, p.flash > 0);
+    CS.V.heroAbove(ctx, X, Y - Math.abs(Math.sin(p.bob)) * 2, p, G.cls, psp);
     CS.WP.drawPlayerFx(ctx, cx, cy);
     drawShots(ctx, cx, cy);
     drawZones(ctx, cx, cy, true); drawWarn(ctx, cx, cy);

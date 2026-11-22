@@ -144,4 +144,22 @@
     else { ctx.strokeStyle = col; ctx.globalAlpha = 0.2; ctx.lineWidth = w * 4; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.globalAlpha = 0.6; ctx.lineWidth = w * 2; ctx.stroke(); ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1.5, w * 0.7); ctx.stroke(); }
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   };
+  /* ---------- hero glow-up: class aura, signature lights, dash afterimages ---------- */
+  var HC = { gunner: ['#ffb347', '#27e6ff'], engineer: ['#4dffb0', '#ffcc33'], priest: ['#ffe44d', '#b890ff'] };
+  V.heroBelow = function (ctx, X, Y, p, cls, sp) {
+    var c = HC[cls] || HC.gunner, T = CS.G.t, foot = sp ? sp.dh / 2 - 3 : 10, pulse = 0.5 + 0.5 * Math.sin(T * 3);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.28 + 0.12 * pulse; ctx.drawImage(A.glow(c[0]), Math.round(X - 36), Math.round(Y + foot - 14), 72, 28);
+    V.add(ctx, 'fx_ring', c[0], X, Y + foot - 1, 52 + 6 * pulse, 20 + 2 * pulse, 0, 0.35 + 0.15 * pulse);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    if (p.dashT > 0) { var k; for (k = 3; k >= 1; k--) A.draw(ctx, cls, X - p.ddx * k * 9, Y - p.ddy * k * 9, p.face < 0, false, 1, 0, 0.12 + 0.1 * (4 - k)); }
+  };
+  V.heroAbove = function (ctx, X, Y, p, cls, sp) {
+    var c = HC[cls] || HC.gunner, T = CS.G.t, dh = sp ? sp.dh : 50, f = p.face, top = Y - dh / 2, fl = 0.6 + 0.4 * Math.sin(T * 17 + 1);
+    ctx.globalCompositeOperation = 'lighter';
+    if (cls === 'priest') { var hy = top + 4; V.add(ctx, 'fx_ring', '#ffe44d', X, hy, 30, 12, 0, 0.7); V.add(ctx, 'fx_orb', '#ffe9a0', X, hy, 36, 22, 0, 0.35 + 0.15 * Math.sin(T * 4)); if (Math.random() < 0.25) fx.spark(p.x + U.rr(-9, 9), p.y - dh / 2 + 6, U.rr(-8, 8), U.rr(-30, -12), 0.7, '#ffe9a0', 2, -10); V.add(ctx, 'fx_orb', '#b890ff', X + f * 12, Y - dh * 0.18, 18, 18, 0, 0.35 + 0.25 * fl); }
+    else if (cls === 'engineer') { V.add(ctx, 'fx_orb', '#4dffb0', X - f * 13, Y - dh * 0.12, 26 + 4 * fl, 26 + 4 * fl, 0, 0.55 * fl + 0.2); V.add(ctx, 'fx_burst', '#8affd0', X - f * 13, Y - dh * 0.12, 18, 18, T * 2, 0.5 * fl); if (Math.random() < 0.2) fx.spark(p.x - f * 13, p.y - dh * 0.12, U.rr(-10, 10) - f * 20, U.rr(-35, -10), 0.5, '#8affd0', 2, -20); }
+    else { V.add(ctx, 'fx_orb', '#27e6ff', X + f * 3, top + dh * 0.17, 18, 12, 0, 0.55 * fl + 0.25); if (Math.sin(T * 1.3) > 0.97) V.add(ctx, 'fx_burst', '#9fffff', X + f * 3, top + dh * 0.17, 26, 26, 0, 0.9); V.add(ctx, 'fx_orb', '#ffb347', X + f * 22, Y - dh * 0.05, 14, 14, 0, 0.18 + 0.12 * fl); }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  };
 })();

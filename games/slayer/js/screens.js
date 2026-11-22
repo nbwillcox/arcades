@@ -75,6 +75,7 @@
       ui.text('HAZARDS', px + 12, py + 88, '#ffd700', 1); var hn = { slag: 'MOLTEN SLAG', conveyor: 'CONVEYORS', storm: 'STORMS', lasers: 'LASER GRIDS', acid: 'ACID POOLS', ice: 'SLIPPERY ICE', rings: 'PLASMA RINGS' }; ui.text(S.hz.length ? S.hz.map(function (h) { return hn[h]; }).join(', ') : 'NONE - WARM UP', px + 12, py + 100, '#fff', 1, 'left', false);
       ui.text('LENGTH', px + 12, py + 122, '#ffd700', 1); ui.text(U.fmt(CS.BAL.stageSec(n - 1, d.blitz)) + (d.blitz ? ' BLITZ' : ' STANDARD') + ' + BOSS', px + 12, py + 134, '#fff', 1);
       ui.text('BEST CLEAR', px + 12, py + 156, '#ffd700', 1); ui.text(d.best[n] ? U.fmt(d.best[n]) : '--', px + 12, py + 168, '#fff', 1);
+      var L = CS.LV.DEF[n - 1]; ui.text('BARRIERS', px + 12, py + 190, '#ffd700', 1); ui.text(L.on, px + 12, py + 202, '#fff', 1, 'left', false); ui.text('TRAPS', px + 12, py + 224, '#ffd700', 1); ui.text(L.tn || 'NONE', px + 12, py + 236, '#fff', 1, 'left', false); ui.text('WEATHER', px + 12, py + 258, '#ffd700', 1); ui.text(L.wn, px + 12, py + 270, '#fff', 1, 'left', false);
       var bs2 = A.spr['boss_' + (n - 1)]; A.draw(ctx, 'boss_' + (n - 1), px + pw - 90, py + 130, false, false, 150 / Math.max(bs2.dw, bs2.dh));
     } else ui.text(n === 10 ? 'DEFEAT ALL NINE SECTOR BOSSES' : 'SPEND A DECRYPTION KEY TO UNLOCK', px + 12, py + 60, '#ff9a7a', 1);
     ui.text('YOUR SLAYER', px + 12, py + ph - 70, '#ffd700', 1); ui.text(C().n, px + 12, py + ph - 58, C().c, 1);

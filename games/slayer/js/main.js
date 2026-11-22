@@ -84,7 +84,7 @@
     ui.begin(ctx, dt);
     switch (M.state) {
       case 'title': SC.title(ctx); break; case 'class': SC.class(ctx); break; case 'levels': SC.levels(ctx); break; case 'shop': SC.shop(ctx); break; case 'result': SC.result(ctx, M); break;
-      case 'combat': G.draw(ctx); bloom(ctx); ctx.drawImage(CS.art.vignette(), 0, 0); ui.hud(ctx); fx.drawXp(ctx); break;
+      case 'combat': G.draw(ctx); CS.LV.drawWeather(ctx); bloom(ctx); ctx.drawImage(CS.art.vignette(), 0, 0); ui.hud(ctx); fx.drawXp(ctx); break;
       case 'settings': SC.settings(ctx, M); break; case 'draft': SC.draft(ctx, M); break; case 'chest': SC.chest(ctx, M); break; case 'pause': SC.pause(ctx, M); break;
     }
     if (M.state !== 'combat') { ui.hints(M.state); In.endFrame(); } else if (ticked) { In.p = {}; In.taps.length = 0; ticked = false; }

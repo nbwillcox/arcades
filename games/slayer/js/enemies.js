@@ -41,6 +41,7 @@
         for (j = 0; j < nb; j++) { o = G.tmp[j]; if (o === e) continue; var sx = e.x - o.x, sy = e.y - o.y, sd = Math.sqrt(sx * sx + sy * sy) || 0.5; mvx += sx / sd * 30; mvy += sy / sd * 30; }
       }
       e.x += (mvx + e.kx) * dt; e.y += (mvy + e.ky) * dt; e.kx *= ex; e.ky *= ex;
+      if (!e.boss && e.type !== 'ghost' && e.type !== 'banshee') { e.vx = mvx; e.vy = mvy; CS.LV.push(e); }
       if (Math.abs(dx) > 3) e.face = dx > 0 ? 1 : -1;
       // contact damage
       if (d < e.r + p.r + 2 && e.cd <= 0 && e.stun <= 0 && !(e.st === 1)) { e.cd = 0.6; G.hurtPlayer(e.dmg * (e.boss ? 1.3 : 1), e.x, e.y, 'contact'); }
