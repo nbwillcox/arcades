@@ -205,8 +205,8 @@
   /* ---------- manifest loader: PNG overrides ---------- */
   A.init = function () { makeSprites(); makeBosses(); };
   A.load = function () {
-    return fetch('assets/manifest.json').then(function (r) { return r.json(); }).then(function (m) {
-      var jobs = [], k;
+    return fetch('assets/manifest.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (m) {
+      var jobs = [], k, Q = m.ver ? '?v=' + m.ver : '';
       Object.keys(m.sprites || {}).forEach(function (key) {
         var e = m.sprites[key], file = typeof e === 'string' ? e : e.file, frames = (e && e.frames) || 1, scale = e && e.scale;
         jobs.push(new Promise(function (res) {
@@ -216,10 +216,10 @@
             var tm = key.match(/^tile_(\d)$/); if (tm) { A.tiles[+tm[1]] = cv; res(); return; }
             if (key === 'title_bg') { A.titleBg = cv; res(); return; }
             A.spr[key] = { c: cv, w: im.width, h: im.height, fw: im.width / frames, frames: frames, dw: dw, dh: dh, white: null, fc: null, fwhite: null, proc: false }; A.loaded++; res();
-          }; im.onerror = function () { res(); }; im.src = file;
+          }; im.onerror = function () { res(); }; im.src = file + Q;
         }));
       });
-      Object.keys(m.audio || {}).forEach(function (key) { jobs.push(CS.audio.loadSample(key, m.audio[key])); });
+      Object.keys(m.audio || {}).forEach(function (key) { jobs.push(CS.audio.loadSample(key, m.audio[key] + Q)); });
       return Promise.all(jobs);
     }).catch(function () { });
   };

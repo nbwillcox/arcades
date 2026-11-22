@@ -10,8 +10,8 @@
     else if (kind === 'sniper') { hp = 28 * (1 + 0.3 * (k - 1)); m.r = 5; }
     else if (kind === 'aegis') { hp = 40 * (1 + 0.3 * (k - 1)); m.r = 6; }
     else if (kind === 'detonator') { hp = 14; m.r = 5; }
-    else { hp = 200 + 70 * k; m.r = 12; m.sz = 1; }
-    m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + (kind === 'giant' ? 'fusion' : kind) + '_' + G.cls; return m;
+    else { hp = 200 + 70 * k; m.r = 14; m.sz = 1.4; }
+    m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + (kind === 'giant' ? 'fusion' : kind) + '_' + G.cls; if (!CS.art.spr[m.spr]) m.spr = 'mn_giant_' + G.cls; return m;
   };
   var KINDS = ['vanguard', 'sniper', 'aegis', 'detonator'];
   var counts = { vanguard: 0, sniper: 0, aegis: 0, detonator: 0, giant: 0 };
@@ -27,7 +27,7 @@
     cand.sort(function (a, b) { return Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y); }); cand = cand.slice(0, 3);
     var cx = p.x + p.face * 26, cy = p.y - 6, hp = 0;
     cand.forEach(function (c) { hp += c.hp; fx.v('line', c.x, c.y, { x2: cx, y2: cy, c: '#ff4fd8', w: 3, life: 0.35 }); fx.burst(c.x, c.y, 8, '#ff4fd8', 90, 0.4, 2); c.dead = true; c.hp = 0; });
-    var g = MN.spawn('giant', cx, cy, it); if (!g) return false; g.mhp = g.hp = Math.round(g.mhp + hp * 0.6); if (it.lv >= 10) { g.mhp = g.hp = Math.round(g.mhp * 1.8); g.sz = 1.6; g.r = 16; }
+    var g = MN.spawn('giant', cx, cy, it); if (!g) return false; g.mhp = g.hp = Math.round(g.mhp + hp * 0.6); if (it.lv >= 10) { g.mhp = g.hp = Math.round(g.mhp * 1.8); g.sz = 1.9; g.r = 18; }
     g.cd = 0.4; fx.v('ring', cx, cy, { r: 8, r2: 90, c: '#ff4fd8', w: 4, life: 0.45 }); fx.v('flash', cx, cy, { r: 34, c: '#ffffff', life: 0.22 }); fx.v('fireball', cx, cy, { r: 90, c: '#ff4fd8', life: 0.45, rot: 0 });
     AU.sfx('summon'); AU.sfx('levelup', 0.6); fx.num(cx, cy - 30, 'FUSION!', '#ff4fd8', 2); fx.num(cx, cy - 16, CS.CLASSES[G.cls].mn.fusion, '#ffffff', 1); fx.shake(0.3);
     return true;
@@ -93,11 +93,11 @@
     var A = CS.art, a = G.mn, i, m, X, Y, sp, hh, ww, py = G.p.y;
     for (i = 0; i < a.n; i++) {
       m = a.a[i]; if (mode === 'back' ? m.y >= py : m.y < py) continue; X = m.x - cx; Y = m.y - cy; if (X < -80 || X > CS.W + 80 || Y < -80 || Y > CS.H + 80) continue;
-      sp = A.spr[m.spr]; hh = sp ? sp.dh * m.sz : m.r * 2; ww = sp ? sp.dw * m.sz : m.r * 2;
+      var key = m.giant && A.spr['mn_fusion_' + G.cls] ? 'mn_fusion_' + G.cls : m.spr; sp = A.spr[key]; hh = sp ? sp.dh * m.sz : m.r * 2; ww = sp ? sp.dw * m.sz : m.r * 2;
       ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(Math.round(X), Math.round(Y + hh / 2 - 3), ww * 0.32, 3, 0, 0, 6.283); ctx.fill();
       if (m.kind === 'aegis') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.45; ctx.drawImage(A.glow('#ffe44d'), Math.round(X - ww * 0.7), Math.round(Y - ww * 0.7), Math.round(ww * 1.4), Math.round(ww * 1.4)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
       var hover = (m.kind === 'aegis' || m.kind === 'detonator' || /^mn_(sniper|detonator|aegis)_engineer/.test(m.spr)) ? Math.sin(m.t * 5) * 2 - 3 : -Math.abs(Math.sin(m.t * 8)) * 1.5;
-      A.draw(ctx, m.spr, X, Y + hover, m.face < 0, m.flash > 0, m.sz);
+      A.draw(ctx, key, X, Y + hover, m.face < 0, m.flash > 0, m.sz);
       if (m.hp < m.mhp) { var w = Math.max(14, ww * 0.6); ctx.fillStyle = '#000'; ctx.fillRect(Math.round(X - w / 2), Math.round(Y - hh / 2 - 6), w, 2); ctx.fillStyle = '#5cff8a'; ctx.fillRect(Math.round(X - w / 2), Math.round(Y - hh / 2 - 6), Math.max(1, Math.round(w * m.hp / m.mhp)), 2); }
     }
   };
