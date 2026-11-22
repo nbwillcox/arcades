@@ -1,5 +1,5 @@
 /* CYBER SLAYER SURVIVOR - config & balance tables. Free for non-commercial use: link back to https://nictools.dev or the GitHub repo. */
-var CS = window.CS = { W: 960, H: 540, VER: '0.0.1',
+var CS = window.CS = { W: 960, H: 540, VER: '0.0.11',
   LINKS: { site: 'https://nictools.dev', repo: 'https://github.com/nbwillcox/CyberSlayerSurvivor' } };
 
 /* ---------- rarity (5 tiers) ---------- */

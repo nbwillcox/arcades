@@ -106,9 +106,9 @@
   WP.cardInfo = function (card) {
     if (card.kind === 'heal') return { name: 'REPAIR KIT', lv: 'RESTORE 50% HP', desc: 'NO UPGRADES AVAILABLE. PATCH UP.', c: '#5cff8a' };
     if (card.kind === 'gold') return { name: 'GOLD CACHE', lv: '+' + card.v + ' GOLD', desc: 'NO UPGRADES AVAILABLE.', c: '#ffd700' };
-    var d = CS.ITEMS[card.id], it = G.p.items[card.id], nl = card.to !== undefined ? card.to : (it ? it.lv + 1 : 1), fl = card.from !== undefined ? card.from : nl - 1, desc;
-    if (nl === 1) desc = d.d; else if (nl === 5) desc = 'AWAKENING: ' + d.a5 + ' - ' + d.t5; else if (nl === 10) desc = 'APEX: ' + d.a10 + ' - ' + d.t10; else desc = d.u + ' (x' + CS.RAR[card.rar].m + ')';
-    return { name: CS.itemName(card.id, G.cls), lv: (card.dbl ? 'DOUBLE! ' : '') + (fl === 0 ? 'NEW  LV ' + nl : 'LV ' + fl + ' > LV ' + nl), desc: desc, c: d.c, bonus: card.bon ? BONS[card.bon] : null, cat: d.cat, awak: nl === 5 || nl === 10 || !!card.dbl };
+    var d = CS.ITEMS[card.id], it = G.p.items[card.id], nl = card.to !== undefined ? card.to : (it ? it.lv + 1 : 1), fl = card.from !== undefined ? card.from : nl - 1, desc, list = null;
+    if (nl === 1) desc = d.d; else if (nl === 5) desc = 'AWAKENING: ' + d.a5 + ' - ' + d.t5; else if (nl === 10) desc = 'APEX: ' + d.a10 + ' - ' + d.t10; else { desc = ''; list = d.u.split(',').map(function (t) { return t.trim().replace(/^\+/, ''); }); }
+    return { name: CS.itemName(card.id, G.cls), lv: (card.dbl ? 'DOUBLE! ' : '') + (fl === 0 ? 'NEW  LV ' + nl : 'LV ' + fl + ' > LV ' + nl), desc: desc, list: list, mult: list ? CS.RAR[card.rar].m : 0, c: d.c, bonus: card.bon ? BONS[card.bon] : null, cat: d.cat, awak: nl === 5 || nl === 10 || !!card.dbl };
   };
   WP.openChest = function () {
     var gold = Math.round((250 + G.stage * 83) * (0.9 + Math.random() * 0.2) * (1 + 0.08 * SV.sharedRank('greed')));
