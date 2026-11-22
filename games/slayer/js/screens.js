@@ -21,6 +21,7 @@
     ui.text('WASD / ARROWS / PAD STICK / TOUCH TO MOVE.   ENTER SELECTS.   ESC PAUSES.', W >> 1, 468, '#6a7a98', 1, 'center');
     ui.text('FREE FOR NON-COMMERCIAL USE  -  CC BY-NC 4.0  -  LINK BACK REQUIRED', W >> 1, 490, '#9fb4d0', 1, 'center');
     arcadeBtn('arc', 12, 12);
+    ui.text('V' + CS.VER, W - 8, H - 12, '#7a8aa8', 1, 'right');
     ui.link('lk1', W / 2 - 170, 506, 150, 'NICTOOLS.DEV', CS.LINKS.site); ui.link('lk2', W / 2 + 20, 506, 150, 'GITHUB REPO', CS.LINKS.repo);
   };
 

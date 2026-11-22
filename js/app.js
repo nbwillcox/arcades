@@ -8,7 +8,7 @@
   const byId = Object.fromEntries(GAMES.map((g) => [g.id, g]));
   const GENRE_NAME = { shoot: 'Shooter', action: 'Action', puzzle: 'Puzzle & Maze', race: 'Racing & Driving' };
 
-  const ARC_VER = 6; // bump with every deploy so games' index.html is refetched
+  const ARC_VER = 7; // bump with every deploy so games' index.html is refetched
   const store = {
     get(k, d) { try { const v = localStorage.getItem('arcades.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('arcades.' + k, JSON.stringify(v)); } catch (e) {} },
