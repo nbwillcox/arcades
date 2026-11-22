@@ -471,7 +471,7 @@
       if (e.type === 'hound' && e.st === 1) { var ddx = Math.cos(e.ang), ddy = Math.sin(e.ang); ctx.strokeStyle = '#ff4a4a'; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(X, Y); ctx.lineTo(X + ddx * 190, Y + ddy * 190); ctx.stroke(); ctx.globalAlpha = 1; }
       A.draw(ctx, e.spr, X, Y - (e.type === 'ghost' ? 3 + Math.sin(G.t * 4 + e.uid) * 2 : Math.abs(Math.sin(G.t * 9 + e.uid)) * 1.5), e.face < 0, e.flash > 0, e.big * (e.elite ? 1.25 : 1));
     }
-    CS.MN.draw(ctx, cx, cy);
+    CS.MN.draw(ctx, cx, cy, 'back');
     // player
     X = p.x - cx; Y = p.y - cy;
     var psp = A.spr[G.cls], foot = psp ? psp.dh / 2 - 3 : 10; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(Math.round(X), Math.round(Y + foot), 10, 3, 0, 0, 6.283); ctx.fill();
@@ -480,6 +480,7 @@
     CS.V.heroBelow(ctx, X, Y, p, G.cls, psp);
     if (!(p.inv > 0 && Math.floor(G.t * 20) % 2 && p.aegisT <= 0)) A.draw(ctx, G.cls, X, Y - Math.abs(Math.sin(p.bob)) * 2, p.face < 0, p.flash > 0);
     CS.V.heroAbove(ctx, X, Y - Math.abs(Math.sin(p.bob)) * 2, p, G.cls, psp);
+    CS.MN.draw(ctx, cx, cy, 'front');
     CS.WP.drawPlayerFx(ctx, cx, cy);
     drawShots(ctx, cx, cy);
     drawZones(ctx, cx, cy, true); drawWarn(ctx, cx, cy);

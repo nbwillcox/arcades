@@ -392,7 +392,7 @@
 
   /* minion items: spawning handled by MN; fusion has its own timer */
   ['vanguard', 'sniper', 'aegis', 'detonator'].forEach(function (id) { UP[id] = function (it, dt) { /* maintained in MN.update */ }; });
-  UP.fusion = function (it, dt) { it.t += dt; var interval = Math.max(7, 20 - 1.2 * it.pw) * (it.lv >= 10 ? 0.55 : 1); if (it.t >= interval) { if (CS.MN.fuse(it)) it.t = 0; else it.t = interval - 1.5; } };
+  UP.fusion = function (it, dt) { it.t += dt; var interval = Math.max(6, 14 - 0.8 * it.pw) * (it.lv >= 10 ? 0.6 : 1); if (it.t >= interval) { if (CS.MN.fuse(it)) it.t = 0; else it.t = interval - 1.5; } };
   ['plating', 'regen', 'deflector', 'thrusters', 'graviton'].forEach(function (id) { UP[id] = function () { }; });
   WP.update = function (it, dt) { UP[it.id](it, dt); };
 

@@ -11,7 +11,7 @@
     else if (kind === 'aegis') { hp = 40 * (1 + 0.3 * (k - 1)); m.r = 6; }
     else if (kind === 'detonator') { hp = 14; m.r = 5; }
     else { hp = 200 + 70 * k; m.r = 12; m.sz = 1; }
-    m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + kind + '_' + G.cls; return m;
+    m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + (kind === 'giant' ? 'fusion' : kind) + '_' + G.cls; return m;
   };
   var KINDS = ['vanguard', 'sniper', 'aegis', 'detonator'];
   var counts = { vanguard: 0, sniper: 0, aegis: 0, detonator: 0, giant: 0 };
@@ -22,13 +22,14 @@
   };
   MN.healAll = function () { for (var i = 0; i < G.mn.n; i++) G.mn.a[i].hp = G.mn.a[i].mhp; };
   MN.fuse = function (it) {
-    var p = G.p, cand = [], i, m, maxG = 1 + Math.floor(it.lv / 3) + (it.bon.proj || 0); countAll(); if (counts.giant >= maxG) return false;
-    for (i = 0; i < G.mn.n; i++) { m = G.mn.a[i]; if (!m.giant && !m.dead) cand.push(m); }
-    if (cand.length < 3) return false;
+    var p = G.p, cand = [], i, m, maxG = 1 + Math.floor(it.lv / 3) + (it.bon.proj || 0); countAll(); if (counts.giant >= maxG || G.mn.n >= 60) return false;
+    for (i = 0; i < G.mn.n; i++) { m = G.mn.a[i]; if (!m.giant && !m.dead && m.life <= 0) cand.push(m); }
     cand.sort(function (a, b) { return Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y); }); cand = cand.slice(0, 3);
-    var cx = 0, cy = 0, hp = 0; cand.forEach(function (c) { cx += c.x / 3; cy += c.y / 3; hp += c.hp; c.dead = true; c.hp = 0; });
+    var cx = p.x + p.face * 26, cy = p.y - 6, hp = 0;
+    cand.forEach(function (c) { hp += c.hp; fx.v('line', c.x, c.y, { x2: cx, y2: cy, c: '#ff4fd8', w: 3, life: 0.35 }); fx.burst(c.x, c.y, 8, '#ff4fd8', 90, 0.4, 2); c.dead = true; c.hp = 0; });
     var g = MN.spawn('giant', cx, cy, it); if (!g) return false; g.mhp = g.hp = Math.round(g.mhp + hp * 0.6); if (it.lv >= 10) { g.mhp = g.hp = Math.round(g.mhp * 1.8); g.sz = 1.6; g.r = 16; }
-    fx.v('ring', cx, cy, { r: 8, r2: 70, c: '#ff4fd8', w: 4, life: 0.4 }); fx.v('flash', cx, cy, { r: 26, c: '#fff', life: 0.2 }); AU.sfx('summon'); fx.num(cx, cy - 24, CS.CLASSES[G.cls].mn.fusion, '#ff4fd8', 1); fx.shake(0.2);
+    g.cd = 0.4; fx.v('ring', cx, cy, { r: 8, r2: 90, c: '#ff4fd8', w: 4, life: 0.45 }); fx.v('flash', cx, cy, { r: 34, c: '#ffffff', life: 0.22 }); fx.v('fireball', cx, cy, { r: 90, c: '#ff4fd8', life: 0.45, rot: 0 });
+    AU.sfx('summon'); AU.sfx('levelup', 0.6); fx.num(cx, cy - 30, 'FUSION!', '#ff4fd8', 2); fx.num(cx, cy - 16, CS.CLASSES[G.cls].mn.fusion, '#ffffff', 1); fx.shake(0.3);
     return true;
   };
 
@@ -88,10 +89,10 @@
     if (lv >= 10) fx.shake(0.4);
   };
 
-  MN.draw = function (ctx, cx, cy) {
-    var A = CS.art, a = G.mn, i, m, X, Y, sp, hh, ww;
+  MN.draw = function (ctx, cx, cy, mode) {
+    var A = CS.art, a = G.mn, i, m, X, Y, sp, hh, ww, py = G.p.y;
     for (i = 0; i < a.n; i++) {
-      m = a.a[i]; X = m.x - cx; Y = m.y - cy; if (X < -80 || X > CS.W + 80 || Y < -80 || Y > CS.H + 80) continue;
+      m = a.a[i]; if (mode === 'back' ? m.y >= py : m.y < py) continue; X = m.x - cx; Y = m.y - cy; if (X < -80 || X > CS.W + 80 || Y < -80 || Y > CS.H + 80) continue;
       sp = A.spr[m.spr]; hh = sp ? sp.dh * m.sz : m.r * 2; ww = sp ? sp.dw * m.sz : m.r * 2;
       ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(Math.round(X), Math.round(Y + hh / 2 - 3), ww * 0.32, 3, 0, 0, 6.283); ctx.fill();
       if (m.kind === 'aegis') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.45; ctx.drawImage(A.glow('#ffe44d'), Math.round(X - ww * 0.7), Math.round(Y - ww * 0.7), Math.round(ww * 1.4), Math.round(ww * 1.4)); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
