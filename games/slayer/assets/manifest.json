@@ -255,7 +255,20 @@
     "icon_graviton": {
       "file": "assets/sprites/icon_graviton.png",
       "scale": 1
-    }
+    },
+    "fx_fireball": "assets/sprites/fx_fireball.png",
+    "fx_flame": "assets/sprites/fx_flame.png",
+    "fx_holyflame": "assets/sprites/fx_holyflame.png",
+    "fx_lightning": "assets/sprites/fx_lightning.png",
+    "fx_ring": "assets/sprites/fx_ring.png",
+    "fx_circle": "assets/sprites/fx_circle.png",
+    "fx_burst": "assets/sprites/fx_burst.png",
+    "fx_swirl": "assets/sprites/fx_swirl.png",
+    "fx_slash": "assets/sprites/fx_slash.png",
+    "fx_orb": "assets/sprites/fx_orb.png",
+    "fx_beam": "assets/sprites/fx_beam.png",
+    "fx_cloud": "assets/sprites/fx_cloud.png",
+    "fx_spark": "assets/sprites/fx_spark.png"
   },
   "audio": {
     "music_menu": "assets/audio/music_menu.mp3",
