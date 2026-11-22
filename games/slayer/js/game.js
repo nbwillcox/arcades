@@ -62,14 +62,15 @@
   var TCOL = { phys: '#ffffff', energy: '#7df3ff', holy: '#ffe44d', fire: '#ff9a3c', poison: '#7dff5a', tesla: '#c9a3ff', explosive: '#ffb347' };
   G.hit = function (e, dmg, o) {
     if (e.dead || e.inv > 0) return 0; o = o || {}; var p = G.p, it = o.src ? p.items[o.src] : null, crit = false, cc = p.crit + (o.critAdd || 0) + (it && it.bon.crit ? it.bon.crit : 0);
-    if (!o.noCrit && Math.random() < cc) { crit = true; dmg *= p.critMul * (o.critMul || 1); G.stats.crits++; }
-    dmg *= p.dmgMul * (o.mul || 1);
+    var ifx = it ? it.fx : null; if (ifx) cc += ifx.crit || 0;
+    if (!o.noCrit && Math.random() < cc) { crit = true; dmg *= (p.critMul + (ifx ? ifx.critdmg || 0 : 0)) * (o.critMul || 1); G.stats.crits++; }
+    dmg *= p.dmgMul * (o.mul || 1) * (1 + (ifx ? ifx.dmg || 0 : 0));
     if (o.purge) dmg *= e.tag === 'demon' ? 1.5 : e.tag === 'undead' ? 1.25 : 1;
     var ar = e.shred > 0 ? 0 : e.armor; dmg = Math.max(dmg * 0.2, dmg - ar);
     if (e.boss && e.act && e.act.name === 'blink' && e.act.t < 0.4) dmg *= 0.3;
     e.hp -= dmg; e.flash = 3; e.last = o.src || '';
     var st = G.stats.dmg; if (o.src) st[o.src] = (st[o.src] || 0) + dmg;
-    if (o.kb) { var f = o.kb * (1 - e.kbr) * (crit && p.items.slug === undefined ? 1 : 1) * (1 + (o.src === 'slug' && crit ? (G.C.id === 'gunner' ? SV.classRank('gunner', 'hollow') * 0.08 : 0) : 0)); e.kx += (o.dx || 0) * f; e.ky += (o.dy || 0) * f; }
+    if (o.kb) { var f = o.kb * (1 + (ifx ? ifx.knockback || 0 : 0)) * (1 - e.kbr) * (crit && p.items.slug === undefined ? 1 : 1) * (1 + (o.src === 'slug' && crit ? (G.C.id === 'gunner' ? SV.classRank('gunner', 'hollow') * 0.08 : 0) : 0)); e.kx += (o.dx || 0) * f; e.ky += (o.dy || 0) * f; }
     var tcol = TCOL[o.type || 'phys'];
     fx.num(e.x, e.y - e.r, Math.max(1, Math.round(dmg)), crit ? (it ? CS.RAR[it.rar].t : '#ffe44d') : tcol, crit ? 2 : 1);
     if (!o.quiet) { if (crit || Math.random() < 0.35) CS.V.impact(e.x, e.y, tcol, crit); AU.sfx(crit ? 'crit' : 'hit'); if (Math.random() < 0.4) fx.spark(e.x, e.y, (Math.random() - 0.5) * 120, (Math.random() - 0.5) * 120, 0.25, crit ? '#ffe44d' : '#fff', 2); }
@@ -83,7 +84,7 @@
   };
 
   G.explode = function (x, y, r, dmg, o) {
-    o = o || {}; var n = G.near(x, y, r), i, e, a, d, list = [];
+    o = o || {}; var eit = o.src && G.p.items[o.src]; if (eit && eit.fx.area) r *= 1 + eit.fx.area; var n = G.near(x, y, r), i, e, a, d, list = [];
     for (i = 0; i < n; i++) list.push(G.tmp[i]);
     for (i = 0; i < list.length; i++) {
       e = list[i]; a = Math.atan2(e.y - y, e.x - x);
@@ -124,6 +125,7 @@
   G.shot = function (x, y, ang, spd, dmg, o) {
     var s = G.sh.spawn(); if (!s) return null; o = o || {};
     s.x = x; s.y = y; s.vx = Math.cos(ang) * spd; s.vy = Math.sin(ang) * spd; s.ang = ang; s.dmg = dmg; s.r = o.r || 4; s.life = o.life || 1.4; s.pierce = o.pierce || 0; s.kb = o.kb || 0; s.src = o.src || ''; s.spr = o.spr || 'shot_slug';
+    var sit = G.p.items[s.src]; if (sit) { s.pierce += Math.floor(sit.fx.pierce || 0); s.life *= 1 + (sit.fx.range || 0); }
     s.bounce = o.bounce || 0; s.home = o.home || 0; s.hit.length = 0; s.saw = !!o.saw; s.split = o.split || 0; s.rot = 0; s.spin = o.spin || 0; s.grav = 0; s.boom = o.boom || 0; s.big = o.big || 1; s.crit = o.crit || 0; s.type = o.type || 'phys'; s.chain = o.chain || 0; s.purge = o.purge || false; s.bomb = 0;
     return s;
   };
@@ -134,10 +136,10 @@
   };
   G.zone = function (kind, x, y, o) {
     var z = G.zn.spawn(); if (!z) return null; z.kind = kind; z.x = x; z.y = y; z.r = 30; z.life = z.max = 2; z.t = 0; z.tt = 0; z.dps = 0; z.dmg = 0; z.spd = 0; z.id = 0; z.follow = false; z.burn = 0; z.c = '#fff'; z.src = ''; z.seed = false; z.n = 0; z.max2 = 0;
-    for (var k in o) z[k] = o[k]; z.max = z.life; return z;
+    for (var k in o) z[k] = o[k]; var zit = z.src && G.p.items[z.src]; if (zit) { z.life *= 1 + (zit.fx.range || 0); z.r *= 1 + (zit.fx.area || 0); if (z.max2) z.max2 *= 1 + (zit.fx.area || 0); } z.max = z.life; return z;
   };
   G.warn = function (x, y, r, delay, dmg, o) {
-    var w = G.wn.spawn(); if (!w) return null; o = o || {}; w.x = x; w.y = y; w.r = r; w.t = 0; w.delay = delay; w.dmg = dmg; w.fr = !!o.fr; w.c = o.c || '#ff4a4a'; w.src = o.src || ''; w.beam = !!o.beam; w.ring = !!o.ring; w.done = false; w.stun = o.stun || 0; w.burn = o.burn || 0; return w;
+    var w = G.wn.spawn(); if (!w) return null; o = o || {}; var wit = o.src && G.p.items[o.src]; if (wit && wit.fx.area) r *= 1 + wit.fx.area; w.x = x; w.y = y; w.r = r; w.t = 0; w.delay = delay; w.dmg = dmg; w.fr = !!o.fr; w.c = o.c || '#ff4a4a'; w.src = o.src || ''; w.beam = !!o.beam; w.ring = !!o.ring; w.done = false; w.stun = o.stun || 0; w.burn = o.burn || 0; return w;
   };
   G.beam = function (o) {
     var b = G.bm.spawn(); if (!b) return null; b.x = o.x || 0; b.y = o.y || 0; b.ang = o.ang || 0; b.len = o.len || 600; b.w = o.w || 6; b.tele = o.tele === undefined ? 0.8 : o.tele; b.life = o.life || 1; b.t = 0; b.dmg = o.dmg || 10; b.own = o.own || null; b.rot = o.rot || 0; b.tick = 0; b.sym = !!o.sym; b.c = o.c || '#ff4a4a'; return b;
@@ -385,7 +387,7 @@
     director(dt); hazards(dt);
     // player movement
     var mv = In.move(), spd = p.spd * (p.spdMul || 1) * (p.inPool === 2 ? 0.6 : 1), k = p.slide ? 2.4 : 15, f = 1 - Math.exp(-k * dt), thr = p.items.thrusters;
-    p.mdMax = 1.7 * (1 - Math.min(0.4, 0.04 * (thr ? thr.pw : 0))); if (p.mdCd > 0) p.mdCd -= dt;
+    p.mdMax = 1.7 * (1 - Math.min(0.5, 0.04 * (thr ? thr.pw : 0) + (thr ? thr.fx.dashcd || 0 : 0))); if (p.mdCd > 0) p.mdCd -= dt;
     if (In.p.dash && p.mdCd <= 0 && p.dashT <= 0) { var dl = Math.hypot(mv.x, mv.y); p.ddx = dl > 0.1 ? mv.x / dl : p.face; p.ddy = dl > 0.1 ? mv.y / dl : 0; p.dashT = 0.17; p.mdCd = p.mdMax; p.inv = Math.max(p.inv, 0.3); AU.sfx('dodge'); In.rumble(35, 0.3); fx.v('flash', p.x, p.y, { r: 16, c: '#9fefff', life: 0.18 }); }
     if (p.dashT > 0) { p.dashT -= dt; p.vx = p.ddx * 580; p.vy = p.ddy * 580; fx.spark(p.x + (Math.random() - 0.5) * 8, p.y + (Math.random() - 0.5) * 10, -p.ddx * 40, -p.ddy * 40, 0.3, Math.random() < 0.5 ? '#9fefff' : '#ffffff', 3); p.x += p.vx * dt; p.y += p.vy * dt; }
     else { p.vx += (mv.x * spd - p.vx) * f; p.vy += (mv.y * spd - p.vy) * f; p.x += p.vx * dt; p.y += p.vy * dt; }

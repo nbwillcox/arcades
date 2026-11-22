@@ -5,28 +5,30 @@
 
   function cls() { return G.cls; }
   function cd(it, base, dec, min) {
-    var p = G.p, v = base * Math.pow(1 - dec, it.pw - 1); v = Math.max(min || base * 0.35, v); v /= (1 + (it.bon.aspd || 0));
+    var p = G.p, v = base * Math.pow(1 - dec, it.pw - 1); v = Math.max(min || base * 0.35, v); v /= (1 + (it.bon.aspd || 0) + (it.fx.speed || 0));
     v *= p.cdMul * (CS.ITEMS[it.id].bal ? p.balMul : 1) * (p.staticT > 0 ? 1.4 : 1); return v;
   }
   function sc(it, per) { return 1 + (per || 0.3) * (it.pw - 1); }
-  function pp(it) { return it.bon.proj || 0; }
+  function pp(it) { return (it.bon.proj || 0) + Math.floor(it.fx.count || 0); }
 
   /* ---------------- stats / recalc ---------------- */
   WP.recalc = function () {
     var p = G.p, C = G.C, it = p.items, sh = SV.sharedRank, oldMax = p.maxHp, k, hpb = 0, id;
-    for (id in it) if (it[id].bon.hp) hpb += 0.15 * it[id].bon.hp;
-    p.maxHp = Math.round(C.hp * (1 + 0.08 * sh('chassis')) * (1 + hpb));
-    p.armor = C.armor + sh('plating') + (it.plating ? 2 * it.plating.pw : 0);
-    p.spd = C.spd * (1 + (it.thrusters ? Math.min(0.5, 0.04 * it.thrusters.pw) : 0));
-    p.dodge = it.thrusters ? Math.min(0.3, 0.03 * it.thrusters.pw) : 0;
-    p.pick = C.pick * (1 + 0.08 * sh('magnet'));
-    p.xpMul = 1 + 0.06 * sh('neural');
-    p.goldMul = 1 + 0.08 * sh('greed') + (it.graviton ? 0.06 * it.graviton.pw : 0);
-    p.crit = C.crit + (G.cls === 'gunner' ? 0.015 * SV.classRank('gunner', 'hollow') : 0);
-    p.critMul = 1.5 + (it.graviton ? 0.25 * it.graviton.pw : 0);
+    var A = { hp: 0, armor: 0, regen: 0, dodge: 0, movespeed: 0, pickup: 0, gold: 0, xp: 0, crit: 0, critdmg: 0 }, key;
+    for (id in it) { if (it[id].bon.hp) hpb += 0.15 * it[id].bon.hp; if (CS.UTIL[id]) for (key in A) A[key] += it[id].fx[key] || 0; }
+    p.fxs = A;
+    p.maxHp = Math.round(C.hp * (1 + 0.08 * sh('chassis')) * (1 + hpb + A.hp));
+    p.armor = C.armor + sh('plating') + (it.plating ? 2 * it.plating.pw : 0) + A.armor;
+    p.spd = C.spd * (1 + (it.thrusters ? Math.min(0.5, 0.04 * it.thrusters.pw) : 0) + A.movespeed);
+    p.dodge = Math.min(0.5, (it.thrusters ? Math.min(0.3, 0.03 * it.thrusters.pw) : 0) + A.dodge);
+    p.pick = C.pick * (1 + 0.08 * sh('magnet') + A.pickup);
+    p.xpMul = 1 + 0.06 * sh('neural') + A.xp;
+    p.goldMul = 1 + 0.08 * sh('greed') + (it.graviton ? 0.06 * it.graviton.pw : 0) + A.gold;
+    p.crit = C.crit + (G.cls === 'gunner' ? 0.015 * SV.classRank('gunner', 'hollow') : 0) + A.crit;
+    p.critMul = 1.5 + (it.graviton ? 0.25 * it.graviton.pw : 0) + A.critdmg;
     p.balMul = 1 - (G.cls === 'gunner' ? 0.03 * SV.classRank('gunner', 'reload') : 0);
-    p.regen = it.regen ? 0.4 * it.regen.pw + (it.regen.bon.reg || 0) : 0;
-    p.shieldMax = it.deflector ? 20 + 12 * it.deflector.pw : 0;
+    p.regen = (it.regen ? 0.4 * it.regen.pw + (it.regen.bon.reg || 0) : 0) + A.regen;
+    p.shieldMax = it.deflector ? 20 + 12 * it.deflector.pw + (it.deflector.fx.shield || 0) : 0;
     p.mAtk = (it.fusion && it.fusion.lv >= 5) ? 1.35 : 1;
     if (p.shield > p.shieldMax) p.shield = p.shieldMax;
     if (p.maxHp > oldMax && oldMax > 1) p.hp += p.maxHp - oldMax;
@@ -52,7 +54,7 @@
     CS.MN.clear(); CS.MN.fillAll();
   };
   WP.addItem = function (id, rar) {
-    var p = G.p, it = { id: id, lv: 1, pw: CS.RAR[rar].m, rar: rar, bon: {}, cd: 0.4, t: 0, t2: 0, n: 0, q: [], sh: [], dr: [], orb: [], spT: 0 };
+    var p = G.p, it = { id: id, lv: 1, pw: 1, rar: rar, bon: {}, fx: {}, cd: 0.4, t: 0, t2: 0, n: 0, q: [], sh: [], dr: [], orb: [], spT: 0 };
     p.items[id] = it; p.order.push(id); return it;
   };
   WP.offenseCount = function () { var n = 0, p = G.p; p.order.forEach(function (id) { var c = CS.ITEMS[id].cat; if (c !== 'defense') n++; }); return n; };
@@ -64,8 +66,24 @@
     for (i = 0; i < (min || 0); i++) ws[i] = 0;
     return U.weighted(ws);
   };
-  var BONS = { proj: '+1 PROJECTILE / UNIT', aspd: '+20% ATTACK SPEED', chain: 'CHAIN LIGHTNING', ls: '2% LIFESTEAL', hp: '+15% MAX HP', reg: '+1 HP/S REGEN' };
-  WP.bonusText = function (k) { return BONS[k]; };
+  WP.fxText = function (key, m) {
+    var e = CS.EFX[key], v = e.b * m, s;
+    if (e.p) s = (e.neg ? '-' : '+') + Math.round(v * 100) + '% ' + e.t; else s = '+' + (e.d === 2 ? v.toFixed(2) : e.d === 1 ? v.toFixed(1) : Math.round(v)) + ' ' + e.t;
+    return s;
+  };
+  WP.boostPool = function (id) {
+    var d = CS.ITEMS[id], util = !!CS.UTIL[id], out = [];
+    Object.keys(CS.BOOSTS).forEach(function (k) { var b = CS.BOOSTS[k]; if (util ? !b.util : !b.atk) return; if (b.need && d.fx.indexOf(b.need) < 0) return; out.push(k); });
+    return out;
+  };
+  function sample(list, n) { var a = list.slice(), o = []; while (o.length < n && a.length) o.push(a.splice(Math.floor(Math.random() * a.length), 1)[0]); return o; }
+  function applyBoost(it, k) {
+    var f = it.fx;
+    if (k === 'proj') it.bon.proj = (it.bon.proj || 0) + 1; else if (k === 'aspd') f.speed = (f.speed || 0) + 0.2; else if (k === 'dmg') f.dmg = (f.dmg || 0) + 0.15; else if (k === 'crit') f.crit = (f.crit || 0) + 0.1;
+    else if (k === 'chain') it.bon.chain = (it.bon.chain || 0) + 1; else if (k === 'ls') it.bon.ls = (it.bon.ls || 0) + 0.02; else if (k === 'area') f.area = (f.area || 0) + 0.15; else if (k === 'pierce') f.pierce = (f.pierce || 0) + 1;
+    else if (k === 'range') f.range = (f.range || 0) + 0.15; else if (k === 'hp') f.hp = (f.hp || 0) + 0.1; else if (k === 'regen') f.regen = (f.regen || 0) + 1; else if (k === 'armor') f.armor = (f.armor || 0) + 3;
+    else if (k === 'dodge') f.dodge = (f.dodge || 0) + 0.04; else if (k === 'movespeed') f.movespeed = (f.movespeed || 0) + 0.06;
+  }
   function candidates() {
     var p = G.p, out = [], off = WP.offenseCount();
     CS.ITEM_ORDER.forEach(function (id) {
@@ -78,7 +96,7 @@
   }
   function mkCard(c, minRar) {
     var d = CS.ITEMS[c.id], r = WP.rollRar(minRar), card = { kind: 'item', id: c.id, rar: r, isNew: c.isNew };
-    if (r === 4) { var opts = d.cat === 'defense' ? ['hp', 'reg'] : ['proj', 'aspd', 'chain', 'ls']; card.bon = U.pick(opts); }
+    card.fx = sample(d.fx, CS.TIER_FX[r]); card.bs = sample(WP.boostPool(c.id), CS.TIER_BOOST[r]);
     return card;
   }
   WP.hasUpgrades = function () { return candidates().length > 0; };
@@ -96,19 +114,21 @@
     var it = p.items[card.id], m = CS.RAR[card.rar].m;
     card.from = it ? it.lv : 0;
     if (!it) { it = WP.addItem(card.id, card.rar); }
-    else { it.lv++; it.pw += m * (it.lv > 5 ? 1.35 : 1); if (card.rar > it.rar) it.rar = card.rar; }
-    if (card.dbl && it.lv < 10) { it.lv++; it.pw += m * (it.lv > 5 ? 1.35 : 1); }   // duplicate roll: doubled upgrade
-    if (card.dbl) it.pw += m * 0.5;
+    else { it.lv++; it.pw += it.lv > 5 ? 1.35 : 1; if (card.rar > it.rar) it.rar = card.rar; }
+    var reps = card.dbl ? 2 : 1, r;
+    if (card.dbl && it.lv < 10) { it.lv++; it.pw += it.lv > 5 ? 1.35 : 1; }   // duplicate roll: doubled upgrade
+    for (r = 0; r < reps; r++) { (card.fx || []).forEach(function (k) { it.fx[k] = (it.fx[k] || 0) + CS.EFX[k].b * m; }); (card.bs || []).forEach(function (k) { applyBoost(it, k); }); }
     card.to = it.lv;
-    if (card.bon) it.bon[card.bon] = (it.bon[card.bon] || 0) + (card.bon === 'aspd' ? 0.2 : card.bon === 'ls' ? 0.02 : 1);
     WP.recalc(); CS.MN.fillAll();
   };
   WP.cardInfo = function (card) {
     if (card.kind === 'heal') return { name: 'REPAIR KIT', lv: 'RESTORE 50% HP', desc: 'NO UPGRADES AVAILABLE. PATCH UP.', c: '#5cff8a' };
     if (card.kind === 'gold') return { name: 'GOLD CACHE', lv: '+' + card.v + ' GOLD', desc: 'NO UPGRADES AVAILABLE.', c: '#ffd700' };
-    var d = CS.ITEMS[card.id], it = G.p.items[card.id], nl = card.to !== undefined ? card.to : (it ? it.lv + 1 : 1), fl = card.from !== undefined ? card.from : nl - 1, desc, list = null;
-    if (nl === 1) desc = d.d; else if (nl === 5) desc = 'AWAKENING: ' + d.a5 + ' - ' + d.t5; else if (nl === 10) desc = 'APEX: ' + d.a10 + ' - ' + d.t10; else { desc = ''; list = d.u.split(',').map(function (t) { return t.trim().replace(/^\+/, ''); }); }
-    return { name: CS.itemName(card.id, G.cls), lv: (card.dbl ? 'DOUBLE! ' : '') + (fl === 0 ? 'NEW  LV ' + nl : 'LV ' + fl + ' > LV ' + nl), desc: desc, list: list, mult: list ? CS.RAR[card.rar].m : 0, c: d.c, bonus: card.bon ? BONS[card.bon] : null, cat: d.cat, awak: nl === 5 || nl === 10 || !!card.dbl };
+    var d = CS.ITEMS[card.id], it = G.p.items[card.id], nl = card.to !== undefined ? card.to : (it ? it.lv + 1 : 1), fl = card.from !== undefined ? card.from : nl - 1, desc, m = CS.RAR[card.rar].m;
+    if (nl === 1) desc = d.d; else if (nl === 5) desc = 'AWAKENING: ' + d.a5 + ' - ' + d.t5; else if (nl === 10) desc = 'APEX: ' + d.a10 + ' - ' + d.t10; else desc = '';
+    var mul = card.dbl ? 2 : 1;
+    return { name: CS.itemName(card.id, G.cls), lv: (card.dbl ? 'DOUBLE! ' : '') + (fl === 0 ? 'NEW  LV ' + nl : 'LV ' + fl + ' > LV ' + nl), desc: desc,
+      list: (card.fx || []).map(function (k) { return WP.fxText(k, m * mul); }), boosts: (card.bs || []).map(function (k) { return (mul > 1 ? 'X2 ' : '') + CS.BOOSTS[k].t; }), c: d.c, cat: d.cat, awak: nl === 5 || nl === 10 || !!card.dbl };
   };
   WP.openChest = function () {
     var gold = Math.round((250 + G.stage * 83) * (0.9 + Math.random() * 0.2) * (1 + 0.08 * SV.sharedRank('greed')));
@@ -117,7 +137,7 @@
       cs = candidates().filter(function (c) { return !picked[c.id]; });
       if (cs.length) { var pk = cs[U.weighted(cs.map(function (c) { return c.w; }))], card = mkCard(pk, 2); picked[pk.id] = card; cards.push(card); WP.apply(card); continue; }
       var ids = Object.keys(picked);   // nothing new left: would duplicate -> boost an existing reward instead
-      if (ids.length && picked[ids[0]]) { var ex = picked[U.pick(ids)]; if (!ex.dbl) { ex.dbl = true; var it2 = G.p.items[ex.id]; if (it2 && it2.lv < 10) { it2.lv++; it2.pw += CS.RAR[ex.rar].m * (it2.lv > 5 ? 1.35 : 1); } if (it2) { it2.pw += CS.RAR[ex.rar].m * 0.5; ex.to = it2.lv; } WP.recalc(); CS.MN.fillAll(); continue; } }
+      if (ids.length && picked[ids[0]]) { var ex = picked[U.pick(ids)]; if (!ex.dbl) { ex.dbl = true; var it2 = G.p.items[ex.id]; if (it2 && it2.lv < 10) { it2.lv++; it2.pw += it2.lv > 5 ? 1.35 : 1; } if (it2) { (ex.fx || []).forEach(function (k) { it2.fx[k] = (it2.fx[k] || 0) + CS.EFX[k].b * CS.RAR[ex.rar].m; }); (ex.bs || []).forEach(function (k) { applyBoost(it2, k); }); ex.to = it2.lv; } WP.recalc(); CS.MN.fillAll(); continue; } }
       G.addGold(5000); cards.push({ kind: 'gold', rar: 3, v: 5000 });
     }
     return { gold: gold, cards: cards, t: 0 };
@@ -126,13 +146,13 @@
   /* ---------------- player-level systems ---------------- */
   WP.updatePlayer = function (dt) {
     var p = G.p, it = p.items, i;
-    p.spdMul = 1; if (!it.stim) p.cdMul = 1; if (p.litanyT > 0) { p.litanyT -= dt; if (it.litany && it.litany.lv >= 5) p.spdMul += 0.15; }
+    p.spdMul = 1; if (!it.stim) p.cdMul = 1; if (p.litanyT > 0) { p.litanyT -= dt; if (it.litany && it.litany.lv >= 5) p.spdMul += 0.15; p.spdMul += (it.litany ? it.litany.fx.movespeed || 0 : 0); }
     p.dmgMul = (it.stim && it.stim.lv >= 10 && (it.stim.fr || 0) >= 0.9 ? 1.4 : 1) * (p.litanyT > 0 ? p.litanyMul : 1);
     if (p.regen > 0 && p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + p.regen * dt);
     if (p.dashCd > 0) p.dashCd -= dt; if (p.burstCd > 0) p.burstCd -= dt; if (p.aegisCd > 0) p.aegisCd -= dt;
     if (p.aegisT > 0) { p.aegisT -= dt; p.inv = Math.max(p.inv, 0.1); }
     if (G.cls === 'engineer' && SV.classRank('engineer', 'nanites') > 0) { p.pulseT -= dt; if (p.pulseT <= 0) { p.pulseT = 5; var rk = SV.classRank('engineer', 'nanites'); G.heal(1 + rk * 1.5, true); fx.v('ring', p.x, p.y, { r: 6, r2: 40, c: '#4dffb0', w: 2, life: 0.4 }); } }
-    if (p.shieldMax > 0 && p.shield < p.shieldMax) { p.shieldT -= dt; if (p.shieldT <= 0) { var rate = 8 + 3 * it.deflector.pw; if (it.deflector.lv >= 10) rate *= 2.5; p.shield = Math.min(p.shieldMax, p.shield + rate * dt); } }
+    if (p.shieldMax > 0 && p.shield < p.shieldMax) { p.shieldT -= dt; if (p.shieldT <= 0) { var rate = (8 + 3 * it.deflector.pw) * (1 + (it.deflector.fx.recharge || 0)); if (it.deflector.lv >= 10) rate *= 2.5; p.shield = Math.min(p.shieldMax, p.shield + rate * dt); } }
     var mr = G.cls === 'priest' ? SV.classRank('priest', 'martyr') : 0;
     if (mr > 0 && p.holy > 0) { var cap = p.maxHp * (0.1 + 0.05 * mr); if (p.holy < cap && p.shieldT <= 0) p.holy = Math.min(cap, p.holy + mr * 0.6 * dt); if (p.holy > cap) p.holy = cap; }
     if (p.shieldT > 0 && p.shieldMax <= 0) p.shieldT -= dt;
@@ -143,7 +163,7 @@
     var p = G.p, it = p.items;
     if (it.plating && it.plating.lv >= 10 && p.hp < p.maxHp * 0.35 && p.aegisCd <= 0) { p.aegisT = 3; p.aegisCd = 45; p.inv = 3; AU.sfx('shield'); fx.v('ring', p.x, p.y, { r: 10, r2: 90, c: '#ffd35a', w: 4, life: 0.5 }); fx.num(p.x, p.y - 24, 'AEGIS PROTOCOL', '#ffd35a', 1); }
     if (it.regen && p.hp < p.maxHp * 0.25 && p.burstCd <= 0 && p.hp > 0) {
-      p.burstCd = Math.max(20, 46 - 2 * it.regen.pw); G.heal(p.maxHp * (0.3 + 0.02 * it.regen.pw)); AU.sfx('heal'); fx.v('ring', p.x, p.y, { r: 8, r2: 80, c: '#5cff8a', w: 3, life: 0.4 }); fx.num(p.x, p.y - 24, 'EMERGENCY HEAL', '#5cff8a', 1);
+      p.burstCd = Math.max(20, 46 - 2 * it.regen.pw); G.heal(p.maxHp * (0.3 + 0.02 * it.regen.pw) * (1 + (it.regen.fx.mend || 0))); AU.sfx('heal'); fx.v('ring', p.x, p.y, { r: 8, r2: 80, c: '#5cff8a', w: 3, life: 0.4 }); fx.num(p.x, p.y - 24, 'EMERGENCY HEAL', '#5cff8a', 1);
       if (it.regen.lv >= 5) G.explode(p.x, p.y, 110, 20 * it.regen.pw, { src: 'regen', stun: 1.6, kb: 260, type: 'holy', col: '#5cff8a' });
     }
     if (it.thrusters && it.thrusters.lv >= 5) WP.phaseDash();
@@ -162,11 +182,11 @@
   WP.deflectPush = function (broke) {
     var p = G.p, d = p.items.deflector, n = G.near(p.x, p.y, 70), i, e, a; if (!d) return;
     for (i = 0; i < n; i++) { e = G.tmp[i]; a = Math.atan2(e.y - p.y, e.x - p.x); e.kx += Math.cos(a) * 280 * (1 - e.kbr); e.ky += Math.sin(a) * 280 * (1 - e.kbr); }
-    if (broke && d.lv >= 5) G.explode(p.x, p.y, 130 + (d.lv >= 10 ? 60 : 0), 36 * d.pw, { src: 'deflector', kb: 320, type: 'energy', col: '#48a8ff' });
+    if (broke && d.lv >= 5) G.explode(p.x, p.y, 130 + (d.lv >= 10 ? 60 : 0), 36 * d.pw * (1 + (d.fx.thorns || 0)), { src: 'deflector', kb: 320, type: 'energy', col: '#48a8ff' });
   };
   WP.reactive = function () {
     var p = G.p, it = p.items.plating; if (!it || (p.rxT && G.t < p.rxT)) return; p.rxT = G.t + 1.5;
-    G.explode(p.x, p.y, 80 + 4 * it.lv, 24 * it.pw, { src: 'plating', kb: 300, type: 'phys', col: '#c0c8d8' });
+    G.explode(p.x, p.y, 80 + 4 * it.lv, 24 * it.pw * (1 + (it.fx.thorns || 0)), { src: 'plating', kb: 300, type: 'phys', col: '#c0c8d8' });
   };
   WP.aegisReflect = function () { var it = G.p.items.aegis; return it && it.lv >= 5; };
   WP.scrapCheck = function () {
@@ -223,7 +243,7 @@
   UP.bolt = function (it, dt) {
     var p = G.p; it.cd -= dt; if (it.cd > 0) return; var n = G.near(p.x, p.y, 300); if (!n) { it.cd = 0.08; return; }
     var list = []; for (var i = 0; i < n; i++) list.push(G.tmp[i]); list.sort(function (a, b) { return (a.x - p.x) * (a.x - p.x) + (a.y - p.y) * (a.y - p.y) - ((b.x - p.x) * (b.x - p.x) + (b.y - p.y) * (b.y - p.y)); });
-    it.cd = cd(it, 1.0, 0.07); var lv = it.lv, arcs = lv >= 5 ? 3 : 1, jumps = 2 + Math.floor(lv / 3) + (it.bon.chain || 0) + (G.cls === 'priest' ? SV.classRank('priest', 'conduit') : 0), dmg = 22 * sc(it), a;
+    it.cd = cd(it, 1.0, 0.07); var lv = it.lv, arcs = (lv >= 5 ? 3 : 1) + pp(it), jumps = 2 + Math.floor(lv / 3) + (it.bon.chain || 0) + (G.cls === 'priest' ? SV.classRank('priest', 'conduit') : 0), dmg = 22 * sc(it), a;
     for (var q = 0; q < Math.min(arcs, list.length); q++) {
       var e = list[q]; a = Math.atan2(e.y - p.y, e.x - p.x);
       var mz = WP.mz(); fx.v('line', mz.x, mz.y, { x2: e.x, y2: e.y, c: '#ffe44d', w: lv >= 5 ? 3 : 2, life: 0.18 }); fx.v('flash', mz.x, mz.y, { r: 10, c: '#fff6a0', life: 0.1 }); fx.v('flash', e.x, e.y, { r: 9, c: '#fff6a0', life: 0.12 });
@@ -261,7 +281,7 @@
     it.cd = cd(it, 2.0, 0.06, 0.7); discharge(it); if (it.lv >= 10) it.q.push(0.28);
   };
   function discharge(it) {
-    var p = G.p, tg = target(280); if (!tg) return; var jumps = Math.min(12, 4 + Math.floor(it.pw * 0.9) + (it.bon.chain || 0)), dmg = 16 * sc(it); if (it.lv >= 10) jumps = 12;
+    var p = G.p, tg = target(280); if (!tg) return; var jumps = Math.min(16, 4 + Math.floor(it.pw * 0.9) + (it.bon.chain || 0) + pp(it)), dmg = 16 * sc(it); if (it.lv >= 10) jumps = Math.max(12, jumps);
     var mz = WP.mz(); fx.v('line', mz.x, mz.y, { x2: tg.x, y2: tg.y, c: '#27e6ff', w: 3, life: 0.2 }); var a = Math.atan2(tg.y - p.y, tg.x - p.x);
     G.hit(tg, dmg, { src: 'tesla', type: 'tesla', kb: 50, dx: Math.cos(a), dy: Math.sin(a), noChain: true }); if (it.lv >= 5 && !tg.dead) tg.stun = 0.6;
     G.chain(tg, dmg, jumps - 1, 105, { src: 'tesla', type: 'tesla', noChain: true, stun: it.lv >= 5 ? 0.6 : 0, col: '#7df3ff' }); AU.sfx('zap'); fx.shake(0.08);
@@ -272,7 +292,7 @@
     for (var i = it.q.length - 1; i >= 0; i--) { it.q[i].t -= dt; if (it.q[i].t <= 0) { ring(it, it.q[i].s); it.q.splice(i, 1); } }
     if (it.cd > 0) return; if (!G.nearest(p.x, p.y, 200)) { it.cd = 0.15; return; }
     it.cd = lv >= 10 ? cd(it, 2.2, 0.0, 1.2) : cd(it, 4.0, 0.06, 1.3); ring(it, 1);
-    if (lv >= 5) it.q.push({ t: 0.35, s: 1.25 }); if (lv >= 10) it.q.push({ t: 0.7, s: 1.5 });
+    if (lv >= 5) it.q.push({ t: 0.35, s: 1.25 }); if (lv >= 10) it.q.push({ t: 0.7, s: 1.5 }); for (var xr = 0; xr < pp(it); xr++) it.q.push({ t: 0.9 + xr * 0.3, s: 1.1 + xr * 0.1 });
   };
   function ring(it, s) { var p = G.p; G.zone('nova', p.x, p.y, { r: 8, spd: 230, max2: (105 + 9 * it.pw) * s, dmg: 30 * sc(it) * (s > 1 ? 0.8 : 1), id: G.novaId++, src: 'nova' }); AU.sfx('nova'); fx.shake(0.15); }
 
@@ -281,7 +301,7 @@
     var best = null, bs = -1, a = G.en.a, i, e, n = G.near(p.x, p.y, 420);
     for (i = 0; i < n; i++) { e = G.tmp[i]; var s = (e.boss ? 100 : e.elite ? 60 : (e.type === 'golem' || e.type === 'lich') ? 30 : 5) + Math.random() * 8; if (s > bs) { bs = s; best = e; } }
     if (!best) { it.cd = 0.15; return; }
-    it.cd = cd(it, 4.5, 0.06, 1.8); var lv = it.lv, cnt = lv >= 10 ? 8 : lv >= 5 ? 3 : 1, r = 34 + 3 * it.pw, dmg = 90 * sc(it, 0.35);
+    it.cd = cd(it, 4.5, 0.06, 1.8); var lv = it.lv, cnt = (lv >= 10 ? 8 : lv >= 5 ? 3 : 1) + pp(it), r = 34 + 3 * it.pw, dmg = 90 * sc(it, 0.35);
     for (i = 0; i < cnt; i++) { var ox = i ? U.rr(-90, 90) : 0, oy = i ? U.rr(-70, 70) : 0; G.warn(best.x + ox, best.y + oy, r, 0.8 + i * (lv >= 10 ? 0.14 : 0.2), dmg, { fr: true, beam: true, c: '#ff4fd8', src: 'orbital', burn: lv >= 10 ? dmg * 0.1 : 0 }); }
     AU.sfx('telegraph');
   };
@@ -322,23 +342,23 @@
     }
     if (it.cd > 0) return; if (!G.nearest(p.x, p.y, 260)) { it.cd = 0.3; return; }
     it.cd = cd(it, 7, 0.05, 3); var n = 1 + Math.floor(lv / 3) + pp(it), cap = 3 + Math.floor(lv / 2), k;
-    for (k = 0; k < n && ar.length < cap; k++) { var a = Math.random() * 6.283; ar.push({ x: p.x + Math.cos(a) * 34, y: p.y + Math.sin(a) * 28, life: 9 + 0.4 * it.pw, cd: 0.3, rk: 1, ang: 0 }); fx.v('ring', p.x + Math.cos(a) * 34, p.y + Math.sin(a) * 28, { r: 3, r2: 16, c: '#ffb347', w: 2, life: 0.2 }); }
+    for (k = 0; k < n && ar.length < cap; k++) { var a = Math.random() * 6.283; ar.push({ x: p.x + Math.cos(a) * 34, y: p.y + Math.sin(a) * 28, life: (9 + 0.4 * it.pw) * (1 + (it.fx.range || 0)), cd: 0.3, rk: 1, ang: 0 }); fx.v('ring', p.x + Math.cos(a) * 34, p.y + Math.sin(a) * 28, { r: 3, r2: 16, c: '#ffb347', w: 2, life: 0.2 }); }
     AU.sfx('spawn');
   };
   UP.stim = function (it, dt) {
-    var p = G.p, mx = 10 + 2 * it.lv; it.stk = it.stk || 0; it.dec = (it.dec || 0) - dt;
+    var p = G.p, mx = 10 + 2 * it.lv + Math.floor(it.fx.stacks || 0); it.stk = it.stk || 0; it.dec = (it.dec || 0) - dt;
     if (it.dec <= 0 && it.stk > 0) { it.stk = Math.max(0, it.stk - 1); it.dec = 0.35; }
-    var fr = it.stk / mx; p.cdMul = 1 - Math.min(0.5, 0.3 * fr * (1 + 0.06 * it.lv)); it.fr = fr; p.spdMul = (p.spdMul || 1) + 0.18 * fr;
+    var fr = it.stk / mx; p.cdMul = 1 - Math.min(0.55, 0.3 * fr * (1 + 0.06 * it.lv) * (1 + (it.fx.haste || 0))); it.fr = fr; p.spdMul = (p.spdMul || 1) + 0.18 * fr;
   };
   WP.onKill = function () {
-    var it = G.p.items.stim; if (!it) return; var mx = 10 + 2 * it.lv; it.stk = Math.min(mx, (it.stk || 0) + 1); it.dec = 2.6 + 0.1 * it.lv;
-    if (it.lv >= 5 && it.stk >= mx / 2 && Math.random() < 0.5) G.heal(1, true);
+    var it = G.p.items.stim; if (!it) return; var mx = 10 + 2 * it.lv + Math.floor(it.fx.stacks || 0); it.stk = Math.min(mx, (it.stk || 0) + 1); it.dec = (2.6 + 0.1 * it.lv) * (1 + (it.fx.decay || 0));
+    if (it.lv >= 5 && it.stk >= mx / 2 && Math.random() < 0.5) G.heal(1 * (1 + (it.fx.mend || 0)), true);
   };
   UP.gunship = function (it, dt) {
     var p = G.p, lv = it.lv, i; it.cd -= dt;
     for (i = it.q.length - 1; i >= 0; i--) { var e = it.q[i]; e.t -= dt; if (e.t <= 0) { G.explode(e.x, e.y, lv >= 10 ? 44 : 32 + it.pw, 24 * sc(it, 0.32), { src: 'gunship', col: '#ffb347', kb: 160 }); it.q.splice(i, 1); } }
     if (it.cd > 0) return; var tg = G.nearest(p.x, p.y, 380); if (!tg) { it.cd = 0.2; return; }
-    it.cd = cd(it, 10, 0.05, 4.5); var lines = lv >= 10 ? 3 : lv >= 5 ? 2 : 1, ang = Math.atan2(tg.y - p.y, tg.x - p.x) + (Math.random() < 0.5 ? 1.5708 : 0), ca = Math.cos(ang), sa = Math.sin(ang), l, j;
+    it.cd = cd(it, 10, 0.05, 4.5); var lines = Math.min(5, (lv >= 10 ? 3 : lv >= 5 ? 2 : 1) + pp(it)), ang = Math.atan2(tg.y - p.y, tg.x - p.x) + (Math.random() < 0.5 ? 1.5708 : 0), ca = Math.cos(ang), sa = Math.sin(ang), l, j;
     for (l = 0; l < lines; l++) { var off = (l - (lines - 1) / 2) * 52, sx = tg.x - ca * 260 - sa * off, sy = tg.y - sa * 260 + ca * off; fx.v('line', sx, sy, { x2: sx + ca * 520, y2: sy + sa * 520, c: '#ffd35a', w: 2, life: 0.9 }); for (j = 0; j < 9; j++) it.q.push({ t: 0.35 + j * 0.09, x: sx + ca * j * 60, y: sy + sa * j * 60 }); }
     AU.sfx('laser');
   };
@@ -357,7 +377,7 @@
     for (i = 0; i < it.dr.length; i++) {
       d = it.dr[i]; if (!bayLife(d, it, dt, Math.round(22 * sc(it)))) continue;
       d.a += dt * 1.5; var R = 54 + (i % 2) * 14, tx = p.x + Math.cos(d.a + i) * R, ty = p.y + Math.sin(d.a + i) * R * 0.8; d.x += (tx - d.x) * Math.min(1, dt * 8); d.y += (ty - d.y) * Math.min(1, dt * 8);
-      d.cd -= dt; if (d.cd <= 0) { var tg = G.nearest(d.x, d.y, 240); if (tg) { d.cd = (lv >= 10 ? 0.45 : 1.2) * Math.pow(0.95, it.pw - 1) / (1 + (it.bon.aspd || 0)) / (1 + 0.04 * cap); G.shot(d.x, d.y, Math.atan2(tg.y - d.y, tg.x - d.x), 420, 5 * sc(it), { src: 'dronebay', spr: 'shot_plasma', life: 0.6, kb: 50, type: 'energy', chain: lv >= 5 ? 1 + (lv >= 8 ? 1 : 0) : 0 }); AU.sfx('plasma'); } else d.cd = 0.15; }
+      d.cd -= dt; if (d.cd <= 0) { var tg = G.nearest(d.x, d.y, 240); if (tg) { d.cd = (lv >= 10 ? 0.45 : 1.2) * Math.pow(0.95, it.pw - 1) / (1 + (it.bon.aspd || 0) + (it.fx.speed || 0)) / (1 + 0.04 * cap); G.shot(d.x, d.y, Math.atan2(tg.y - d.y, tg.x - d.x), 420, 5 * sc(it), { src: 'dronebay', spr: 'shot_plasma', life: 0.6, kb: 50, type: 'energy', chain: lv >= 5 ? 1 + (lv >= 8 ? 1 : 0) : 0 }); AU.sfx('plasma'); } else d.cd = 0.15; }
     }
   };
   UP.emp = function (it, dt) {
@@ -374,7 +394,7 @@
     AU.sfx('summon'); fx.v('ring', p.x, p.y, { r: 6, r2: 40, c: '#ff7a3c', w: 2, life: 0.3 });
   };
   UP.sanctum = function (it, dt) {
-    var p = G.p, lv = it.lv; it.t -= dt; if (it.t > 0) return; it.t = 0.4;
+    var p = G.p, lv = it.lv; it.t -= dt; if (it.t > 0) return; it.t = 0.4 / (1 + (it.fx.speed || 0));
     var R = (70 + 6 * it.pw) * (lv >= 10 ? 1.6 : 1), l = G.nearList(p.x, p.y, R), i, e; it.r = R;
     for (i = 0; i < l.length; i++) { e = l[i]; if (e.dead) continue; if (lv >= 5) e.slow = 0.6; if (lv >= 10) { e.burn = 1.5; e.burnD = 6 * it.pw; } G.hit(e, 6 * sc(it), { src: 'sanctum', type: 'holy', purge: true, noCrit: true, quiet: true }); }
     it.pulse = 1; for (i = 0; i < l.length; i++) { e = l[i]; if (e.dead) continue; for (var q = 0; q < 2; q++) fx.spark(e.x + U.rr(-5, 5), e.y + U.rr(-3, 5), U.rr(-15, 15), U.rr(-60, -25), 0.55, q ? '#ffe9a0' : '#ff8a2a', 2, -20); }
@@ -383,7 +403,7 @@
   };
   UP.litany = function (it, dt) {
     var p = G.p, lv = it.lv; it.cd -= dt; if (it.cd > 0) return; if (!G.nearest(p.x, p.y, 320)) { it.cd = 0.5; return; }
-    it.cd = cd(it, 17, 0.04, 8); p.litanyT = 6; p.litanyMul = 1.25 + 0.03 * it.pw; CS.MN.healAll(); if (lv >= 10) p.inv = Math.max(p.inv, 2);
+    it.cd = cd(it, 17, 0.04, 8); p.litanyT = 6 * (1 + (it.fx.range || 0)); p.litanyMul = 1.25 + 0.03 * it.pw + (it.fx.buff || 0); G.heal(p.maxHp * 0.03 * (1 + (it.fx.mend || 0)), true); CS.MN.healAll(); if (lv >= 10) p.inv = Math.max(p.inv, 2);
     fx.v('ring', p.x, p.y, { r: 8, r2: 110, c: '#c9a3ff', w: 3, life: 0.5 }); fx.num(p.x, p.y - 26, 'BATTLE LITANY', '#c9a3ff', 1); AU.sfx('levelup');
   };
   UP.wings = function (it, dt) {
@@ -395,7 +415,7 @@
 
   /* minion items: spawning handled by MN; fusion has its own timer */
   ['vanguard', 'sniper', 'aegis', 'detonator'].forEach(function (id) { UP[id] = function (it, dt) { /* maintained in MN.update */ }; });
-  WP.fusionInfo = function (it) { var g = 0, i; for (i = 0; i < G.mn.n; i++) if (G.mn.a[i].giant) g++; return { interval: Math.max(6, 14 - 0.8 * it.pw) * (it.lv >= 10 ? 0.6 : 1), giants: g, maxG: 1 + Math.floor(it.lv / 3) + (it.bon.proj || 0) }; };
+  WP.fusionInfo = function (it) { var g = 0, i; for (i = 0; i < G.mn.n; i++) if (G.mn.a[i].giant) g++; return { interval: Math.max(4, 14 - 0.8 * it.pw) * (it.lv >= 10 ? 0.6 : 1) / (1 + (it.fx.speed || 0)), giants: g, maxG: 1 + Math.floor(it.lv / 3) + (it.bon.proj || 0) }; };
   UP.fusion = function (it, dt) { var fi = WP.fusionInfo(it), interval = fi.interval; if (fi.giants >= fi.maxG) { it.t = 0; return; } it.t += dt; if (it.t >= interval) { if (CS.MN.fuse(it)) it.t = 0; else it.t = interval - 1.5; } };
   ['plating', 'regen', 'deflector', 'thrusters', 'graviton'].forEach(function (id) { UP[id] = function () { }; });
   WP.update = function (it, dt) { UP[it.id](it, dt); };

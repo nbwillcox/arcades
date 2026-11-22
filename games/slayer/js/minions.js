@@ -11,7 +11,7 @@
     else if (kind === 'aegis') { hp = 40 * (1 + 0.3 * (k - 1)); m.r = 6; }
     else if (kind === 'detonator') { hp = 14; m.r = 5; }
     else { hp = 200 + 70 * k; m.r = 14; m.sz = 1.4; }
-    m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + (kind === 'giant' ? 'fusion' : kind) + '_' + G.cls; if (!CS.art.spr[m.spr]) m.spr = 'mn_giant_' + G.cls; return m;
+    if (it && it.fx.hp) hp *= 1 + it.fx.hp; m.mhp = m.hp = Math.round(hp); m.spr = 'mn_' + (kind === 'giant' ? 'fusion' : kind) + '_' + G.cls; if (!CS.art.spr[m.spr]) m.spr = 'mn_giant_' + G.cls; return m;
   };
   var KINDS = ['vanguard', 'sniper', 'aegis', 'detonator'];
   var counts = { vanguard: 0, sniper: 0, aegis: 0, detonator: 0, giant: 0 };
@@ -44,7 +44,7 @@
     countAll();
     // maintain counts: respawn missing units on a timer
     var cap = WP.minionCap();
-    for (k = 0; k < 4; k++) { var id = KINDS[k], itm = p.items[id]; if (!itm) continue; var tg = WP.minionTarget(id); itm.spT -= dt; if (counts[id] < tg && a.n < cap && itm.spT <= 0) { var an = Math.random() * 6.283; if (MN.spawn(id, p.x + Math.cos(an) * 24, p.y + Math.sin(an) * 24, itm)) { counts[id]++; fx.v('ring', p.x, p.y, { r: 4, r2: 20, c: '#ffffff', w: 1, life: 0.2 }); AU.sfx('spawn'); } itm.spT = id === 'detonator' ? 1.4 : 2.6; } }
+    for (k = 0; k < 4; k++) { var id = KINDS[k], itm = p.items[id]; if (!itm) continue; var tg = WP.minionTarget(id); itm.spT -= dt; if (counts[id] < tg && a.n < cap && itm.spT <= 0) { var an = Math.random() * 6.283; if (MN.spawn(id, p.x + Math.cos(an) * 24, p.y + Math.sin(an) * 24, itm)) { counts[id]++; fx.v('ring', p.x, p.y, { r: 4, r2: 20, c: '#ffffff', w: 1, life: 0.2 }); AU.sfx('spawn'); } itm.spT = (id === 'detonator' ? 1.4 : 2.6) / (1 + (itm.fx.speed || 0)); } }
     var tot = { vanguard: counts.vanguard, sniper: counts.sniper, aegis: counts.aegis, detonator: counts.detonator, giant: counts.giant };
     for (i = a.n - 1; i >= 0; i--) {
       m = a.a[i]; it = p.items[m.item] || p.items.fusion || { pw: 1, lv: 1, bon: {} };
@@ -56,14 +56,14 @@
       var dmgBase = 10 * (1 + 0.3 * (k2 - 1)) * atkMul;
       if (m.kind === 'vanguard') {
         t = G.nearest(m.x, m.y, 230); if (t && Math.hypot(t.x - p.x, t.y - p.y) > 330) t = null;
-        if (t) { steer(m, t.x, t.y, 120 + 6 * k2, dt); var dx = t.x - m.x, dy = t.y - m.y, d = Math.hypot(dx, dy); if (d < m.r + t.r + 5 && m.cd <= 0) { m.cd = 0.55 / (1 + (it.bon.aspd || 0)) / atkMul; var ang = Math.atan2(dy, dx); G.hit(t, dmgBase, { src: 'vanguard', kb: lv >= 5 ? 360 : 150, dx: Math.cos(ang), dy: Math.sin(ang), type: 'phys' }); if (lv >= 10) G.explode(t.x, t.y, 40, dmgBase * 0.7, { src: 'vanguard', quiet: true, kb: 200 }); fx.burst(t.x, t.y, 3, '#ffb347', 90, 0.2, 2); AU.sfx('hit'); } }
+        if (t) { steer(m, t.x, t.y, 120 + 6 * k2, dt); var dx = t.x - m.x, dy = t.y - m.y, d = Math.hypot(dx, dy); if (d < m.r + t.r + 5 && m.cd <= 0) { m.cd = 0.55 / (1 + (it.bon.aspd || 0) + (it.fx.speed || 0)) / atkMul; var ang = Math.atan2(dy, dx); G.hit(t, dmgBase, { src: 'vanguard', kb: lv >= 5 ? 360 : 150, dx: Math.cos(ang), dy: Math.sin(ang), type: 'phys' }); if (lv >= 10) G.explode(t.x, t.y, 40, dmgBase * 0.7, { src: 'vanguard', quiet: true, kb: 200 }); fx.burst(t.x, t.y, 3, '#ffb347', 90, 0.2, 2); AU.sfx('hit'); } }
         else { var fa = idx / n * 6.283 + G.t * 0.25; steer(m, p.x + Math.cos(fa) * 48, p.y + Math.sin(fa) * 38, 140, dt); }
       } else if (m.kind === 'sniper') {
         var sa = idx / n * 6.283 + G.t * 0.5; steer(m, p.x + Math.cos(sa) * 58, p.y + Math.sin(sa) * 46, 150, dt);
-        if (m.cd <= 0) { t = G.nearest(m.x, m.y, 280); if (t) { m.cd = 1.4 * Math.pow(0.93, k2 - 1) / (1 + (it.bon.aspd || 0)) / atkMul; var a2 = Math.atan2(t.y - m.y, t.x - m.x), sh = (lv >= 5 ? 2 : 1), q; for (q = 0; q < sh; q++) G.shot(m.x - Math.sin(a2) * (q * 4 - (sh - 1) * 2), m.y + Math.cos(a2) * (q * 4 - (sh - 1) * 2), a2, 520, 14 * (1 + 0.3 * (k2 - 1)) * atkMul, { src: 'sniper', pierce: lv >= 10 ? 3 : 0, crit: lv >= 10 ? 0.25 : 0, spr: 'shot_plasma', kb: 120, life: 0.7, type: lv >= 10 ? 'energy' : 'phys', chain: G.cls === 'engineer' ? Math.ceil(SV.classRank('engineer', 'capacitor') / 3) : 0 }); AU.sfx('plasma'); } else m.cd = 0.15; }
+        if (m.cd <= 0) { t = G.nearest(m.x, m.y, 280); if (t) { m.cd = 1.4 * Math.pow(0.93, k2 - 1) / (1 + (it.bon.aspd || 0) + (it.fx.speed || 0)) / atkMul; var a2 = Math.atan2(t.y - m.y, t.x - m.x), sh = (lv >= 5 ? 2 : 1), q; for (q = 0; q < sh; q++) G.shot(m.x - Math.sin(a2) * (q * 4 - (sh - 1) * 2), m.y + Math.cos(a2) * (q * 4 - (sh - 1) * 2), a2, 520, 14 * (1 + 0.3 * (k2 - 1)) * atkMul, { src: 'sniper', pierce: lv >= 10 ? 3 : 0, crit: lv >= 10 ? 0.25 : 0, spr: 'shot_plasma', kb: 120, life: 0.7, type: lv >= 10 ? 'energy' : 'phys', chain: G.cls === 'engineer' ? Math.ceil(SV.classRank('engineer', 'capacitor') / 3) : 0 }); AU.sfx('plasma'); } else m.cd = 0.15; }
       } else if (m.kind === 'aegis') {
         var R = lv >= 10 ? 56 : 42, oa = idx / n * 6.283 + G.t * (2 + 0.08 * k2); m.x += (p.x + Math.cos(oa) * R - m.x) * Math.min(1, dt * 12); m.y += (p.y + Math.sin(oa) * R * 0.8 - m.y) * Math.min(1, dt * 12); m.vx = m.vy = 0;
-        m.aux -= dt; if (m.aux <= 0) { m.aux = lv >= 10 ? 4 : 8; if (p.hp < p.maxHp) { G.heal(3 + k2 * 1.2); fx.v('ring', m.x, m.y, { r: 4, r2: 26, c: '#5cff8a', w: 2, life: 0.3 }); } }
+        m.aux -= dt; if (m.aux <= 0) { m.aux = (lv >= 10 ? 4 : 8) / (1 + (it.fx.speed || 0)); if (p.hp < p.maxHp) { G.heal((3 + k2 * 1.2) * (1 + (it.fx.mend || 0))); fx.v('ring', m.x, m.y, { r: 4, r2: 26, c: '#5cff8a', w: 2, life: 0.3 }); } }
         if (m.cd <= 0) { var ne2 = G.nearest(m.x, m.y, m.r + 8); if (ne2) { m.cd = 0.5; var ag = Math.atan2(ne2.y - m.y, ne2.x - m.x); G.hit(ne2, 4 * (1 + 0.3 * (k2 - 1)) * (lv >= 10 ? 2.5 : 1), { src: 'aegis', type: 'holy', kb: 120, dx: Math.cos(ag), dy: Math.sin(ag), noCrit: true, quiet: true }); if (lv >= 10) ne2.burn = 2, ne2.burnD = 6 * k2; } }
       } else if (m.kind === 'detonator') {
         t = G.nearest(p.x, p.y, 300);

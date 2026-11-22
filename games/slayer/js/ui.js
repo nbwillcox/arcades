@@ -76,9 +76,10 @@
     else { c.fillStyle = info.c; c.fillRect(x + w / 2 - 20, y + 34, 40, 32); }
     var ny = y + 86, nl = ui.wrap(info.name, Math.floor((w - 12) / 6)); nl.forEach(function (l, i) { ui.text(l, x + w / 2, ny + i * 10, '#fff', 1, 'center'); }); ny += nl.length * 10 + 4;
     ui.text(info.lv, x + w / 2, ny, info.awak ? '#ffe44d' : '#7df3ff', 1, 'center'); ny += 14;
-    if (info.list) { info.list.forEach(function (l, i) { ui.text('+ ' + l, x + 22, ny + i * 11, '#9fffb0', 1, 'left', false); }); ny += info.list.length * 11 + 2; ui.text('RARITY BOOST X' + info.mult, x + w / 2, ny, R.t, 1, 'center', false); ny += 14; }
-    else { ui.wrap(info.desc, Math.floor((w - 16) / 6)).forEach(function (l, i) { ui.text(l, x + 8, ny + i * 9, '#b8c4dc', 1, 'left', false); }); ny += ui.wrap(info.desc, Math.floor((w - 16) / 6)).length * 9 + 5; }
-    if (info.bonus) { ui.text('+BONUS', x + w / 2, ny, '#ffd700', 1, 'center'); ui.wrap(info.bonus, Math.floor((w - 16) / 6)).forEach(function (l, i) { ui.text(l, x + w / 2, ny + 10 + i * 9, '#ffe44d', 1, 'center'); }); }
+    if (info.desc) { var dl = ui.wrap(info.desc, Math.floor((w - 16) / 6)); dl.forEach(function (l, i) { ui.text(l, x + 8, ny + i * 9, '#b8c4dc', 1, 'left', false); }); ny += dl.length * 9 + 5; }
+    if (info.list) { info.list.forEach(function (l, i) { ui.text(l, x + 12, ny + i * 11, '#9fffb0', 1, 'left', false); }); ny += info.list.length * 11 + 3; }
+    if (info.boosts && info.boosts.length) { ui.text('BONUS BOOSTS', x + w / 2, ny, '#ffd700', 1, 'center'); ny += 11; info.boosts.forEach(function (l, i) { ui.text('+ ' + l.replace(/^\+/, ''), x + 12, ny + i * 11, '#ffe44d', 1, 'left', false); }); ny += info.boosts.length * 11; }
+    if (!info.list && info.desc === undefined) { /* heal / gold cards */ }
     if (card.kind === 'item' && !card.isNew) ui.text(CS.ITEMS[card.id].cls ? 'CLASS EXCLUSIVE' : CS.ITEMS[card.id].cat.toUpperCase(), x + w / 2, y + h - 12, CS.ITEMS[card.id].cls ? '#ffd700' : '#5a6a88', 1, 'center');
     else if (card.isNew) ui.text(CS.ITEMS[card.id].cls ? 'NEW - CLASS EXCLUSIVE' : 'NEW', x + w / 2, y + h - 12, '#5cff8a', 1, 'center');
     if (hit) { AU.sfx('click'); return true; } return false;

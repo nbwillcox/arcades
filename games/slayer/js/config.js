@@ -1,5 +1,5 @@
 /* CYBER SLAYER SURVIVOR - config & balance tables. Free for non-commercial use: link back to https://nictools.dev or the GitHub repo. */
-var CS = window.CS = { W: 960, H: 540, VER: '0.0.31',
+var CS = window.CS = { W: 960, H: 540, VER: '0.0.131',
   LINKS: { site: 'https://nictools.dev', repo: 'https://github.com/nbwillcox/CyberSlayerSurvivor' } };
 
 /* ---------- rarity (5 tiers) ---------- */
@@ -134,4 +134,40 @@ CS.BAL = {
   maxEnemies: 520, stageSec: function (i, blitz) { return blitz ? 300 : 480 + 15 * i; },
   midInterval: 90, loot: { accel: 600, maxSpeed: 520 },
   xpNeed: function (L) { return Math.round(4 + L * 5 + Math.pow(L, 1.6) * 1.1); }
+};
+
+/* ---------- card architecture: rarity = number of effect lines + number of bonus boosts ----------
+   effects/boosts per tier:  Basic 1/0, Enhanced 2/1, Superior 3/2, Epic 4/3, Legendary 5/5.
+   Every item lists >=5 effect keys (EFX) it can roll; each effect adds base * rarity-multiplier to item.fx[key].
+   Boosts are flat bonus modifiers (BOOSTS) drawn from the item's pool. */
+CS.TIER_FX = [1, 2, 3, 4, 5];
+CS.TIER_BOOST = [0, 1, 2, 3, 5];
+CS.EFX = {
+  dmg: { t: 'DAMAGE', b: 0.12, p: 1 }, speed: { t: 'ATTACK SPEED', b: 0.05, p: 1 }, area: { t: 'AREA / RADIUS', b: 0.07, p: 1 }, range: { t: 'RANGE / DURATION', b: 0.08, p: 1 },
+  count: { t: 'PROJECTILES / UNITS', b: 0.4, d: 1 }, crit: { t: 'CRIT CHANCE', b: 0.03, p: 1 }, critdmg: { t: 'CRIT DAMAGE', b: 0.10, p: 1 }, knockback: { t: 'KNOCKBACK', b: 0.12, p: 1 },
+  pierce: { t: 'PIERCE', b: 0.4, d: 1 }, hp: { t: 'MAX HP', b: 0.05, p: 1 }, regen: { t: 'HP REGEN /S', b: 0.25, d: 2 }, armor: { t: 'ARMOR', b: 1.0, d: 1 },
+  dodge: { t: 'DODGE', b: 0.012, p: 1 }, movespeed: { t: 'MOVE SPEED', b: 0.03, p: 1 }, dashcd: { t: 'DASH COOLDOWN', b: 0.04, p: 1, neg: 1 }, pickup: { t: 'PICKUP RANGE', b: 0.06, p: 1 },
+  gold: { t: 'GOLD FIND', b: 0.05, p: 1 }, xp: { t: 'XP GAIN', b: 0.04, p: 1 }, shield: { t: 'SHIELD CAPACITY', b: 8, d: 0 }, recharge: { t: 'SHIELD RECHARGE', b: 0.08, p: 1 },
+  thorns: { t: 'REACTIVE DAMAGE', b: 0.12, p: 1 }, mend: { t: 'HEALING POWER', b: 0.10, p: 1 }, stacks: { t: 'RUSH STACKS', b: 2, d: 0 }, haste: { t: 'HASTE POWER', b: 0.08, p: 1 },
+  decay: { t: 'RUSH DURATION', b: 0.10, p: 1 }, buff: { t: 'PRAYER BUFF', b: 0.04, p: 1 }
+};
+CS.FXLIST = {
+  slug: ['dmg', 'speed', 'pierce', 'knockback', 'crit', 'count', 'critdmg'], drone: ['dmg', 'speed', 'count', 'crit', 'critdmg', 'pierce'], bolt: ['dmg', 'speed', 'count', 'crit', 'critdmg', 'knockback'],
+  grenade: ['dmg', 'speed', 'area', 'count', 'crit', 'knockback'], tesla: ['dmg', 'speed', 'count', 'crit', 'critdmg', 'knockback'], nova: ['dmg', 'speed', 'area', 'count', 'knockback', 'crit'],
+  orbital: ['dmg', 'speed', 'area', 'count', 'crit', 'critdmg'], nanite: ['dmg', 'speed', 'area', 'range', 'count', 'crit'], saw: ['dmg', 'speed', 'count', 'range', 'crit', 'knockback'],
+  turret: ['dmg', 'speed', 'count', 'range', 'pierce', 'crit'], gunship: ['dmg', 'speed', 'area', 'count', 'crit', 'knockback'], dronebay: ['dmg', 'speed', 'count', 'pierce', 'crit', 'critdmg'],
+  emp: ['dmg', 'speed', 'area', 'crit', 'knockback', 'critdmg'], fabricator: ['dmg', 'speed', 'area', 'count', 'crit', 'knockback'], sanctum: ['dmg', 'speed', 'area', 'crit', 'critdmg'],
+  wings: ['dmg', 'speed', 'count', 'pierce', 'crit', 'knockback'],
+  vanguard: ['dmg', 'speed', 'hp', 'count', 'knockback', 'crit'], sniper: ['dmg', 'speed', 'hp', 'count', 'pierce', 'crit'], aegis: ['dmg', 'speed', 'hp', 'count', 'mend', 'knockback'],
+  detonator: ['dmg', 'speed', 'hp', 'count', 'area', 'knockback'], fusion: ['dmg', 'speed', 'hp', 'count', 'area', 'crit'],
+  stim: ['stacks', 'haste', 'decay', 'mend', 'movespeed'], litany: ['speed', 'range', 'buff', 'mend', 'movespeed'],
+  plating: ['armor', 'hp', 'regen', 'thorns', 'dodge'], regen: ['regen', 'hp', 'mend', 'armor', 'dodge'], deflector: ['shield', 'recharge', 'thorns', 'armor', 'hp'],
+  thrusters: ['movespeed', 'dodge', 'dashcd', 'pickup', 'hp'], graviton: ['critdmg', 'gold', 'xp', 'crit', 'pickup']
+};
+Object.keys(CS.FXLIST).forEach(function (id) { CS.ITEMS[id].fx = CS.FXLIST[id]; });
+CS.UTIL = { plating: 1, regen: 1, deflector: 1, thrusters: 1, graviton: 1, stim: 1, litany: 1 };
+CS.BOOSTS = {
+  proj: { t: '+1 PROJECTILE / UNIT', atk: 1, need: 'count' }, aspd: { t: '+20% ATTACK SPEED', atk: 1 }, dmg: { t: '+15% DAMAGE', atk: 1 }, crit: { t: '+10% CRIT CHANCE', atk: 1 },
+  chain: { t: '+1 CHAIN JUMP', atk: 1 }, ls: { t: '+2% LIFESTEAL', atk: 1 }, area: { t: '+15% AREA', atk: 1, need: 'area' }, pierce: { t: '+1 PIERCE', atk: 1, need: 'pierce' }, range: { t: '+15% RANGE', atk: 1, need: 'range' },
+  hp: { t: '+10% MAX HP', util: 1 }, regen: { t: '+1 HP/S REGEN', util: 1 }, armor: { t: '+3 ARMOR', util: 1 }, dodge: { t: '+4% DODGE', util: 1 }, movespeed: { t: '+6% MOVE SPEED', util: 1 }
 };
