@@ -81,6 +81,7 @@
     if (r === 4) { var opts = d.cat === 'defense' ? ['hp', 'reg'] : ['proj', 'aspd', 'chain', 'ls']; card.bon = U.pick(opts); }
     return card;
   }
+  WP.hasUpgrades = function () { return candidates().length > 0; };
   WP.rollCards = function (n) {
     var cs = candidates(), cards = [], pick;
     while (cards.length < n && cs.length) { var i = U.weighted(cs.map(function (c) { return c.w; })); cards.push(mkCard(cs[i], 0)); cs.splice(i, 1); }

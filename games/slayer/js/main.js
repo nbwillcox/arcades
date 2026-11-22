@@ -27,7 +27,11 @@
   M.pick = function (i) {
     var c = M.cards[i]; if (!c) return; CS.WP.apply(c); AU.sfx(c.rar >= 3 ? 'levelup' : 'pick'); fx.shake(0.1); G.pendingLv--; if (G.pendingLv > 0) M.openDraft(); else M.go('combat');
   };
-  M.openDraft = function () { M.cards = CS.WP.rollCards(3); M.state = 'draft'; ui.focus = 'c0'; AU.sfx('levelup'); In.joyEnabled = false; In.joy.on = false; };
+  M.openDraft = function () {
+    if (!CS.WP.hasUpgrades()) { // everything maxed: no card screen, just bank 1000 gold per level
+      var n = G.pendingLv; G.pendingLv = 0; G.addGold(1000 * n); fx.num(G.p.x, G.p.y - 30, '+' + (1000 * n) + ' GOLD', '#ffd700', 2); AU.sfx('chest'); fx.shake(0.1); M.go('combat'); return;
+    }
+    M.cards = CS.WP.rollCards(3); M.state = 'draft'; ui.focus = 'c0'; AU.sfx('levelup'); In.joyEnabled = false; In.joy.on = false; };
   M.endChest = function () { G.chest = null; M.go('combat'); };
 
   M.finish = function () {
