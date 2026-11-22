@@ -6,6 +6,23 @@
   function arcadeBtn(id, x, y) { if (arc() && ui.btn(id, x, y, 170, 22, 'BACK TO ARCADE', { c: '#ff9a3c' })) arc().ARCADE.exitGame(); }
   function afs() { try { return window.parent !== window && window.parent.ARCADE_FS; } catch (e) { return null; } }
 
+  /* ---------------- photosensitivity warning (first launch, choice is recorded) ---------------- */
+  SC.applySafe = function (on) {
+    var s = SV.d.set; s.safe = on; if (on) { s.flash = false; s.bloom = false; s.shake = Math.min(s.shake, 0.25); } else { s.flash = true; s.bloom = true; s.shake = 1; }
+    SV.store(); if (CS.audio) CS.audio.vol();
+  };
+  SC.warning = function (ctx, M) {
+    ui.backdrop(ctx, ['#0a0204', '#3a0a14', '#ff3030']);
+    ui.panel(100, 60, 760, 400, '#ff4040', '#0a0408', 0.94);
+    ui.text('! WARNING !', W >> 1, 80, '#ff4040', 5, 'center'); ui.text('PHOTOSENSITIVITY / SEIZURE WARNING', W >> 1, 126, '#ffd0d0', 2, 'center');
+    var lines = ['THIS GAME CONTAINS RAPIDLY FLASHING LIGHTS, STROBING AND', 'BLINKING EFFECTS, EXPLOSIONS, LIGHTNING AND INTENSE', 'MOVING VISUAL PATTERNS THAT MAY TRIGGER SEIZURES, DIZZINESS', 'OR DISCOMFORT IN PEOPLE WITH PHOTOSENSITIVE EPILEPSY OR', 'OTHER LIGHT SENSITIVITIES.', '', 'IF YOU FEEL DIZZY, NAUSEOUS, DISORIENTED OR EXPERIENCE ANY', 'TWITCHING OR LOSS OF AWARENESS, STOP PLAYING IMMEDIATELY', 'AND CONSULT A DOCTOR. PLAY IN A WELL-LIT ROOM.'];
+    lines.forEach(function (l, i) { ui.text(l, W >> 1, 168 + i * 14, '#e8d8d8', 1, 'center', false); });
+    ui.text('PLAYER DISCRETION IS ADVISED. YOUR CHOICE IS SAVED AND CAN BE CHANGED IN SETTINGS.', W >> 1, 306, '#ffb0b0', 1, 'center', false);
+    if (ui.btn('wsafe', 140, 330, 680, 44, 'REDUCE FLASHING & SCREEN SHAKE (RECOMMENDED IF SENSITIVE)', { c: '#5cff8a', sc: 1 })) { SC.applySafe(true); SV.d.warned = true; SV.d.warnedAt = new Date().toISOString(); SV.store(); M.go('title'); }
+    if (ui.btn('wok', 140, 384, 680, 44, 'I UNDERSTAND THE RISK - PLAY WITH FULL EFFECTS', { c: '#ff9a3c', sc: 1 })) { SC.applySafe(false); SV.d.warned = true; SV.d.warnedAt = new Date().toISOString(); SV.store(); M.go('title'); }
+    if (M.seeWarn) ui.text('YOU CAN CHANGE THIS ANY TIME UNDER SETTINGS', W >> 1, 440, '#7a8aa8', 1, 'center', false);
+  };
+
   /* ---------------- title ---------------- */
   SC.title = function (ctx) {
     var t = ui.t; if (A.titleBg) { ctx.drawImage(A.titleBg, 0, 0, W, H); ctx.fillStyle = 'rgba(4,2,12,.55)'; ctx.fillRect(0, 0, W, H); } else ui.backdrop(ctx, ['#07040f', '#1a1040', '#b54cff']);
@@ -171,9 +188,10 @@
     var d = SV.d, s = d.set, i;
     ui.backdrop(ctx, ['#070a16', '#142040', '#7a8aa8']); ui.title('SETTINGS', 12, '#27e6ff', 3);
     ['GAME & AUDIO', 'KEYBOARD', 'TOUCH & CONTROLLER'].forEach(function (n, k) { if (ui.btn('tab' + k, 60 + k * 276, 50, 268, 26, n, { c: tab === k ? '#ffd700' : '#5a6a88', tc: tab === k ? '#fff' : '#99a' })) { tab = k; pending = null; In.listen = null; } });
-    var y = 84, st = 31;
+    var y = 82, st = 29;
     if (tab === 0) {
       slider('shk', y, 'SCREEN SHAKE', s.shake, [0, 0.25, 0.5, 0.75, 1], PCT, function (v) { s.shake = v; SV.store(); }); y += st;
+      toggle('safe', y, 'REDUCED FLASHING MODE', !!s.safe, function (v) { SC.applySafe(v); M.resize(); }, 'SOFTER EFFECTS, NO SCREEN FLASHES, LESS SHAKE'); y += st;
       toggle('dmg', y, 'DAMAGE NUMBERS', s.dmgnums !== false, function (v) { s.dmgnums = v; SV.store(); }); y += st;
       toggle('fls', y, 'SCREEN FLASHES', s.flash !== false, function (v) { s.flash = v; SV.store(); }, 'HIT FLASH, SIREN AND LOW-HP PULSES'); y += st;
       toggle('blm', y, 'GLOW / BLOOM', s.bloom !== false, function (v) { s.bloom = v; SV.store(); }, 'TURNS ITSELF OFF ON SLOW DEVICES'); y += st;

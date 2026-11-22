@@ -77,7 +77,7 @@
       }
       if (pt.x < -40) pt.x += W + 80; else if (pt.x > W + 40) pt.x -= W + 80; if (pt.y < -40) pt.y += H + 80; else if (pt.y > H + 40) pt.y -= H + 80;
     }
-    if (d.flash) { flashT -= dt; if (flashT <= 0) { flashT = d.flash * (0.6 + Math.random() * 0.8); flashA = 0.35; AU.sfx('zap', 0.5); } if (flashA > 0) flashA -= dt * 1.4; }
+    if (d.flash && !CS.save.d.set.safe) { flashT -= dt; if (flashT <= 0) { flashT = d.flash * (0.6 + Math.random() * 0.8); flashA = 0.35; AU.sfx('zap', 0.5); } if (flashA > 0) flashA -= dt * 1.4; }
   };
 
   /* ---------- drawing: ground layer (traps, barriers) ---------- */

@@ -14,6 +14,7 @@
   }
 
   M.go = function (st) {
+    if (st === 'warning') { In.joyEnabled = false; }
     if (st === 'title' || st === 'levels' || st === 'class' || st === 'shop' || st === 'settings') { AU.music('menu'); In.joyEnabled = false; }
     if (st === 'combat') In.joyEnabled = true; else In.joyEnabled = false;
     M.state = st; ui.focus = ''; In.p = {}; In.taps.length = 0;
@@ -87,7 +88,7 @@
     if (!CS.G.p || M.state === 'title' || M.state === 'levels' || M.state === 'class' || M.state === 'shop' || M.state === 'result') CS.t = performance.now() / 1000;
     ui.begin(ctx, dt);
     switch (M.state) {
-      case 'title': SC.title(ctx); break; case 'class': SC.class(ctx); break; case 'levels': SC.levels(ctx); break; case 'shop': SC.shop(ctx); break; case 'result': SC.result(ctx, M); break;
+      case 'warning': SC.warning(ctx, M); break; case 'title': SC.title(ctx); break; case 'class': SC.class(ctx); break; case 'levels': SC.levels(ctx); break; case 'shop': SC.shop(ctx); break; case 'result': SC.result(ctx, M); break;
       case 'combat': G.draw(ctx); CS.LV.drawWeather(ctx); bloom(ctx); ctx.drawImage(CS.art.vignette(), 0, 0); ui.hud(ctx); fx.drawXp(ctx); break;
       case 'settings': SC.settings(ctx, M); break; case 'draft': SC.draft(ctx, M); break; case 'chest': SC.chest(ctx, M); break; case 'pause': SC.pause(ctx, M); break;
     }
@@ -106,7 +107,7 @@
     try { if (framed) window.parent.document.addEventListener('fullscreenchange', lockEsc); } catch (e) { }
     if (q.cls && CS.CLASSES[q.cls]) SV.d.cls = q.cls;
     CS.art.load();
-    if (q.go) { SV.d.intro = true; M.startRun(Math.max(0, (+q.stage || 1) - 1)); } else M.go('title');
+    if (q.go) { SV.d.intro = true; M.startRun(Math.max(0, (+q.stage || 1) - 1)); } else M.go(SV.d.warned ? 'title' : 'warning');
     if (q.gold) SV.d.gold = +q.gold;
     requestAnimationFrame(function (t) { last = t; frame(t); });
   }

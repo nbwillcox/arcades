@@ -54,7 +54,7 @@
 
   /* ---------- the vfx renderer (replaces the basic one in fx.js) ---------- */
   fx.drawVfx = function (ctx, cx, cy) {
-    var a = fx.vfx, i, v, t, X, Y, k;
+    var a = fx.vfx, i, v, t, X, Y, k, safe = CS.save.d.set.safe;
     // dark smoke first (normal blend)
     for (i = 0; i < a.n; i++) { v = a.a[i]; if (v.kind !== 'smoke') continue; t = 1 - v.life / v.max; X = v.x - cx; Y = v.y - cy - t * 26; ctx.globalAlpha = (1 - t) * 0.5; ctx.fillStyle = v.c; ctx.beginPath(); ctx.arc(X, Y, v.r * (0.5 + t * 0.7), 0, TAU); ctx.fill(); }
     ctx.globalCompositeOperation = 'lighter';
@@ -66,8 +66,8 @@
           ctx.globalAlpha = fade; ctx.strokeStyle = v.c; ctx.lineWidth = Math.max(1, v.w * (1 - t * 0.7)); ctx.beginPath(); ctx.arc(X, Y, rr, 0, TAU); ctx.stroke();
           if (v.kind === 'shock') { ctx.globalAlpha = fade * 0.5; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(X, Y, rr * 0.97, 0, TAU); ctx.stroke(); }
           break;
-        case 'flash': V.add(ctx, 'fx_burst', v.c, X, Y, v.r * 2.4 * (0.6 + t * 0.6), v.r * 2.4 * (0.6 + t * 0.6), 0, fade * 0.7); break;
-        case 'flare': V.add(ctx, 'fx_burst', v.c, X, Y, v.r * 2.2, v.r * 2.2, v.rot || 0, fade * 0.95); break;
+        case 'flash': V.add(ctx, 'fx_burst', v.c, X, Y, v.r * 2.4 * (0.6 + t * 0.6), v.r * 2.4 * (0.6 + t * 0.6), 0, fade * (safe ? 0.22 : 0.7)); break;
+        case 'flare': V.add(ctx, 'fx_burst', v.c, X, Y, v.r * 2.2, v.r * 2.2, v.rot || 0, fade * (safe ? 0.3 : 0.95)); break;
         case 'fireball': rr = v.r * (0.45 + 0.55 * (1 - Math.pow(1 - t, 3))); V.add(ctx, 'fx_fireball', v.c, X, Y, rr, rr, (v.rot || 0) + t * 0.6, fade); V.add(ctx, 'fx_orb', '#ffffff', X, Y, rr * 0.3 * (1 - t), rr * 0.3 * (1 - t), 0, fade * 0.45); break;
         case 'line': lightning(ctx, v, X, Y, cx, cy, t); break;
         case 'beam': {
