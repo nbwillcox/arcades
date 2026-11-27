@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Idle SciFi RPG</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #05070f; overflow: hidden; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+  #back { position: fixed; top: 8px; right: 8px; z-index: 5; padding: 6px 12px; font: 600 12px/1 system-ui, sans-serif; letter-spacing: .08em;
+    color: #9ff; background: rgba(5, 12, 30, .72); border: 1px solid rgba(0, 255, 255, .45); border-radius: 4px; cursor: pointer; }
+  #back:hover, #back:focus-visible { background: rgba(0, 120, 140, .8); outline: none; }
+</style>
+</head>
+<body>
+<!-- Idle SciFi RPG is a Godot web build hosted in its own repo; this cabinet frames the live copy. -->
+<iframe id="g" src="https://nbwillcox.github.io/IdleSciFantRPG/" allow="autoplay; fullscreen; gamepad" allowfullscreen title="Idle SciFi RPG"></iframe>
+<button id="back" type="button">&lsaquo; BACK TO ARCADE</button>
+<script>
+  document.getElementById('back').onclick = function () { try { parent.ARCADE.exitGame(); } catch (e) { history.back(); } };
+</script>
+</body>
+</html>

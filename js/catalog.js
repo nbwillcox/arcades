@@ -79,6 +79,10 @@ window.ARCADE_GAMES = [
     tag: 'Pixel-art bullet-heaven roguelite: pick a slayer, summon minions, level up Lv 1-10 and clear ten cyber-gothic sectors.',
     keys: [['Move', 'WASD / arrows / stick / touch'], ['Pick card', '1 2 3 / Enter / A'], ['Pause', 'Esc / P / Start'], ['Settings', 'Pause menu']] },
 
+  { id: 'idle', name: 'Idle SciFi RPG', genre: 'action', hue: 265, t: 1, mouse: 1,
+    tag: 'An endless rift roguelite: send your squad through the rift, fight idle battles and grow stronger with every run.',
+    keys: [['Play', 'Mouse / touch'], ['Menus', 'Click / tap'], ['Back', 'Button, top right']] },
+
   // ---- PUZZLE & MAZE ------------------------------------------------------
   { id: 'pac', name: 'Space Pac', genre: 'puzzle', hue: 55, t: 1, mouse: 0,
     tag: 'Gobble every star-dust pellet while four drones hunt you, each in its own way.',
